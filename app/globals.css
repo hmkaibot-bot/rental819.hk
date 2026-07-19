@@ -4,7 +4,10 @@
 
 @layer base {
   :root {
-    --font-noto: "Noto Sans HK", system-ui, sans-serif;
+    /* Native CJK-first stack — renders 繁中 in PingFang HK / JhengHei on the
+       user's device (no web-font download, no build-time font fetch). */
+    --font-noto: "PingFang HK", "PingFang TC", "Noto Sans HK", "Noto Sans TC",
+      "Microsoft JhengHei", "Hiragino Sans", system-ui, -apple-system, sans-serif;
   }
 
   html {

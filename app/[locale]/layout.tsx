@@ -1,18 +1,10 @@
 import { notFound } from "next/navigation";
-import { Noto_Sans_HK } from "next/font/google";
 import { locales, isLocale, htmlLang, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { buildNav } from "@/lib/nav";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
-
-const noto = Noto_Sans_HK({
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
-  variable: "--font-noto",
-  display: "swap",
-});
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -31,7 +23,7 @@ export default function LocaleLayout({
   const nav = buildNav(dict);
 
   return (
-    <html lang={htmlLang[locale]} className={noto.variable}>
+    <html lang={htmlLang[locale]}>
       <body className="flex min-h-screen flex-col font-sans">
         <Header locale={locale} dict={dict} nav={nav} />
         <main className="flex-1">{children}</main>
