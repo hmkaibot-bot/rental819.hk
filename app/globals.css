@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Native CJK-first stack — renders 繁中 in PingFang HK / JhengHei on the
+       user's device (no web-font download, no build-time font fetch). */
+    --font-noto: "PingFang HK", "PingFang TC", "Noto Sans HK", "Noto Sans TC",
+      "Microsoft JhengHei", "Hiragino Sans", system-ui, -apple-system, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-ink antialiased;
+    font-feature-settings: "kern";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    /* Inherit colour from context: dark on light sections (via body),
+       white on dark sections (via their text-white container). */
+    @apply font-bold tracking-tight;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    @apply bg-brand-600/20;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-content px-5 sm:px-6 lg:px-8;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3
+      text-sm font-semibold transition-all duration-200 focus:outline-none
+      focus-visible:ring-2 focus-visible:ring-offset-2;
+  }
+  .btn-primary {
+    @apply btn bg-accent-600 text-white shadow-sm hover:bg-accent-700
+      hover:shadow-cardhover focus-visible:ring-accent-600;
+  }
+  .btn-brand {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700
+      focus-visible:ring-brand-600;
+  }
+  .btn-outline {
+    @apply btn border border-brand-200 bg-white text-brand-700
+      hover:border-brand-400 hover:bg-brand-50 focus-visible:ring-brand-600;
+  }
+  .btn-ghost {
+    @apply btn text-ink-soft hover:bg-brand-50 hover:text-brand-700;
+  }
+
+  /* Cards */
+  .card {
+    @apply rounded-2xl border border-slate-100 bg-white shadow-card
+      transition-shadow duration-200;
+  }
+  .card-hover {
+    @apply card hover:shadow-cardhover;
+  }
+
+  /* Section eyebrow */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-bold uppercase
+      tracking-[0.18em] text-accent-600;
+  }
+
+  /* Long-form article styling used by guide pages */
+  .prose-r819 {
+    @apply text-[15px] leading-7 text-ink-soft;
+  }
+  .prose-r819 h2 {
+    @apply mt-10 mb-3 text-2xl text-ink;
+  }
+  .prose-r819 h3 {
+    @apply mt-8 mb-2 text-lg text-ink;
+  }
+  .prose-r819 p {
+    @apply my-4;
+  }
+  .prose-r819 ul {
+    @apply my-4 list-disc space-y-2 pl-5 marker:text-brand-500;
+  }
+  .prose-r819 ol {
+    @apply my-4 list-decimal space-y-2 pl-5 marker:font-semibold marker:text-brand-600;
+  }
+  .prose-r819 a {
+    @apply font-medium text-brand-700 underline decoration-brand-300
+      underline-offset-2 hover:text-brand-800;
+  }
+  .prose-r819 strong {
+    @apply font-semibold text-ink;
+  }
+  .prose-r819 table {
+    @apply my-6 w-full border-collapse overflow-hidden rounded-xl text-sm;
+  }
+  .prose-r819 th {
+    @apply bg-brand-600 px-4 py-3 text-left font-semibold text-white;
+  }
+  .prose-r819 td {
+    @apply border-b border-slate-100 px-4 py-3 align-top;
+  }
+  .prose-r819 tr:nth-child(even) td {
+    @apply bg-slate-50/60;
+  }
+}
+
+/* Hide scrollbar on horizontal nav scroll containers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
