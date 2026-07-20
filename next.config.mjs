@@ -8,17 +8,6 @@ const nextConfig = {
       { protocol: "https", hostname: "rental819.com" },
     ],
   },
-  // Root → default locale. Handled at the routing layer (not Edge middleware),
-  // so there is no middleware invocation that can fail at runtime.
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/zh-hk",
-        permanent: false,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
