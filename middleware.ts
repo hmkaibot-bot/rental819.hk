@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { locales, defaultLocale } from "@/lib/i18n";
+
+/**
+ * Locale constants are inlined here (rather than imported from "@/lib/i18n")
+ * on purpose: Vercel's Edge-Function bundler rejects path-aliased imports in
+ * middleware ("referencing unsupported modules: @/lib/i18n"), so the middleware
+ * must stay self-contained. Keep these in sync with lib/i18n.ts.
+ */
+const locales = ["zh-hk", "en"] as const;
+const defaultLocale = "zh-hk";
 
 const PUBLIC_FILE = /\.(.*)$/;
 
