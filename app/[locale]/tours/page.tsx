@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { tours, type Tour } from "@/lib/content/tours";
-import { whatsappLink } from "@/lib/site";
+import { whatsappLink, site } from "@/lib/site";
 import PageHero from "@/components/PageHero";
 import CTABand from "@/components/CTABand";
 import { ArrowRight, WhatsAppIcon } from "@/components/icons";
@@ -65,16 +65,12 @@ function TourCard({ tour, locale }: { tour: Tour; locale: Locale }) {
             {priceLabel(tour, isEn)}
           </span>
           <a
-            href={whatsappLink(
-              isEn
-                ? `Hi, I'm interested in the tour: ${tour.title} (${tour.dateLabel})`
-                : `你好，我想查詢旅行團：${tour.title}（${tour.dateLabel}）`,
-            )}
+            href={site.adventureUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
           >
-            {isEn ? "Enquire" : "查詢報名"}
+            {isEn ? "Sign up" : "報名"}
             <ArrowRight className="h-4 w-4" />
           </a>
         </div>
@@ -148,11 +144,13 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
         <CTABand
           locale={locale}
           dict={dict}
-          title={isEn ? "Want a private group tour?" : "想包團出發？"}
+          primaryHref={site.adventureUrl}
+          primaryLabel={isEn ? "Book on 26 Adventure" : "到 26 Adventure 報名"}
+          title={isEn ? "Ready to join a tour?" : "想參加自駕團？"}
           subtitle={
             isEn
-              ? "Clubs, groups and companies — we tailor the route, dates and support to you."
-              : "車會、團體、公司包團 — 路線、日期、後勤全為你度身訂造。"
+              ? "Guided tours and self-drive packages are booked on 26adventure.com."
+              : "自駕團及自駕套票現於 26adventure.com 報名。"
           }
         />
       </div>

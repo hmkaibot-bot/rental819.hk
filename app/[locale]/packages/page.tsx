@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { packages } from "@/lib/content/tours";
-import { whatsappLink } from "@/lib/site";
+import { site } from "@/lib/site";
 import PageHero from "@/components/PageHero";
 import CTABand from "@/components/CTABand";
 import { CheckIcon, ArrowRight } from "@/components/icons";
@@ -77,16 +77,12 @@ export default function PackagesPage({ params }: { params: { locale: string } })
                   </p>
                 </div>
                 <a
-                  href={whatsappLink(
-                    isEn
-                      ? `Hi, I'd like to know more about the package: ${p.title}`
-                      : `你好，我想了解自駕套票：${p.title}`,
-                  )}
+                  href={site.adventureUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-outline"
                 >
-                  {dict.common.enquire}
+                  {isEn ? "Book on 26 Adventure" : "到 26 Adventure 報名"}
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </div>
@@ -99,11 +95,13 @@ export default function PackagesPage({ params }: { params: { locale: string } })
         <CTABand
           locale={locale}
           dict={dict}
-          title={isEn ? "Not sure which package fits?" : "唔知揀邊個套票？"}
+          primaryHref={site.adventureUrl}
+          primaryLabel={isEn ? "Book on 26 Adventure" : "到 26 Adventure 報名"}
+          title={isEn ? "Book a package" : "預約自駕套票"}
           subtitle={
             isEn
-              ? "Tell us your dates and riding style and we'll recommend the right one."
-              : "話俾我哋知你嘅日期同騎乘喜好，我哋幫你推薦最啱嘅套票。"
+              ? "Self-drive packages are booked on 26adventure.com."
+              : "自駕套票現於 26adventure.com 報名預約。"
           }
         />
       </div>
