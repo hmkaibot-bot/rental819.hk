@@ -33,7 +33,8 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur">
+    <>
+      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur">
       <div className="container-x flex h-16 items-center justify-between gap-4 lg:h-20">
         {/* Logo */}
         <Link href={lp("/")} className="flex shrink-0 items-center gap-2" aria-label={site.name}>
@@ -125,8 +126,11 @@ export default function Header({
           </button>
         </div>
       </div>
+      </header>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — rendered outside <header> because the header's
+          backdrop-blur would otherwise become the containing block for this
+          fixed overlay, collapsing it to the header's height. */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
@@ -186,6 +190,6 @@ export default function Header({
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

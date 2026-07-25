@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { localePath } from "@/lib/i18n";
@@ -29,9 +30,13 @@ export default function Footer({
       <div className="container-x grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <div className="text-2xl font-black tracking-tight text-white">
-            RENTAL<span className="text-accent-500">819</span>
-          </div>
+          <Image
+            src="/logo-lg.png"
+            alt="RENTAL819 レンタルバイク"
+            width={768}
+            height={488}
+            className="h-12 w-auto rounded-md"
+          />
           <p className="mt-4 max-w-xs text-sm leading-6 text-brand-200">
             {dict.footer.about}
           </p>
