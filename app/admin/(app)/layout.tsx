@@ -13,7 +13,7 @@ export default function AdminAppLayout({
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
+      <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Link href="/admin" className="flex items-center gap-2 font-black text-brand-700">
             RENTAL<span className="text-accent-500">819</span>

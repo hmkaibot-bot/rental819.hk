@@ -1,7 +1,7 @@
 import type { Reservation } from "./types";
 
 /** Sample reservations so the admin backend is fully viewable without a live DB. */
-export const demoReservations: Reservation[] = [
+const rawDemo: Omit<Reservation, "invoice_date" | "invoice_items">[] = [
   {
     id: "demo-1",
     booking_ref: "2026-049",
@@ -203,3 +203,9 @@ export const demoReservations: Reservation[] = [
     updated_at: "2026-07-05T09:00:00Z",
   },
 ];
+
+export const demoReservations: Reservation[] = rawDemo.map((r) => ({
+  ...r,
+  invoice_date: null,
+  invoice_items: [],
+}));

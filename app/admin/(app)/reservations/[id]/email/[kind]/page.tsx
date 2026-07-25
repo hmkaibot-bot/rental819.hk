@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getReservation } from "@/lib/reservations/store";
 import { jpReservationEmail, customerConfirmEmail } from "@/lib/reservations/emails";
+import { isGmailConfigured } from "@/lib/gmail";
 import EmailPreview from "@/components/admin/EmailPreview";
+import GmailDraftButton from "@/components/admin/GmailDraftButton";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +36,13 @@ export default async function EmailDraft({
       </p>
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <EmailPreview subject={mail.subject} body={mail.body} to={to} />
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <GmailDraftButton
+            id={r.id}
+            kind={params.kind as "jp" | "customer"}
+            enabled={isGmailConfigured()}
+          />
+        </div>
       </div>
     </div>
   );

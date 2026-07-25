@@ -116,6 +116,16 @@
   }
 }
 
+/* Print: show only the invoice (.print-area), drop admin chrome */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+  }
+}
+
 /* Hide scrollbar on horizontal nav scroll containers */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

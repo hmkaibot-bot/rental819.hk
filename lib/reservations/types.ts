@@ -22,6 +22,13 @@ export interface ReservationAddons {
   luggage_storage?: boolean; // 行李寄存
 }
 
+export interface InvoiceItem {
+  description: string;
+  qty: number;
+  unit_price: number; // HKD
+  amount: number; // HKD
+}
+
 export interface Reservation {
   id: string;
   booking_ref: string | null;
@@ -55,6 +62,8 @@ export interface Reservation {
   promo: string | null;
 
   si_number: string | null;
+  invoice_date: string | null;
+  invoice_items: InvoiceItem[];
   customer_paid_date: string | null;
   paid_to_supplier: boolean;
   supplier_paid_date: string | null;

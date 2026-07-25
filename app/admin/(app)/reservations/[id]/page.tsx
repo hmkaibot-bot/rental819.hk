@@ -139,13 +139,16 @@ export default async function ReservationDetail({
           <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
             <h2 className="text-sm font-bold text-brand-700">下一步</h2>
 
-            {/* Email drafts (steps 4 & 8) */}
+            {/* Email drafts (steps 4 & 8) + invoice (step 6) */}
             <div className="flex flex-wrap gap-2">
               <Link href={`/admin/reservations/${r.id}/email/jp`} className="btn-outline text-xs">
                 ✉️ 生成日本預約信
               </Link>
               <Link href={`/admin/reservations/${r.id}/email/customer`} className="btn-outline text-xs">
                 ✉️ 生成客人確認信
+              </Link>
+              <Link href={`/admin/reservations/${r.id}/invoice`} className="btn-brand text-xs">
+                🧾 開單 / 生成 PDF
               </Link>
             </div>
 
