@@ -8,6 +8,8 @@ export const site = {
   whatsapp: "https://wa.me/85298686569",
   email: "info@helmetking.com",
   maps: "https://maps.app.goo.gl/w9DNWSusHhF5W6RB9",
+  /** Guided tours & self-drive packages are handled on 26adventure.com. */
+  adventureUrl: "https://26adventure.com",
   social: {
     facebook: "https://www.facebook.com/rental819hk",
     instagram: "https://www.instagram.com/rental819_hk/",

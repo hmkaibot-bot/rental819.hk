@@ -11,12 +11,18 @@ export default function CTABand({
   dict,
   title,
   subtitle,
+  primaryHref,
+  primaryLabel,
 }: {
   locale: Locale;
   dict: Dictionary;
   title: string;
   subtitle: string;
+  /** External URL (e.g. 26adventure.com) — overrides the default /booking link. */
+  primaryHref?: string;
+  primaryLabel?: string;
 }) {
+  const external = primaryHref?.startsWith("http");
   return (
     <section className="container-x">
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-700 to-brand-900 px-6 py-14 text-center text-white sm:px-12">
@@ -25,10 +31,22 @@ export default function CTABand({
           <h2 className="mx-auto max-w-2xl text-3xl font-black sm:text-4xl">{title}</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-brand-100">{subtitle}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href={localePath(locale, "/booking")} className="btn-primary">
-              {dict.common.bookNow}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            {external ? (
+              <a
+                href={primaryHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary"
+              >
+                {primaryLabel ?? dict.common.bookNow}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            ) : (
+              <Link href={localePath(locale, primaryHref ?? "/booking")} className="btn-primary">
+                {primaryLabel ?? dict.common.bookNow}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
             <a
               href={whatsappLink()}
               target="_blank"

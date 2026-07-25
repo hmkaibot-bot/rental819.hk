@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createReservation } from "@/lib/reservations/store";
 
 export const runtime = "nodejs";
 
@@ -14,12 +15,14 @@ interface BookingPayload {
   locale?: string;
 }
 
+const hasCJK = (s: string) => /[㐀-鿿]/.test(s);
+
 /**
  * Booking-request endpoint.
  *
- * With no mail backend configured this validates the payload and returns ok
- * (the form also offers a WhatsApp hand-off). Set BOOKING_WEBHOOK_URL to
- * forward each request to email/Slack/CRM in production.
+ * Creates a reservation record (the rental pipeline picks it up in the admin
+ * backend). In demo mode this validates and acknowledges. A BOOKING_WEBHOOK_URL
+ * can additionally forward the raw payload to email/Slack.
  */
 export async function POST(request: Request) {
   let body: BookingPayload;
@@ -38,24 +41,41 @@ export async function POST(request: Request) {
     );
   }
 
+  const notes = [
+    body.service && `服務類型：${body.service}`,
+    body.region && `想去地區：${body.region}`,
+    body.dates && `預計日期：${body.dates}`,
+    body.message && `備註：${body.message}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  try {
+    await createReservation({
+      name_zh: hasCJK(name) ? name : null,
+      name_en: hasCJK(name) ? null : name,
+      email: body.email?.trim() || null,
+      hk_phone: body.phone?.trim() || null,
+      bike_pref_1: body.bike?.trim() || null,
+      notes: notes || null,
+      source: "website",
+    });
+  } catch (err) {
+    console.error("createReservation failed", err);
+    return NextResponse.json({ ok: false, error: "store_failed" }, { status: 500 });
+  }
+
   const webhook = process.env.BOOKING_WEBHOOK_URL;
   if (webhook) {
     try {
       await fetch(webhook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          source: "rental819.hk booking form",
-          receivedAt: new Date().toISOString(),
-          ...body,
-        }),
+        body: JSON.stringify({ source: "rental819.hk booking form", ...body }),
       });
     } catch (err) {
-      // Non-fatal: never lose the lead just because the webhook is down.
       console.error("booking webhook failed", err);
     }
-  } else {
-    console.info("[booking] new request", { name, contact, service: body.service });
   }
 
   return NextResponse.json({ ok: true });
