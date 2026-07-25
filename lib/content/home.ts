@@ -3,7 +3,7 @@ import type { Locale } from "@/lib/i18n";
 export interface Feature {
   title: string;
   body: string;
-  icon: "fleet" | "support" | "shield" | "gear" | "map" | "oneway";
+  icon: "fleet" | "support" | "shield" | "gear" | "map" | "clock";
 }
 
 export interface Step {
@@ -23,6 +23,7 @@ export interface HomeContent {
     badge: string;
     title: string;
     highlight: string;
+    tagline: string;
     subtitle: string;
     primaryCta: string;
     secondaryCta: string;
@@ -46,6 +47,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       badge: "頭盔王 × Rental819 官方香港合作夥伴",
       title: "在日本，親手駕馭你的",
       highlight: "電單車自駕遊",
+      tagline: "體驗日本道路之美，感受日本二輪文化",
       subtitle:
         "由香港直接以中文預約，於全日本 99 間分店取車。由 125cc 到大型旅行電單車、Harley、越野車一應俱全，連保險、ETC、頭盔裝備一次過安排妥當。",
       primaryCta: "立即預約租車",
@@ -84,9 +86,9 @@ export const homeContent: Record<Locale, HomeContent> = {
         body: "頭盔、手套、ETC 卡、車架箱、導航等按需要準備，落機即可出發。",
       },
       {
-        icon: "oneway",
-        title: "彈性單程還車",
-        body: "支援 A 地取車、B 地還車，行程規劃更自由，唔使原路折返。",
+        icon: "clock",
+        title: "彈性租期",
+        body: "由 4 小時、8 小時、1 天到多日，租期自由組合，短程試玩或長途縱走都啱。",
       },
       {
         icon: "map",
@@ -102,7 +104,7 @@ export const homeContent: Record<Locale, HomeContent> = {
     offers: [
       {
         title: "租車自駕",
-        body: "自選車款、日期與取還車地點，完全按自己節奏走遍日本。",
+        body: "自選車款、日期同取車分店，完全按自己節奏走遍日本。",
         href: "/rental",
         cta: "了解租車詳情",
       },
@@ -161,6 +163,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       badge: "Helmet King × Rental819 — official Hong Kong partner",
       title: "Ride Japan your way on a",
       highlight: "self-drive motorcycle tour",
+      tagline: "Experience the beauty of Japan's roads and the spirit of its riding culture",
       subtitle:
         "Book from Hong Kong in your own language and pick up at any of 99 branches across Japan. From 125cc to big tourers, Harleys and off-road machines — with insurance, ETC and gear all sorted for you.",
       primaryCta: "Book a rental",
@@ -199,9 +202,9 @@ export const homeContent: Record<Locale, HomeContent> = {
         body: "Helmets, gloves, ETC card, panniers and navigation prepared as needed — land and ride.",
       },
       {
-        icon: "oneway",
-        title: "Flexible one-way returns",
-        body: "Pick up in one city and drop off in another, so you can plan a route without doubling back.",
+        icon: "clock",
+        title: "Flexible rental periods",
+        body: "From 4 hours, 8 hours and a full day to multi-day rentals — pick the duration that fits, a quick spin or a long tour.",
       },
       {
         icon: "map",
@@ -217,7 +220,7 @@ export const homeContent: Record<Locale, HomeContent> = {
     offers: [
       {
         title: "Rent & self-drive",
-        body: "Choose your bike, dates and pick-up/drop-off points and explore Japan entirely at your own pace.",
+        body: "Choose your bike, dates and pick-up branch and explore Japan entirely at your own pace.",
         href: "/rental",
         cta: "Rental details",
       },

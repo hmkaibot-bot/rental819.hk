@@ -33,10 +33,10 @@ const paths: Record<Feature["icon"], JSX.Element> = {
       <path d="M9 4v14M15 6v14" />
     </>
   ),
-  oneway: (
+  clock: (
     <>
-      <path d="M4 12h14" />
-      <path d="M14 6l6 6-6 6" />
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
     </>
   ),
 };
