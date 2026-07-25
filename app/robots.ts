@@ -6,6 +6,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      // Operations backend and internal APIs must never be indexed.
+      disallow: ["/admin", "/admin/", "/api/"],
     },
     sitemap: `${site.url}/sitemap.xml`,
     host: site.url,

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { site } from "@/lib/site";
 import PageHero from "@/components/PageHero";
@@ -8,6 +9,7 @@ import type { Block } from "@/lib/content/blocks";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/privacy"),
     title: isEn ? "Privacy Policy" : "私隱政策",
     description: isEn
       ? "How RENTAL819 Hong Kong collects and uses your personal data."

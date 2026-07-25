@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { guideDocs } from "@/lib/content/guide";
@@ -10,6 +11,7 @@ import { ArrowRight } from "@/components/icons";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/guide"),
     title: isEn ? "Ride Guide" : "自駕攻略",
     description: isEn
       ? "Everything you need to plan and ride a motorcycle self-drive trip in Japan."

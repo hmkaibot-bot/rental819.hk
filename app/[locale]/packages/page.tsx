@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { packages } from "@/lib/content/tours";
@@ -10,6 +11,7 @@ import { CheckIcon, ArrowRight } from "@/components/icons";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/packages"),
     title: isEn ? "Self-Drive Packages" : "自駕套票",
     description: isEn
       ? "Motorcycle rental + accommodation bundles for popular Japan routes, in 3/4/5-day tiers."
@@ -104,6 +106,11 @@ export default function PackagesPage({ params }: { params: { locale: string } })
               : "自駕套票現於 26adventure.com 報名預約。"
           }
         />
+        <p className="container-x mt-6 text-center text-xs text-ink-muted">
+          {isEn
+            ? `Self-drive packages are operated by ${site.travelAgent.name} · HK Travel Agent Licence No. ${site.travelAgent.licence}.`
+            : `自駕套票由 ${site.travelAgent.name} 提供，旅行代理商牌照號碼：${site.travelAgent.licence}。`}
+        </p>
       </div>
     </>
   );

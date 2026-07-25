@@ -19,6 +19,10 @@ export default function Footer({
   );
   const guides = guidePages(dict).slice(0, 6);
   const year = 2026;
+  const isEn = locale === "en";
+  const licenceLine = isEn
+    ? `Guided tours & self-drive packages are operated by ${site.travelAgent.name} · Travel Agent Licence No. ${site.travelAgent.licence}.`
+    : `自駕團及自駕套票由 ${site.travelAgent.name} 提供，旅行代理商牌照號碼：${site.travelAgent.licence}。`;
 
   return (
     <footer className="mt-24 border-t border-slate-100 bg-brand-950 text-brand-100">
@@ -144,6 +148,13 @@ export default function Footer({
               </li>
             ))}
           </ul>
+        </div>
+      </div>
+
+      {/* Travel-agency licence disclosure (HK Travel Agents Ordinance) */}
+      <div className="border-t border-white/10">
+        <div className="container-x py-4 text-xs leading-5 text-brand-300">
+          {licenceLine}
         </div>
       </div>
 

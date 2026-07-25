@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { aboutContent } from "@/lib/content/about";
@@ -10,6 +11,7 @@ import CTABand from "@/components/CTABand";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/about"),
     title: isEn ? "About Us" : "關於我們",
     description: isEn
       ? "RENTAL819 Hong Kong — the official HK & Macau agent for Rental819 Japan, part of the Helmet King group."

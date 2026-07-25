@@ -37,15 +37,28 @@ export const faq: Record<Locale, FaqGroup[]> = {
         },
         {
           q: "如何支付租車費用？何時支付？",
-          a: "租貸者須於頭盔王海外自駕客服發出租車發票後的工作天內，以轉數快或銀行匯款繳付予頭盔王。",
+          a: "租貸者須於頭盔王海外自駕客服發出租車發票後的三個工作天內，以轉數快或銀行匯款繳付予頭盔王。",
         },
         {
           q: "我沒有信用卡，可以用現金或由朋友代付嗎？",
           a: "租金以轉數快／銀行匯款繳付。惟取車時日本店鋪一般需要出示信用卡作按金及身分核對之用，建議準備至少一張信用卡。",
         },
         {
+          q: "香港 Rental819 與日本 Rental819 的租車費用有分別嗎？",
+          a: "沒有分別，租金與日本相同。透過香港頭盔王預約，更可享免費中文咨詢及全程協助安排，毋須額外收費。",
+        },
+        {
           q: "我收不到預約的確認電郵",
           a: "確認電郵由系統自動發出，請先檢查垃圾郵件。或可透過 Facebook 或 WhatsApp 向我們查詢。",
+        },
+      ],
+    },
+    {
+      category: "車輛選擇",
+      items: [
+        {
+          q: "可以指定車款的年份及顏色嗎？",
+          a: "車輛的年份及顏色有可能會變更，未必能完全指定。如你有特別需要，請於預約時提早告知，我們會盡量為你安排。",
         },
       ],
     },
@@ -110,6 +123,10 @@ export const faq: Record<Locale, FaqGroup[]> = {
           q: "騎車時行李如何處置？",
           a: "大部分分店都可讓你寄存行李，事前請聯絡我們協助安排。",
         },
+        {
+          q: "可以把自己的車輛停放在租車店嗎？",
+          a: "租車店一般沒有多餘空間停放客人的私家車或電單車，建議乘搭公共交通工具前往取車。",
+        },
       ],
     },
     {
@@ -153,15 +170,28 @@ export const faq: Record<Locale, FaqGroup[]> = {
         },
         {
           q: "How and when do I pay?",
-          a: "Payment is made to Helmet King by FPS or bank transfer within a few working days after our overseas self-drive team issues your rental invoice.",
+          a: "Payment is made to Helmet King by FPS or bank transfer within three working days after our overseas self-drive team issues your rental invoice.",
         },
         {
           q: "I don't have a credit card — can I pay cash or have a friend pay?",
           a: "Rental fees are paid by FPS/bank transfer. However, the branch in Japan usually requires a credit card at pick-up for deposit and identity verification, so please bring at least one.",
         },
         {
+          q: "Is the rental fee different between Rental819 Hong Kong and Rental819 Japan?",
+          a: "No — the rent is the same as in Japan. Booking through Helmet King in Hong Kong also gives you free Chinese-language consultation and full arrangement support at no extra charge.",
+        },
+        {
           q: "I didn't receive my confirmation email",
           a: "The confirmation email is sent automatically — please check your spam folder, or reach us on Facebook or WhatsApp.",
+        },
+      ],
+    },
+    {
+      category: "Choosing a bike",
+      items: [
+        {
+          q: "Can I specify the model year and colour of the bike?",
+          a: "The year and colour of the vehicle may change and cannot always be guaranteed. If you have a specific requirement, let us know early when booking and we will do our best to arrange it.",
         },
       ],
     },
@@ -225,6 +255,10 @@ export const faq: Record<Locale, FaqGroup[]> = {
         {
           q: "What do I do with luggage while riding?",
           a: "Most branches can store your luggage — please contact us in advance to arrange it.",
+        },
+        {
+          q: "Can I leave my own vehicle parked at the rental shop?",
+          a: "Rental shops generally don't have spare space to store customers' cars or motorcycles, so we recommend taking public transport to pick up your bike.",
         },
       ],
     },

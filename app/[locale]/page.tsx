@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { homeContent } from "@/lib/content/home";
@@ -13,6 +14,7 @@ import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, ""),
     title: isEn
       ? "Japan Motorcycle Rental & Self-Drive Tours"
       : "日本電單車租賃・自駕遊團",

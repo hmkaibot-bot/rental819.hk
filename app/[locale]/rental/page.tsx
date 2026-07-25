@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { rentalContent } from "@/lib/content/rental";
@@ -10,6 +11,7 @@ import { ArrowRight } from "@/components/icons";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/rental"),
     title: isEn ? "Rent a Motorcycle in Japan" : "日本電單車租賃",
     description: isEn
       ? "Rent a motorcycle in Japan — 125cc to big tourers and Harleys, 99 branches nationwide, booked from Hong Kong."
