@@ -14,7 +14,7 @@ export function StatusFilter({
 }: {
   value: string;
   options: { key: string; label: string; count: number }[];
-  keep: { sort?: string; dir?: string };
+  keep: { tab?: string; sort?: string; dir?: string };
 }) {
   const router = useRouter();
   return (
@@ -23,6 +23,7 @@ export function StatusFilter({
       value={value}
       onChange={(e) => {
         const sp = new URLSearchParams();
+        if (keep.tab) sp.set("tab", keep.tab);
         if (e.target.value) sp.set("status", e.target.value);
         if (keep.sort) {
           sp.set("sort", keep.sort);

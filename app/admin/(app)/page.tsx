@@ -17,6 +17,20 @@ const statusIndex = (s: ReservationStatus) => {
   return i < 0 ? 99 : i;
 };
 
+// Three books, mirroring the master Excel sheets: 2026 FIT / 2025 FIT / 2025 PKG.
+type TabKey = "2026" | "2025" | "pkg";
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "2026", label: "2026" },
+  { key: "2025", label: "2025" },
+  { key: "pkg", label: "2025 PKG" },
+];
+function tabOf(r: Reservation): TabKey {
+  const ref = r.booking_ref ?? "";
+  if (ref.startsWith("P-")) return "pkg"; // 套票 P-YYYY-nnn
+  if (ref.startsWith("2026")) return "2026";
+  return "2025";
+}
+
 type SortKey = "booking_ref" | "status" | "name" | "shop" | "pickup_date";
 const SORT_KEYS: SortKey[] = ["booking_ref", "status", "name", "shop", "pickup_date"];
 
@@ -63,31 +77,38 @@ const COLUMNS: { label: string; sort?: SortKey; filter?: boolean }[] = [
 export default async function AdminDashboard({
   searchParams,
 }: {
-  searchParams: { status?: string; sort?: string; dir?: string };
+  searchParams: { tab?: string; status?: string; sort?: string; dir?: string };
 }) {
   const all = await listReservations();
 
+  const tab: TabKey = TABS.some((t) => t.key === searchParams.tab)
+    ? (searchParams.tab as TabKey)
+    : "2026";
   const activeStatus = searchParams.status as ReservationStatus | undefined;
   const sortKey = SORT_KEYS.includes(searchParams.sort as SortKey)
     ? (searchParams.sort as SortKey)
     : undefined;
   const dir: "asc" | "desc" = searchParams.dir === "desc" ? "desc" : "asc";
 
-  const counts = new Map<string, number>();
-  for (const r of all) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
+  const tabCount = (k: TabKey) => all.filter((r) => tabOf(r) === k).length;
+  const tabRows = all.filter((r) => tabOf(r) === tab);
 
-  const list = activeStatus ? all.filter((r) => r.status === activeStatus) : [...all];
+  // Status counts are scoped to the active tab so the filter reflects this book.
+  const counts = new Map<string, number>();
+  for (const r of tabRows) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
+
+  const list = activeStatus ? tabRows.filter((r) => r.status === activeStatus) : [...tabRows];
   if (sortKey) list.sort((a, b) => compare(a, b, sortKey) * (dir === "desc" ? -1 : 1));
 
   const th = "px-4 py-3 text-left align-middle";
 
   return (
     <div>
-      <div className="mb-6 flex items-end justify-between">
+      <div className="mb-4 flex items-end justify-between">
         <div>
           <h1 className="text-xl font-bold">租車預約</h1>
           <p className="text-sm text-ink-muted">
-            共 {all.length} 張預約
+            共 {tabRows.length} 張預約
             {activeStatus
               ? ` · 篩選：${statusMeta(activeStatus).zh}（${list.length}）`
               : ""}
@@ -95,12 +116,39 @@ export default async function AdminDashboard({
         </div>
         {activeStatus && (
           <Link
-            href={`/admin${qs({ sort: sortKey, dir: sortKey ? dir : undefined })}`}
+            href={`/admin${qs({ tab, sort: sortKey, dir: sortKey ? dir : undefined })}`}
             className="text-sm text-brand-700 hover:underline"
           >
             清除篩選 ✕
           </Link>
         )}
+      </div>
+
+      {/* Books — one per master-Excel sheet */}
+      <div className="mb-5 flex gap-1 border-b border-slate-200">
+        {TABS.map((t) => {
+          const activeT = tab === t.key;
+          return (
+            <Link
+              key={t.key}
+              href={`/admin${qs({ tab: t.key, status: activeStatus, sort: sortKey, dir: sortKey ? dir : undefined })}`}
+              className={`-mb-px inline-flex items-center gap-1.5 rounded-t-lg border-b-2 px-4 py-2 text-sm font-medium ${
+                activeT
+                  ? "border-brand-600 text-brand-700"
+                  : "border-transparent text-ink-muted hover:text-ink hover:border-slate-300"
+              }`}
+            >
+              {t.label}
+              <span
+                className={`rounded-full px-1.5 py-0.5 text-xs tabular-nums ${
+                  activeT ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-ink-muted"
+                }`}
+              >
+                {tabCount(t.key)}
+              </span>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Table — sorting & status filter live in the header row */}
@@ -116,7 +164,7 @@ export default async function AdminDashboard({
                     <div className="flex items-center gap-1.5">
                       {c.sort ? (
                         <Link
-                          href={`/admin${qs({ status: activeStatus, sort: c.sort, dir: nextDir })}`}
+                          href={`/admin${qs({ tab, status: activeStatus, sort: c.sort, dir: nextDir })}`}
                           className={`inline-flex items-center gap-1 hover:text-ink ${active ? "text-ink" : ""}`}
                         >
                           {c.label}
@@ -131,9 +179,9 @@ export default async function AdminDashboard({
                       {c.filter && (
                         <StatusFilter
                           value={activeStatus ?? ""}
-                          keep={{ sort: sortKey, dir: sortKey ? dir : undefined }}
+                          keep={{ tab, sort: sortKey, dir: sortKey ? dir : undefined }}
                           options={[
-                            { key: "", label: "全部", count: all.length },
+                            { key: "", label: "全部", count: tabRows.length },
                             ...STATUS_ORDER.map((s) => ({
                               key: s.key,
                               label: s.zh,
