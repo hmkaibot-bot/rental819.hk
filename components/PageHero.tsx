@@ -27,11 +27,12 @@ export default function PageHero({
               fill
               priority
               sizes="100vw"
-              className="object-cover object-center opacity-45"
+              className="object-cover object-center"
             />
-            {/* Dark gradients keep the copy legible over the photo */}
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-950 via-brand-950/85 to-brand-950/40" />
-            <div className="absolute inset-0 bg-gradient-to-t from-brand-950 via-transparent to-brand-950/30" />
+            {/* Photo shown at full strength; only the left is darkened (a soft
+                navy gradient) enough for the copy, fading to the clear photo. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-950/85 via-brand-950/35 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-950/45 via-transparent to-transparent" />
           </>
         ) : (
           <div className="absolute inset-0 opacity-30">
