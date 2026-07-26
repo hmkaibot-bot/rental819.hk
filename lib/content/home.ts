@@ -60,7 +60,7 @@ export const homeContent: Record<Locale, HomeContent> = {
     },
     featuresHead: {
       eyebrow: "為何選擇 RENTAL819",
-      title: "全日本最大電單車租賃網絡，香港騎士專屬支援",
+      title: "全日本最大電單車租賃網絡，港澳騎士專屬支援",
       intro:
         "由選車、預約到取車，全程以你熟悉的語言處理。無論你是首次挑戰日本自駕，還是資深騎士，都能輕鬆上路。",
     },
@@ -176,7 +176,7 @@ export const homeContent: Record<Locale, HomeContent> = {
     },
     featuresHead: {
       eyebrow: "Why RENTAL819",
-      title: "Japan's largest rental network, with support built for Hong Kong riders",
+      title: "Japan's largest rental network, with support built for Hong Kong & Macau riders",
       intro:
         "From choosing a bike to picking it up, the whole journey is handled in a language you're comfortable with — whether it's your first ride in Japan or your fiftieth.",
     },

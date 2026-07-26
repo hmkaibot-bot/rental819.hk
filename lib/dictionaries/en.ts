@@ -40,7 +40,7 @@ const dict: Dictionary = {
   },
   footer: {
     about:
-      "RENTAL819 Hong Kong — a Helmet King × Rental819 partnership bringing Japan motorcycle rentals and self-drive tours to Hong Kong riders, across 99 branches nationwide in Japan.",
+      "RENTAL819 Hong Kong — a Helmet King × Rental819 partnership bringing Japan motorcycle rentals and self-drive tours to Hong Kong & Macau riders, across 99 branches nationwide in Japan.",
     quickLinks: "Quick links",
     guideLinks: "Ride guide",
     contact: "Contact",

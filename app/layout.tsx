@@ -4,7 +4,7 @@ import "./globals.css";
 
 const title = "RENTAL819 — 日本電單車自駕遊";
 const description =
-  "頭盔王 × Rental819：香港騎士的日本電單車租賃及自駕遊團，橫跨全日本 99 間分店。";
+  "頭盔王 × Rental819：港澳騎士的日本電單車租賃及自駕遊團，橫跨全日本 99 間分店。";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
