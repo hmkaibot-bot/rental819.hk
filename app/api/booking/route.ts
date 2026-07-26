@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createReservation } from "@/lib/reservations/store";
+import { notifyNewBooking } from "@/lib/reservations/notify";
 import type { ReservationAddons } from "@/lib/reservations/types";
 
 export const runtime = "nodejs";
@@ -115,8 +116,9 @@ export async function POST(request: Request) {
     .filter(Boolean)
     .join("\n");
 
+  let created: { id: string };
   try {
-    await createReservation({
+    created = await createReservation({
       name_zh: clean(body.name_zh),
       name_en: clean(body.name_en),
       gender: clean(body.gender),
@@ -147,6 +149,23 @@ export async function POST(request: Request) {
     console.error("createReservation failed", err);
     return NextResponse.json({ ok: false, error: "store_failed" }, { status: 500 });
   }
+
+  // Push a Slack alert to the 電單車旅行 channel (soft-fail — never blocks booking).
+  await notifyNewBooking({
+    id: created.id,
+    name: name,
+    name_zh: clean(body.name_zh),
+    shop: clean(body.shop),
+    pickup_date: clean(body.pickup_date),
+    pickup_time: clean(body.pickup_time),
+    return_date: clean(body.return_date),
+    return_time: clean(body.return_time),
+    bike_pref_1: clean(body.bike_pref_1),
+    email,
+    hk_phone: clean(body.hk_phone),
+    addons,
+    promo: clean(body.promo),
+  });
 
   const webhook = process.env.BOOKING_WEBHOOK_URL;
   if (webhook) {

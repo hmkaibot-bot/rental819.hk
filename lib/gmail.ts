@@ -97,3 +97,37 @@ export async function createGmailDraft(opts: {
   const json = (await res.json()) as { id?: string };
   return { draftId: json.id ?? "" };
 }
+
+/**
+ * Send an email directly (not a draft). The gmail.compose scope also grants
+ * send, so this reuses the same OAuth credentials. Used for internal
+ * notifications (e.g. a new-booking alert to the Slack channel address).
+ */
+export async function sendGmailMessage(opts: {
+  to: string;
+  subject: string;
+  body: string;
+  html?: string;
+}): Promise<{ id: string }> {
+  const token = await accessToken();
+  const raw = base64url(
+    buildMime(opts.to, opts.subject, opts.body, process.env.GMAIL_SENDER, opts.html),
+  );
+  const res = await fetch(
+    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ raw }),
+    },
+  );
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`Gmail send error: ${res.status} ${t.slice(0, 200)}`);
+  }
+  const json = (await res.json()) as { id?: string };
+  return { id: json.id ?? "" };
+}
