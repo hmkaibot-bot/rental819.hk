@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAuthed } from "@/lib/admin/auth";
@@ -15,13 +16,16 @@ export default function AdminAppLayout({
     <div className="min-h-screen">
       <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link href="/admin" className="flex items-center gap-2 font-black text-brand-700">
-            RENTAL<span className="text-accent-500">819</span>
-            <span className="ml-1 text-xs font-semibold text-ink-muted">租車後台</span>
+          <Link href="/admin" className="flex items-center gap-2">
+            <Image src="/logo-lg.png" alt="RENTAL819" width={768} height={488} className="h-8 w-auto rounded" />
+            <span className="text-xs font-semibold text-ink-muted">租車後台</span>
           </Link>
           <nav className="flex items-center gap-1 text-sm">
             <Link href="/admin" className="rounded-lg px-3 py-1.5 font-medium text-ink-soft hover:bg-slate-100">
               預約
+            </Link>
+            <Link href="/admin/accounting" className="rounded-lg px-3 py-1.5 font-medium text-ink-soft hover:bg-slate-100">
+              會計
             </Link>
             <form action="/api/admin/login" method="post">
               <input type="hidden" name="_method" value="delete" />

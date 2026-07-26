@@ -2,6 +2,8 @@ import type { Locale } from "@/lib/i18n";
 
 export interface AboutContent {
   hero: { eyebrow: string; title: string; intro: string };
+  storyEyebrow: string;
+  storyTitle: string;
   brands: { name: string; year: string; body: string }[];
   roleTitle: string;
   roles: { title: string; body: string }[];
@@ -18,21 +20,28 @@ export const aboutContent: Record<Locale, AboutContent> = {
       intro:
         "RENTAL819 香港是日本最大電單車租賃公司 Rental819 的指定香港及澳門區代理，隸屬頭盔王集團。我們為港澳車友提供一條龍式租車自駕遊旅行團、租車住宿自由行套票等服務。",
     },
+    storyEyebrow: "OUR STORY",
+    storyTitle: "品牌故事",
     brands: [
+      {
+        name: "頭盔王",
+        year: "2014 年成立",
+        body: "香港大型電單車用品網上購物與實體店平台；多個國際品牌指定香港區代理。由頭盔、騎士裝備、電單車改裝部件等產品一應俱全，款色數量多達數以萬計。",
+      },
       {
         name: "RENTAL819 香港",
         year: "2017 年成立",
-        body: "日本最大電單車租賃公司 Rental819 的指定香港及澳門區代理。為港澳車友提供一條龍式租車自駕遊旅行團、租車住宿自由行套票等服務。",
+        body: "日本最大電單車租賃公司 Rental819 的指定香港及澳門區代理。我們為香港 / 澳門車友提供一條龍式租車、自駕遊旅行團、租車住宿自由行套票等服務。",
       },
       {
-        name: "頭盔王 Helmet King",
-        year: "2014 年成立",
-        body: "香港大型電單車用品網上購物與實體店平台；多個國際品牌指定香港區代理，由頭盔、騎士裝備、電單車改裝部件一應俱全，款色數量多達數以萬計。",
-      },
-      {
-        name: "二碌王",
+        name: "26KING",
         year: "2023 年成立",
-        body: "頭盔王轄下分部，一站式電單車買賣與資訊平台；日、歐品牌官方指定全新行貨車經銷商、日本二手車進口商。另設資深車房團隊，以平民價錢提供星級保養維修及改裝服務。",
+        body: "26KING 為頭盔王附屬公司，除了為日歐品牌官方指定全新行貨車經銷商，另設資深車房團隊，提供星級電單車保養維修及改裝服務。由維修、改裝到車輛買賣，服務一應俱全！",
+      },
+      {
+        name: "RentalBike.HK",
+        year: "2024 年成立",
+        body: "全港唯一合法旅客電單車租賃平台。專為訪港旅客及本地車手而設，全車隊均為 2024—2026 年最新型號，並提供 24/7 路面支援與 Premium Go CDW 保障，讓你以最安心方式探索香港。",
       },
     ],
     roleTitle: "我們為你安排的一切",
@@ -66,21 +75,28 @@ export const aboutContent: Record<Locale, AboutContent> = {
       intro:
         "RENTAL819 Hong Kong is the official Hong Kong & Macau agent for Rental819, Japan's largest motorcycle rental company, and part of the Helmet King group. We offer end-to-end rental self-drive tours and rental-plus-accommodation packages for riders from Hong Kong and Macau.",
     },
+    storyEyebrow: "OUR STORY",
+    storyTitle: "Our story",
     brands: [
-      {
-        name: "RENTAL819 Hong Kong",
-        year: "Est. 2017",
-        body: "The official Hong Kong & Macau agent for Rental819, Japan's largest motorcycle rental company — offering end-to-end self-drive tours and rental + accommodation packages for HK/Macau riders.",
-      },
       {
         name: "Helmet King",
         year: "Est. 2014",
-        body: "A major Hong Kong motorcycle-gear retailer, online and in-store; official HK distributor for many international brands, with tens of thousands of helmets, riding gear and parts.",
+        body: "A major Hong Kong online and in-store retailer of motorcycle gear, and official HK distributor for many international brands — helmets, riding gear and custom parts by the tens of thousands.",
       },
       {
-        name: "26King",
+        name: "RENTAL819 Hong Kong",
+        year: "Est. 2017",
+        body: "The official Hong Kong & Macau agent for Rental819, Japan's largest motorcycle rental company. We offer HK/Macau riders end-to-end rentals, self-drive tours and rental-plus-accommodation packages.",
+      },
+      {
+        name: "26KING",
         year: "Est. 2023",
-        body: "A Helmet King division: a one-stop motorcycle sales and information platform, official new-vehicle dealer for Japanese and European brands and importer of used Japanese bikes, with an experienced workshop team.",
+        body: "A Helmet King subsidiary and official new-vehicle dealer for Japanese and European brands, with an experienced workshop team offering premium maintenance, repairs and customisation — from servicing and mods to buying and selling bikes.",
+      },
+      {
+        name: "RentalBike.HK",
+        year: "Est. 2024",
+        body: "Hong Kong's only licensed motorcycle rental platform for visitors. Built for tourists and local riders, with a fleet of 2024–2026 models, 24/7 roadside support and Premium Go CDW cover so you can explore Hong Kong with total peace of mind.",
       },
     ],
     roleTitle: "Everything we arrange for you",

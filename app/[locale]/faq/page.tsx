@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { faq } from "@/lib/content/faq";
 import { whatsappLink } from "@/lib/site";
+import { faqLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import CTABand from "@/components/CTABand";
+import JsonLd from "@/components/JsonLd";
 import { ChevronDown, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/faq"),
     title: "FAQ",
     description: isEn
       ? "Common questions about renting a motorcycle in Japan — eligibility, payment, insurance, pick-up and cancellation."
@@ -25,7 +29,9 @@ export default function FaqPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
+      <JsonLd data={faqLd(groups)} />
       <PageHero
+        image="/images/tours/hokkaido-2026-07-30.jpg"
         eyebrow={dict.nav.faq}
         title={isEn ? "Frequently asked questions" : "常見問題"}
         intro={

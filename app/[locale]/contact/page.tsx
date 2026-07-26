@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { site, whatsappLink } from "@/lib/site";
@@ -9,6 +10,7 @@ import { WhatsAppIcon, FacebookIcon, InstagramIcon, ArrowRight } from "@/compone
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/contact"),
     title: isEn ? "Contact" : "聯絡我們",
     description: isEn
       ? "Reach the RENTAL819 Hong Kong team by WhatsApp, email or social media."
@@ -55,6 +57,7 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
   return (
     <>
       <PageHero
+        image="/images/about/shop.jpg"
         eyebrow={dict.nav.contact}
         title={isEn ? "Get in touch" : "聯絡我們"}
         intro={

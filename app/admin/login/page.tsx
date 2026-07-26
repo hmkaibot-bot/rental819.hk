@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { isAuthed } from "@/lib/admin/auth";
 
@@ -11,10 +12,15 @@ export default function AdminLogin({
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-card">
         <div className="text-center">
-          <div className="text-2xl font-black text-brand-700">
-            RENTAL<span className="text-accent-500">819</span>
-          </div>
-          <p className="mt-1 text-sm text-ink-muted">租車管理後台</p>
+          <Image
+            src="/logo-lg.png"
+            alt="RENTAL819"
+            width={768}
+            height={488}
+            priority
+            className="mx-auto h-12 w-auto rounded-md"
+          />
+          <p className="mt-2 text-sm text-ink-muted">租車管理後台</p>
         </div>
         {searchParams.error && (
           <p className="mt-5 rounded-lg bg-accent-50 px-3 py-2 text-sm text-accent-700">

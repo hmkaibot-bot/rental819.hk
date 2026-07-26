@@ -1,13 +1,16 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { guideDocs } from "@/lib/content/guide";
+import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import GuideArticle from "@/components/GuideArticle";
 import CTABand from "@/components/CTABand";
+import JsonLd from "@/components/JsonLd";
 import { ArrowRight } from "@/components/icons";
 
 export function generateStaticParams() {
@@ -22,7 +25,11 @@ export function generateMetadata({
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
   const doc = guideDocs[locale].find((d) => d.slug === params.slug);
   if (!doc) return {};
-  return { title: doc.title, description: doc.intro };
+  return {
+    alternates: pageAlternates(params.locale, `/guide/${params.slug}`),
+    title: doc.title,
+    description: doc.intro,
+  };
 }
 
 export default function GuideDocPage({
@@ -42,7 +49,14 @@ export default function GuideDocPage({
 
   return (
     <>
-      <PageHero eyebrow={dict.nav.guide} title={doc.title} intro={doc.intro}>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.guide, url: localePath(locale, "/guide") },
+          { name: doc.title, url: localePath(locale, `/guide/${doc.slug}`) },
+        ])}
+      />
+      <PageHero image="/images/tours/kansai-sakura-2026-04-08.jpg" eyebrow={dict.nav.guide} title={doc.title} intro={doc.intro}>
         <Breadcrumb
           locale={locale}
           items={[

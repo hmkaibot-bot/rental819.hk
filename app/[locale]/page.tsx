@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { homeContent } from "@/lib/content/home";
@@ -13,6 +15,7 @@ import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, ""),
     title: isEn
       ? "Japan Motorcycle Rental & Self-Drive Tours"
       : "日本電單車租賃・自駕遊團",
@@ -33,9 +36,19 @@ export default function HomePage({ params }: { params: { locale: string } }) {
       {/* Hero */}
       <section className="relative overflow-hidden bg-brand-950 text-white">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-brand-600/50 blur-3xl" />
-          <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-accent-600/40 blur-3xl" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_40%)]" />
+          {/* Banner photo — riders on a Japanese country road */}
+          <Image
+            src="/images/tours/hokkaido-2026-07-30.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center opacity-60"
+          />
+          {/* Dark gradient keeps the left-aligned copy legible over the photo */}
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-950 via-brand-950/80 to-brand-950/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-950 via-transparent to-brand-950/40" />
+          <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-accent-600/30 blur-3xl" />
         </div>
         <div className="container-x relative py-20 lg:py-28">
           <div className="max-w-3xl animate-fade-up">
@@ -46,7 +59,10 @@ export default function HomePage({ params }: { params: { locale: string } }) {
               {c.hero.title}
               <span className="mt-2 block text-accent-500">{c.hero.highlight}</span>
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-brand-100">
+            <p className="mt-5 max-w-2xl text-xl font-medium text-white/95 sm:text-2xl">
+              {c.hero.tagline}
+            </p>
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-brand-100">
               {c.hero.subtitle}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">

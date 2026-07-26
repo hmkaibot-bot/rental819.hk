@@ -46,29 +46,39 @@ function encodeHeader(value: string): string {
   return `=?UTF-8?B?${Buffer.from(value, "utf8").toString("base64")}?=`;
 }
 
-function buildMime(to: string, subject: string, body: string, from?: string): string {
+function buildMime(
+  to: string,
+  subject: string,
+  body: string,
+  from?: string,
+  html?: string,
+): string {
+  const contentType = html ? 'text/html; charset="UTF-8"' : 'text/plain; charset="UTF-8"';
   const headers = [
     from ? `From: ${from}` : null,
     to ? `To: ${to}` : null,
     `Subject: ${encodeHeader(subject)}`,
     "MIME-Version: 1.0",
-    'Content-Type: text/plain; charset="UTF-8"',
+    `Content-Type: ${contentType}`,
     "Content-Transfer-Encoding: base64",
   ]
     .filter(Boolean)
     .join("\r\n");
-  const encodedBody = Buffer.from(body, "utf8").toString("base64");
+  const encodedBody = Buffer.from(html ?? body, "utf8").toString("base64");
   return `${headers}\r\n\r\n${encodedBody}`;
 }
 
-/** Create a Gmail draft; returns the draft id. */
+/** Create a Gmail draft; returns the draft id. Pass `html` for an HTML email. */
 export async function createGmailDraft(opts: {
   to: string;
   subject: string;
   body: string;
+  html?: string;
 }): Promise<{ draftId: string }> {
   const token = await accessToken();
-  const raw = base64url(buildMime(opts.to, opts.subject, opts.body, process.env.GMAIL_SENDER));
+  const raw = base64url(
+    buildMime(opts.to, opts.subject, opts.body, process.env.GMAIL_SENDER, opts.html),
+  );
   const res = await fetch(
     "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
     {

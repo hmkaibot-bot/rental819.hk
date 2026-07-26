@@ -25,7 +25,16 @@ export const site = {
     { name: "RentalBike.hk", url: "https://rentalbike.hk" },
     { name: "26King 二碌王", url: "https://26king.hk" },
   ],
-  /** Travel service licence (Go Asia Plus Travel & Tours Co Ltd). */
+  /**
+   * Licensed travel agent for the guided-tour & self-drive-package products
+   * (booking handed off to 26adventure.com). Disclosure is required under the
+   * HK Travel Agents Ordinance wherever those travel products are advertised.
+   */
+  travelAgent: {
+    name: "Go Asia Plus Travel & Tours Co Ltd",
+    licence: "354367",
+  },
+  /** @deprecated use travelAgent.licence */
   travelLicence: "354367",
 } as const;
 

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { aboutContent } from "@/lib/content/about";
@@ -10,6 +11,7 @@ import CTABand from "@/components/CTABand";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/about"),
     title: isEn ? "About Us" : "關於我們",
     description: isEn
       ? "RENTAL819 Hong Kong — the official HK & Macau agent for Rental819 Japan, part of the Helmet King group."
@@ -24,7 +26,7 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
-      <PageHero eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro} />
+      <PageHero image="/images/about/shop.jpg" eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro} />
 
       {/* Stats */}
       <section className="border-b border-slate-100 bg-white">
@@ -38,19 +40,30 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
         </div>
       </section>
 
-      {/* Group brands */}
+      {/* Brand story timeline */}
       <section className="container-x py-16 lg:py-20">
-        <div className="grid gap-6 lg:grid-cols-3">
+        <p className="text-sm font-bold uppercase tracking-widest text-accent-600">
+          {c.storyEyebrow}
+        </p>
+        <h2 className="mt-2 text-3xl font-black sm:text-4xl">{c.storyTitle}</h2>
+        <ol className="relative mt-12 space-y-12">
+          {/* vertical connector line */}
+          <div
+            className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-slate-200"
+            aria-hidden
+          />
           {c.brands.map((b) => (
-            <div key={b.name} className="card flex flex-col p-7">
-              <span className="text-xs font-semibold uppercase tracking-wide text-accent-600">
-                {b.year}
-              </span>
-              <h2 className="mt-1 text-xl font-bold">{b.name}</h2>
-              <p className="mt-3 text-sm leading-6 text-ink-muted">{b.body}</p>
-            </div>
+            <li key={b.name} className="relative pl-10 sm:pl-12">
+              <span
+                className="absolute left-0 top-1 h-5 w-5 rounded-full bg-accent-600 ring-4 ring-white"
+                aria-hidden
+              />
+              <p className="text-sm font-bold text-accent-600">{b.year}</p>
+              <h3 className="mt-1 text-2xl font-black text-ink sm:text-3xl">{b.name}</h3>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-ink-muted">{b.body}</p>
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
 
       {/* Roles + shop image */}

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { tours, type Tour } from "@/lib/content/tours";
@@ -12,6 +13,7 @@ import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   return {
+    alternates: pageAlternates(params.locale, "/tours"),
     title: isEn ? "Guided Motorcycle Tours" : "電單車旅行團",
     description: isEn
       ? "Led group self-drive motorcycle tours across Japan, with Cantonese-speaking guides and full support."
@@ -90,6 +92,7 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
   return (
     <>
       <PageHero
+        image="/images/tours/tohoku-2026-09-20.jpg"
         eyebrow={dict.nav.tours}
         title={isEn ? "Guided self-drive motorcycle tours" : "電單車自駕遊旅行團"}
         intro={
@@ -153,6 +156,11 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
               : "自駕團及自駕套票現於 26adventure.com 報名。"
           }
         />
+        <p className="container-x mt-6 text-center text-xs text-ink-muted">
+          {isEn
+            ? `Guided tours are operated by ${site.travelAgent.name} · HK Travel Agent Licence No. ${site.travelAgent.licence}.`
+            : `自駕團由 ${site.travelAgent.name} 提供，旅行代理商牌照號碼：${site.travelAgent.licence}。`}
+        </p>
       </div>
     </>
   );
