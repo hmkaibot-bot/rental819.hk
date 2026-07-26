@@ -16,6 +16,7 @@ export interface OfferCard {
   body: string;
   href: string;
   cta: string;
+  image: string;
 }
 
 export interface HomeContent {
@@ -106,18 +107,21 @@ export const homeContent: Record<Locale, HomeContent> = {
         title: "租車自駕",
         body: "自選車款、日期同取車分店，完全按自己節奏走遍日本。",
         href: "/rental",
+        image: "/images/home/way-1.png",
         cta: "了解租車詳情",
       },
       {
         title: "電單車旅行團",
         body: "由經驗領隊帶路，路線、住宿、行程一手包辦，輕鬆享受騎旅。",
         href: "/tours",
+        image: "/images/home/way-2.png",
         cta: "查看旅行團",
       },
       {
         title: "自駕套票",
         body: "租車＋住宿＋行程建議一次搞掂，最抵最方便的自由行組合。",
         href: "/packages",
+        image: "/images/home/way-3.png",
         cta: "瀏覽套票",
       },
     ],
@@ -222,18 +226,21 @@ export const homeContent: Record<Locale, HomeContent> = {
         title: "Rent & self-drive",
         body: "Choose your bike, dates and pick-up branch and explore Japan entirely at your own pace.",
         href: "/rental",
+        image: "/images/home/way-1.png",
         cta: "Rental details",
       },
       {
         title: "Guided motorcycle tours",
         body: "An experienced leader handles the route, stays and itinerary — you just enjoy the ride.",
         href: "/tours",
+        image: "/images/home/way-2.png",
         cta: "See tours",
       },
       {
         title: "Self-drive packages",
         body: "Bike, accommodation and a suggested itinerary bundled together — the easy-value way to go independent.",
         href: "/packages",
+        image: "/images/home/way-3.png",
         cta: "Browse packages",
       },
     ],

@@ -126,8 +126,17 @@ export default function HomePage({ params }: { params: { locale: string } }) {
               href={localePath(locale, o.href)}
               className="group card-hover flex flex-col overflow-hidden"
             >
+              <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                <Image
+                  src={o.image}
+                  alt={o.title}
+                  fill
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                  className="object-cover transition duration-500 group-hover:scale-105"
+                />
+              </div>
               <div
-                className={`h-2 w-full ${
+                className={`h-1.5 w-full ${
                   i === 0 ? "bg-brand-600" : i === 1 ? "bg-accent-600" : "bg-brand-400"
                 }`}
               />

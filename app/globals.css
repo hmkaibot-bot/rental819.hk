@@ -4,10 +4,12 @@
 
 @layer base {
   :root {
-    /* Native CJK-first stack — renders 繁中 in PingFang HK / JhengHei on the
-       user's device (no web-font download, no build-time font fetch). */
-    --font-noto: "PingFang HK", "PingFang TC", "Noto Sans HK", "Noto Sans TC",
-      "Microsoft JhengHei", "Hiragino Sans", system-ui, -apple-system, sans-serif;
+    /* Latin-first, then native CJK — Latin/numerals render in the crisp system
+       sans while 繁中 falls through to PingFang HK / JhengHei (the recommended
+       order for mixed CJK/EN typesetting). No web-font download. */
+    --font-noto: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+      Roboto, Arial, "PingFang HK", "PingFang TC", "Noto Sans HK", "Noto Sans TC",
+      "Microsoft JhengHei", "Hiragino Sans", system-ui, sans-serif;
   }
 
   html {
@@ -16,7 +18,12 @@
 
   body {
     @apply bg-white text-ink antialiased;
-    font-feature-settings: "kern";
+    /* kern + palt tighten Latin kerning and CJK full-width punctuation; a touch
+       of tracking and a roomier line-height keep long 繁中 copy easy to read. */
+    font-feature-settings: "kern", "palt";
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+    text-rendering: optimizeLegibility;
   }
 
   h1,
@@ -25,8 +32,9 @@
   h4 {
     /* Inherit colour from context: dark on light sections (via body),
        white on dark sections (via their text-white container). */
-    @apply font-bold tracking-tight;
+    @apply font-bold leading-tight tracking-tight;
     text-wrap: balance;
+    letter-spacing: -0.005em;
   }
 
   ::selection {
@@ -78,7 +86,8 @@
 
   /* Long-form article styling used by guide pages */
   .prose-r819 {
-    @apply text-[15px] leading-7 text-ink-soft;
+    @apply text-base leading-[1.85] text-ink-soft;
+    max-width: 72ch; /* comfortable measure (~40 全形字 / 72 Latin chars per line) */
   }
   .prose-r819 h2 {
     @apply mt-10 mb-3 text-2xl text-ink;
@@ -87,7 +96,7 @@
     @apply mt-8 mb-2 text-lg text-ink;
   }
   .prose-r819 p {
-    @apply my-4;
+    @apply my-5;
   }
   .prose-r819 ul {
     @apply my-4 list-disc space-y-2 pl-5 marker:text-brand-500;
