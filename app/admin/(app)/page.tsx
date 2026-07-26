@@ -4,72 +4,148 @@ import {
   STATUS_FLOW,
   TERMINAL_STATUS,
   statusMeta,
+  type Reservation,
   type ReservationStatus,
 } from "@/lib/reservations/types";
+import { StatusFilter } from "./status-filter";
 
 export const dynamic = "force-dynamic";
+
+const STATUS_ORDER = [...STATUS_FLOW, ...TERMINAL_STATUS];
+const statusIndex = (s: ReservationStatus) => {
+  const i = STATUS_ORDER.findIndex((x) => x.key === s);
+  return i < 0 ? 99 : i;
+};
+
+type SortKey = "booking_ref" | "status" | "name" | "shop" | "pickup_date";
+const SORT_KEYS: SortKey[] = ["booking_ref", "status", "name", "shop", "pickup_date"];
 
 function fmtDate(d: string | null) {
   return d ? d : "—";
 }
+function nameOf(r: Reservation) {
+  return r.name_en ?? r.name_zh ?? "";
+}
+function compare(a: Reservation, b: Reservation, key: SortKey): number {
+  switch (key) {
+    case "booking_ref":
+      return (a.booking_ref ?? "").localeCompare(b.booking_ref ?? "");
+    case "status":
+      return statusIndex(a.status) - statusIndex(b.status);
+    case "name":
+      return nameOf(a).localeCompare(nameOf(b));
+    case "shop":
+      return (a.shop ?? "").localeCompare(b.shop ?? "");
+    case "pickup_date":
+      return (a.pickup_date ?? "").localeCompare(b.pickup_date ?? "");
+    default:
+      return 0;
+  }
+}
+
+/** Build a /admin query string, dropping empty values. */
+function qs(p: Record<string, string | undefined>) {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(p)) if (v) sp.set(k, v);
+  const s = sp.toString();
+  return s ? `?${s}` : "";
+}
+
+const COLUMNS: { label: string; sort?: SortKey; filter?: boolean }[] = [
+  { label: "編號", sort: "booking_ref" },
+  { label: "狀態", sort: "status", filter: true },
+  { label: "客人", sort: "name" },
+  { label: "出發店", sort: "shop" },
+  { label: "取車日期", sort: "pickup_date" },
+  { label: "車款" },
+];
 
 export default async function AdminDashboard({
   searchParams,
 }: {
-  searchParams: { status?: string };
+  searchParams: { status?: string; sort?: string; dir?: string };
 }) {
   const all = await listReservations();
-  const active = searchParams.status as ReservationStatus | undefined;
-  const list = active ? all.filter((r) => r.status === active) : all;
+
+  const activeStatus = searchParams.status as ReservationStatus | undefined;
+  const sortKey = SORT_KEYS.includes(searchParams.sort as SortKey)
+    ? (searchParams.sort as SortKey)
+    : undefined;
+  const dir: "asc" | "desc" = searchParams.dir === "desc" ? "desc" : "asc";
 
   const counts = new Map<string, number>();
   for (const r of all) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
+
+  const list = activeStatus ? all.filter((r) => r.status === activeStatus) : [...all];
+  if (sortKey) list.sort((a, b) => compare(a, b, sortKey) * (dir === "desc" ? -1 : 1));
+
+  const th = "px-4 py-3 text-left align-middle";
 
   return (
     <div>
       <div className="mb-6 flex items-end justify-between">
         <div>
           <h1 className="text-xl font-bold">租車預約</h1>
-          <p className="text-sm text-ink-muted">共 {all.length} 張預約</p>
+          <p className="text-sm text-ink-muted">
+            共 {all.length} 張預約
+            {activeStatus
+              ? ` · 篩選：${statusMeta(activeStatus).zh}（${list.length}）`
+              : ""}
+          </p>
         </div>
-      </div>
-
-      {/* Pipeline summary */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <Link
-          href="/admin"
-          className={`rounded-full border px-3 py-1.5 text-sm ${
-            !active ? "border-brand-500 bg-brand-50 text-brand-700" : "border-slate-200 bg-white text-ink-soft hover:bg-slate-50"
-          }`}
-        >
-          全部 <span className="ml-1 font-semibold">{all.length}</span>
-        </Link>
-        {[...STATUS_FLOW, ...TERMINAL_STATUS].map((s) => (
+        {activeStatus && (
           <Link
-            key={s.key}
-            href={`/admin?status=${s.key}`}
-            className={`rounded-full border px-3 py-1.5 text-sm ${
-              active === s.key
-                ? "border-brand-500 bg-brand-50 text-brand-700"
-                : "border-slate-200 bg-white text-ink-soft hover:bg-slate-50"
-            }`}
+            href={`/admin${qs({ sort: sortKey, dir: sortKey ? dir : undefined })}`}
+            className="text-sm text-brand-700 hover:underline"
           >
-            {s.zh} <span className="ml-1 font-semibold">{counts.get(s.key) ?? 0}</span>
+            清除篩選 ✕
           </Link>
-        ))}
+        )}
       </div>
 
-      {/* Table */}
+      {/* Table — sorting & status filter live in the header row */}
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
         <table className="w-full min-w-[820px] text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-ink-muted">
-              <th className="px-4 py-3">編號</th>
-              <th className="px-4 py-3">狀態</th>
-              <th className="px-4 py-3">客人</th>
-              <th className="px-4 py-3">出發店</th>
-              <th className="px-4 py-3">取車日期</th>
-              <th className="px-4 py-3">車款</th>
+              {COLUMNS.map((c) => {
+                const active = !!c.sort && sortKey === c.sort;
+                const nextDir = active && dir === "asc" ? "desc" : "asc";
+                return (
+                  <th key={c.label} className={th}>
+                    <div className="flex items-center gap-1.5">
+                      {c.sort ? (
+                        <Link
+                          href={`/admin${qs({ status: activeStatus, sort: c.sort, dir: nextDir })}`}
+                          className={`inline-flex items-center gap-1 hover:text-ink ${active ? "text-ink" : ""}`}
+                        >
+                          {c.label}
+                          <span className="text-[10px] leading-none">
+                            {active ? (dir === "asc" ? "▲" : "▼") : "↕"}
+                          </span>
+                        </Link>
+                      ) : (
+                        <span>{c.label}</span>
+                      )}
+
+                      {c.filter && (
+                        <StatusFilter
+                          value={activeStatus ?? ""}
+                          keep={{ sort: sortKey, dir: sortKey ? dir : undefined }}
+                          options={[
+                            { key: "", label: "全部", count: all.length },
+                            ...STATUS_ORDER.map((s) => ({
+                              key: s.key,
+                              label: s.zh,
+                              count: counts.get(s.key) ?? 0,
+                            })),
+                          ]}
+                        />
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
