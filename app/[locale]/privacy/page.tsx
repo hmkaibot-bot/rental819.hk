@@ -67,7 +67,7 @@ export default function PrivacyPage({ params }: { params: { locale: string } }) 
   const c = content[locale];
   return (
     <>
-      <PageHero title={c.title} />
+      <PageHero image="/images/tours/kansai-sakura-2026-04-08.jpg" title={c.title} />
       <section className="container-x py-14 lg:py-16">
         <GuideArticle blocks={c.blocks} />
       </section>

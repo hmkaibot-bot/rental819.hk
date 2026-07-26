@@ -27,7 +27,7 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
-      <PageHero eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro}>
+      <PageHero image="/images/tours/shikoku-2026-07-01.jpg" eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro}>
         <Link href={localePath(locale, "/booking")} className="btn-primary">
           {dict.common.bookNow}
           <ArrowRight className="h-4 w-4" />

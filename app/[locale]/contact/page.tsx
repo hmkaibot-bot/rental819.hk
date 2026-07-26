@@ -57,6 +57,7 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
   return (
     <>
       <PageHero
+        image="/images/about/shop.jpg"
         eyebrow={dict.nav.contact}
         title={isEn ? "Get in touch" : "聯絡我們"}
         intro={

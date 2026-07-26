@@ -26,7 +26,7 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
-      <PageHero eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro} />
+      <PageHero image="/images/about/shop.jpg" eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro} />
 
       {/* Stats */}
       <section className="border-b border-slate-100 bg-white">

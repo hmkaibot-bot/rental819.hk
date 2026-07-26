@@ -32,6 +32,7 @@ export default function PackagesPage({ params }: { params: { locale: string } })
   return (
     <>
       <PageHero
+        image="/images/tours/kyushu-aso-2026-04-30.jpg"
         eyebrow={dict.nav.packages}
         title={isEn ? "Self-drive packages" : "電單車自駕套票"}
         intro={

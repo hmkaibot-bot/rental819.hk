@@ -92,6 +92,7 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
   return (
     <>
       <PageHero
+        image="/images/tours/tohoku-2026-09-20.jpg"
         eyebrow={dict.nav.tours}
         title={isEn ? "Guided self-drive motorcycle tours" : "電單車自駕遊旅行團"}
         intro={

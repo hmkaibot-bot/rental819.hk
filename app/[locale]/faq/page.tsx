@@ -31,6 +31,7 @@ export default function FaqPage({ params }: { params: { locale: string } }) {
     <>
       <JsonLd data={faqLd(groups)} />
       <PageHero
+        image="/images/tours/hokkaido-2026-07-30.jpg"
         eyebrow={dict.nav.faq}
         title={isEn ? "Frequently asked questions" : "常見問題"}
         intro={

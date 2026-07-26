@@ -44,6 +44,7 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
   return (
     <>
       <PageHero
+        image="/images/tours/hokkaido-2026-07-30.jpg"
         eyebrow={dict.nav.book}
         title={isEn ? "Booking enquiry" : "預約查詢"}
         intro={

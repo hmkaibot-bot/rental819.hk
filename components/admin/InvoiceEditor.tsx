@@ -1,9 +1,31 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import type { Reservation, InvoiceItem } from "@/lib/reservations/types";
-import { ISSUER, fmtHKD, invoiceTotal } from "@/lib/reservations/invoice";
+import {
+  ISSUER,
+  BANKS,
+  fmtAmount,
+  invoiceTotal,
+  invoiceInfoRows,
+} from "@/lib/reservations/invoice";
+import {
+  RT819_ITEMS,
+  RT819_GROUP_LABELS,
+  rt819Label,
+  type Rt819Item,
+} from "@/lib/reservations/items";
 import { saveInvoice } from "@/app/admin/(app)/reservations/[id]/invoice/actions";
+
+const GROUP_ORDER: Rt819Item["group"][] = [
+  "bike",
+  "insurance",
+  "mamoride",
+  "helmet",
+  "case",
+  "other",
+];
 
 export default function InvoiceEditor({
   reservation,
@@ -13,15 +35,24 @@ export default function InvoiceEditor({
   seed: InvoiceItem[];
 }) {
   const r = reservation;
+  const settlement = (r.settlement ?? {}) as Record<string, unknown>;
   const [si, setSi] = useState(r.si_number ?? "");
   const [date, setDate] = useState(r.invoice_date ?? new Date().toISOString().slice(0, 10));
+  const [paymentDate, setPaymentDate] = useState(
+    (settlement.invoice_payment_date as string) ?? "",
+  );
+  const [deposit, setDeposit] = useState<number>(
+    Number(settlement.invoice_deposit ?? 0) || 0,
+  );
   const [items, setItems] = useState<InvoiceItem[]>(
     r.invoice_items?.length ? r.invoice_items : seed,
   );
   const [saved, setSaved] = useState(false);
   const [pending, start] = useTransition();
 
-  const total = useMemo(() => invoiceTotal(items), [items]);
+  const subtotal = useMemo(() => invoiceTotal(items), [items]);
+  const remaintance = Math.max(0, subtotal - (Number(deposit) || 0));
+  const infoRows = invoiceInfoRows(r);
 
   const update = (i: number, patch: Partial<InvoiceItem>) =>
     setItems((prev) =>
@@ -37,6 +68,20 @@ export default function InvoiceEditor({
     setItems((prev) => [...prev, { description: "", qty: 1, unit_price: 0, amount: 0 }]);
   const removeRow = (i: number) => setItems((prev) => prev.filter((_, idx) => idx !== i));
 
+  const addCatalogItem = (code: string) => {
+    const it = RT819_ITEMS.find((x) => x.code === code);
+    if (!it) return;
+    setItems((prev) => [
+      ...prev,
+      {
+        description: rt819Label(it),
+        qty: 1,
+        unit_price: it.unit_price,
+        amount: it.unit_price,
+      },
+    ]);
+  };
+
   const save = (markInvoiced: boolean) =>
     start(async () => {
       await saveInvoice({
@@ -44,6 +89,11 @@ export default function InvoiceEditor({
         si_number: si || null,
         invoice_date: date || null,
         invoice_items: items,
+        settlement: {
+          ...settlement,
+          invoice_payment_date: paymentDate || null,
+          invoice_deposit: Number(deposit) || 0,
+        },
         markInvoiced,
       });
       setSaved(true);
@@ -56,24 +106,58 @@ export default function InvoiceEditor({
     <div>
       {/* ---- Editor (hidden when printing) ---- */}
       <div className="no-print mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-4">
           <label className="text-sm">
             <span className="mb-1 block font-medium text-ink-soft">單號 (SI No.)</span>
             <input value={si} onChange={(e) => setSi(e.target.value)} placeholder="SI-26-xxxxx" className={`${cell} w-full`} />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block font-medium text-ink-soft">單據日期</span>
+            <span className="mb-1 block font-medium text-ink-soft">單據日期 Date</span>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={`${cell} w-full`} />
           </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium text-ink-soft">付款日期 Payment date</span>
+            <input type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} className={`${cell} w-full`} />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium text-ink-soft">訂金 Deposit (HK$)</span>
+            <input type="number" value={deposit} onChange={(e) => setDeposit(Number(e.target.value))} className={`${cell} w-full`} />
+          </label>
+        </div>
+
+        {/* Item picker from the RT819 catalog */}
+        <div className="mt-4">
+          <label className="mb-1 block text-sm font-medium text-ink-soft">
+            由 RT819 項目表加入
+          </label>
+          <select
+            className={`${cell} w-full sm:max-w-md`}
+            value=""
+            onChange={(e) => {
+              if (e.target.value) addCatalogItem(e.target.value);
+              e.target.value = "";
+            }}
+          >
+            <option value="">＋ 選擇項目加入單據…</option>
+            {GROUP_ORDER.map((g) => (
+              <optgroup key={g} label={RT819_GROUP_LABELS[g]}>
+                {RT819_ITEMS.filter((it) => it.group === g).map((it) => (
+                  <option key={it.code} value={it.code}>
+                    {rt819Label(it)} — HK${it.unit_price}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         </div>
 
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-ink-muted">
-                <th className="py-1 pr-2">項目說明</th>
-                <th className="w-16 py-1 px-2">數量</th>
+                <th className="py-1 pr-2">項目說明 Description</th>
                 <th className="w-28 py-1 px-2">單價 (HK$)</th>
+                <th className="w-16 py-1 px-2">數量</th>
                 <th className="w-28 py-1 px-2 text-right">金額</th>
                 <th className="w-8"></th>
               </tr>
@@ -85,12 +169,12 @@ export default function InvoiceEditor({
                     <input value={it.description} onChange={(e) => update(i, { description: e.target.value })} className={`${cell} w-full`} />
                   </td>
                   <td className="py-1 px-2">
-                    <input type="number" value={it.qty} onChange={(e) => update(i, { qty: Number(e.target.value) })} className={`${cell} w-full`} />
-                  </td>
-                  <td className="py-1 px-2">
                     <input type="number" value={it.unit_price} onChange={(e) => update(i, { unit_price: Number(e.target.value) })} className={`${cell} w-full`} />
                   </td>
-                  <td className="py-1 px-2 text-right font-medium">{fmtHKD(it.amount)}</td>
+                  <td className="py-1 px-2">
+                    <input type="number" value={it.qty} onChange={(e) => update(i, { qty: Number(e.target.value) })} className={`${cell} w-full`} />
+                  </td>
+                  <td className="py-1 px-2 text-right font-medium">{fmtAmount(it.amount)}</td>
                   <td className="py-1 text-center">
                     <button onClick={() => removeRow(i)} className="text-slate-400 hover:text-rose-600" aria-label="刪除">×</button>
                   </td>
@@ -101,10 +185,10 @@ export default function InvoiceEditor({
         </div>
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">+ 加一行</button>
+          <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">+ 自訂一行</button>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-ink-muted">合計</span>
-            <span className="text-lg font-black text-ink">{fmtHKD(total)}</span>
+            <span className="text-sm text-ink-muted">總額</span>
+            <span className="text-lg font-black text-ink">HK${fmtAmount(remaintance)}</span>
           </div>
         </div>
 
@@ -121,70 +205,143 @@ export default function InvoiceEditor({
         </div>
       </div>
 
-      {/* ---- Print-ready invoice ---- */}
-      <div className="print-area mx-auto max-w-[800px] rounded-2xl border border-slate-200 bg-white p-8 shadow-card print:rounded-none print:border-0 print:shadow-none">
-        <div className="flex items-start justify-between">
+      {/* ---- Print-ready invoice (matches the SI-24 template) ---- */}
+      <div className="print-area mx-auto max-w-[820px] bg-white p-8 text-ink shadow-card print:max-w-none print:p-0 print:shadow-none">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-6">
           <div>
-            <div className="text-2xl font-black text-brand-700">
-              RENTAL<span className="text-accent-500">819</span>
-              <span className="ml-1 text-sm font-semibold text-ink-muted">.HK</span>
-            </div>
-            <div className="mt-1 text-sm text-ink-soft">{ISSUER.name}</div>
-            <div className="mt-1 text-xs leading-5 text-ink-muted">
-              {ISSUER.addressLines.filter(Boolean).map((l) => (
-                <div key={l}>{l}</div>
-              ))}
-              <div>{ISSUER.phone} · {ISSUER.email}</div>
-            </div>
+            <div className="text-3xl font-black">Invoice</div>
+            <div className="text-2xl font-bold">發票</div>
           </div>
-          <div className="text-right">
-            <div className="text-xl font-bold tracking-wide text-ink">INVOICE 單據</div>
-            <div className="mt-2 text-sm">
-              <div><span className="text-ink-muted">單號 No.：</span><span className="font-semibold">{si || "—"}</span></div>
-              <div><span className="text-ink-muted">日期 Date：</span>{date || "—"}</div>
-              <div><span className="text-ink-muted">預約 Ref：</span>{r.booking_ref ?? "—"}</div>
-            </div>
+          <Image src={ISSUER.logo} alt="HELMET KING" width={1182} height={425} className="h-16 w-auto" />
+        </div>
+
+        {/* Address */}
+        <div className="mt-6">
+          <div className="border-b-2 border-ink pb-1 text-sm font-bold">ADDRESS 地址</div>
+          <div className="mt-2 text-sm leading-6 text-ink-soft">
+            <div>{ISSUER.name}</div>
+            {ISSUER.addressLines.map((l) => (
+              <div key={l}>{l}</div>
+            ))}
+            <div>{ISSUER.email}</div>
           </div>
         </div>
 
-        <div className="mt-8 rounded-lg bg-slate-50 p-4 text-sm">
-          <div className="text-xs uppercase tracking-wide text-ink-muted">Bill to 客戶</div>
-          <div className="mt-1 font-semibold">{r.name_en ?? r.name_zh}</div>
-          <div className="text-ink-soft">{r.name_zh}</div>
-          <div className="text-ink-muted">{r.email} · {r.hk_phone}</div>
+        {/* Bill to + date/no */}
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          <div>
+            <div className="border-b-2 border-ink pb-1 text-sm font-bold">BILL TO 發票資料</div>
+            <table className="mt-2 text-sm">
+              <tbody>
+                <tr>
+                  <td className="py-1 pr-4 font-semibold">CUSTOMER 客戶名稱：</td>
+                  <td className="py-1">{r.name_en ?? r.name_zh ?? "—"}</td>
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 font-semibold">CONTACT 聯絡電話：</td>
+                  <td className="py-1">{r.hk_phone ?? "—"}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="self-start">
+            <table className="w-full text-sm">
+              <tbody>
+                <tr className="border-b border-slate-200">
+                  <td className="py-1.5 pr-4 font-bold">DATE 日期</td>
+                  <td className="py-1.5 text-right">{date || "—"}</td>
+                </tr>
+                <tr className="border-b border-slate-200">
+                  <td className="py-1.5 pr-4 font-bold">INVOICE NO. 發票號碼</td>
+                  <td className="py-1.5 text-right">{si || "—"}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <table className="mt-6 w-full text-sm">
+        {/* Line items */}
+        <table className="mt-8 w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b-2 border-slate-200 text-left text-xs uppercase tracking-wide text-ink-muted">
-              <th className="py-2">項目說明 Description</th>
-              <th className="w-16 py-2 text-center">數量</th>
-              <th className="w-32 py-2 text-right">單價</th>
-              <th className="w-32 py-2 text-right">金額</th>
+            <tr className="bg-slate-500 text-white">
+              <th className="px-3 py-2 text-center font-bold">DESCRIPTION<br />貨品</th>
+              <th className="w-28 px-3 py-2 text-center font-bold">UNIT PRICE<br />單價</th>
+              <th className="w-24 px-3 py-2 text-center font-bold">QUANTITY<br />數量</th>
+              <th className="w-28 px-3 py-2 text-center font-bold">TOTAL<br />總額</th>
             </tr>
           </thead>
           <tbody>
             {items.map((it, i) => (
-              <tr key={i} className="border-b border-slate-100">
-                <td className="py-2.5">{it.description || "—"}</td>
-                <td className="py-2.5 text-center">{it.qty}</td>
-                <td className="py-2.5 text-right">{fmtHKD(it.unit_price)}</td>
-                <td className="py-2.5 text-right">{fmtHKD(it.amount)}</td>
+              <tr key={i} className="border-b border-slate-200">
+                <td className="px-3 py-1.5">{it.description || "—"}</td>
+                <td className="px-3 py-1.5 text-right">{fmtAmount(it.unit_price)}</td>
+                <td className="px-3 py-1.5 text-right">{fmtAmount(it.qty)}</td>
+                <td className="px-3 py-1.5 text-right">{fmtAmount(it.amount)}</td>
+              </tr>
+            ))}
+            {infoRows.map((row, i) => (
+              <tr key={`info-${i}`} className="border-b border-slate-100">
+                <td className="whitespace-pre-wrap px-3 py-1.5 text-ink-soft">{row}</td>
+                <td /><td /><td />
               </tr>
             ))}
           </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={3} className="py-3 text-right font-semibold">總計 Total</td>
-              <td className="py-3 text-right text-lg font-black text-brand-700">{fmtHKD(total)}</td>
-            </tr>
-          </tfoot>
         </table>
 
-        <div className="mt-10 border-t border-slate-100 pt-4 text-xs leading-5 text-ink-muted">
-          付款方式：轉數快 (FPS) / 銀行轉帳予「頭盔王 Helmet King」。請於單據發出後之工作天內完成付款。
-          <br />
-          多謝惠顧！ Helmet King × RENTAL819.HK — 日本電單車自駕遊。
+        {/* Payment instruction + totals */}
+        <div className="mt-6 grid gap-8 sm:grid-cols-2">
+          <div className="text-xs leading-5 text-ink-soft">
+            <div className="mb-2 text-sm font-bold underline">
+              REMARK/ PAYMENT INSTRUCTION 備註/付款指示
+            </div>
+            {[BANKS.hk, BANKS.macau].map((bank) => (
+              <div key={bank.label} className="mt-3">
+                <div className="font-semibold underline">{bank.label}</div>
+                <table className="mt-1">
+                  <tbody>
+                    {bank.lines.map(([k, v]) => (
+                      <tr key={k}>
+                        <td className="py-0.5 pr-3 align-top">{k}</td>
+                        <td className="py-0.5 font-medium">{v}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-sm">
+            <table className="w-full">
+              <tbody>
+                <tr className="border-b border-slate-200">
+                  <td className="py-1.5 pr-4 text-right font-bold">PAYMENT DATE 付款日期</td>
+                  <td className="py-1.5 text-right">{paymentDate || "—"}</td>
+                </tr>
+                <tr className="border-b border-slate-200">
+                  <td className="py-1.5 pr-4 text-right font-bold">SUBTOTAL 小計</td>
+                  <td className="py-1.5 text-right">{fmtAmount(subtotal)}</td>
+                </tr>
+                {(Number(deposit) || 0) > 0 && (
+                  <tr className="border-b border-slate-200">
+                    <td className="py-1.5 pr-4 text-right font-bold">DEPOSIT 訂金</td>
+                    <td className="py-1.5 text-right">-{fmtAmount(deposit)}</td>
+                  </tr>
+                )}
+                <tr className="border-b border-slate-200">
+                  <td className="py-1.5 pr-4 text-right font-bold">REMAINTANCE 餘數</td>
+                  <td className="py-1.5 text-right">{fmtAmount(remaintance)}</td>
+                </tr>
+                <tr>
+                  <td className="py-2 pr-4 text-right text-base font-black">BALANCE DUE (HKD) 總額(港幣)</td>
+                  <td className="py-2 text-right text-base font-black">{fmtAmount(remaintance)}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="mt-8 text-center text-base font-bold">SIGN 客戶簽署</div>
+            <div className="mt-8 border-t border-ink" />
+          </div>
         </div>
       </div>
     </div>

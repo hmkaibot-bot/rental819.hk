@@ -56,7 +56,7 @@ export default function GuideDocPage({
           { name: doc.title, url: localePath(locale, `/guide/${doc.slug}`) },
         ])}
       />
-      <PageHero eyebrow={dict.nav.guide} title={doc.title} intro={doc.intro}>
+      <PageHero image="/images/tours/kansai-sakura-2026-04-08.jpg" eyebrow={dict.nav.guide} title={doc.title} intro={doc.intro}>
         <Breadcrumb
           locale={locale}
           items={[

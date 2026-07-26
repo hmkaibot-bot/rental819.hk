@@ -21,14 +21,10 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function addonSummary(r: Reservation) {
-  const on: string[] = [];
-  for (const a of ADDON_LABELS) {
-    const v = r.addons?.[a.key];
-    if (typeof v === "number" && v > 0) on.push(`${a.zh} ×${v}`);
-    else if (v === true) on.push(a.zh);
-  }
-  return on.length ? on.join("、") : "—";
+function addonValue(r: Reservation, key: (typeof ADDON_LABELS)[number]["key"]) {
+  const v = r.addons?.[key];
+  if (typeof v === "number") return v > 0 ? `×${v}` : "—";
+  return v === true ? "✔" : "—";
 }
 
 const input =
@@ -67,6 +63,17 @@ export default async function ReservationDetail({
         {/* ---- Details ---- */}
         <div className="space-y-5">
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+            <h2 className="mb-2 text-sm font-bold text-brand-700">預約</h2>
+            <dl className="grid grid-cols-2 gap-x-6 sm:grid-cols-3">
+              <Field label="預約編號" value={r.booking_ref} />
+              <Field label="提交日期" value={r.request_date} />
+              <Field label="狀態" value={m.zh} />
+              <Field label="優惠" value={r.promo} />
+              <Field label="來源" value={r.source} />
+            </dl>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
             <h2 className="mb-2 text-sm font-bold text-brand-700">客人資料</h2>
             <dl className="grid grid-cols-2 gap-x-6">
               <Field label="中文姓名" value={r.name_zh} />
@@ -74,13 +81,18 @@ export default async function ReservationDetail({
               <Field label="性別" value={r.gender} />
               <Field label="出生年月日" value={r.dob} />
               <Field label="電郵" value={r.email} />
-              <Field label="香港電話" value={r.hk_phone} />
+              <Field label="香港聯絡電話" value={r.hk_phone} />
               <Field label="日語能力" value={r.japanese_ability} />
               <Field label="英語能力" value={r.english_ability} />
-              <Field label="香港地址" value={r.hk_address} />
-              <Field label="日本住宿地址" value={r.jp_address} />
-              <Field label="日本電話" value={r.jp_phone} />
-              <Field label="緊急聯絡" value={[r.emergency_contact, r.emergency_phone].filter(Boolean).join(" · ")} />
+              <div className="col-span-2">
+                <Field label="原國籍居住地址" value={r.hk_address} />
+              </div>
+              <div className="col-span-2">
+                <Field label="日本住宿地址" value={r.jp_address} />
+              </div>
+              <Field label="日本手提電話" value={r.jp_phone} />
+              <Field label="緊急聯絡人" value={r.emergency_contact} />
+              <Field label="緊急聯絡人號碼" value={r.emergency_phone} />
             </dl>
           </section>
 
@@ -88,15 +100,21 @@ export default async function ReservationDetail({
             <h2 className="mb-2 text-sm font-bold text-brand-700">租車詳情</h2>
             <dl className="grid grid-cols-2 gap-x-6">
               <Field label="出發店" value={r.shop} />
-              <Field label="租期" value={[r.pickup_date && `${r.pickup_date} ${r.pickup_time ?? ""}`, r.return_date && `${r.return_date} ${r.return_time ?? ""}`].filter(Boolean).join(" → ")} />
+              <Field label="確認車款" value={r.confirmed_bike ? <span className="font-semibold text-emerald-700">{r.confirmed_bike}</span> : "未確認"} />
+              <Field label="取車日期" value={[r.pickup_date, r.pickup_time].filter(Boolean).join(" ")} />
+              <Field label="還車日期" value={[r.return_date, r.return_time].filter(Boolean).join(" ")} />
               <Field label="首選車款" value={r.bike_pref_1} />
               <Field label="次選車款" value={r.bike_pref_2} />
               <Field label="第三選車款" value={r.bike_pref_3} />
-              <Field label="確認車款" value={r.confirmed_bike ? <span className="font-semibold text-emerald-700">{r.confirmed_bike}</span> : "未確認"} />
-              <div className="col-span-2">
-                <Field label="裝備" value={addonSummary(r)} />
-              </div>
-              <Field label="優惠" value={r.promo} />
+            </dl>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+            <h2 className="mb-2 text-sm font-bold text-brand-700">配件及加購</h2>
+            <dl className="grid grid-cols-3 gap-x-6 sm:grid-cols-5">
+              {ADDON_LABELS.map((a) => (
+                <Field key={a.key} label={a.zh} value={addonValue(r, a.key)} />
+              ))}
             </dl>
           </section>
 
