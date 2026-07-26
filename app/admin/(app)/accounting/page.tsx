@@ -9,10 +9,16 @@ export const dynamic = "force-dynamic";
 
 const BILLED = ["invoiced", "paid", "customer_confirmed", "settled"];
 
+// Revenue = the in-app invoice total when there is one, otherwise the imported
+// customer price (單價（港幣）) from the master Excel.
 function revenue(r: Reservation) {
-  return invoiceTotal(r.invoice_items ?? []);
+  const inv = invoiceTotal(r.invoice_items ?? []);
+  return inv > 0 ? inv : Number(r.revenue_hkd) || 0;
 }
+// Cost (HK$) = the imported 單價成本 when present, otherwise the JPY cost
+// converted at the reference rate (for in-app bookings priced in yen).
 function costHkd(r: Reservation) {
+  if (r.cost_hkd != null) return Number(r.cost_hkd) || 0;
   return (Number(r.cost_jpy) || 0) * RT819_EXCHANGE_RATE;
 }
 

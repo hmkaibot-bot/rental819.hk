@@ -68,6 +68,8 @@ export interface Reservation {
   paid_to_supplier: boolean;
   supplier_paid_date: string | null;
   cost_jpy: number | null;
+  revenue_hkd?: number | null; // 單價（港幣） customer price (imported)
+  cost_hkd?: number | null; // 單價成本（港元） real HK$ cost (imported)
   settlement: Record<string, unknown>;
 
   notes: string | null;
