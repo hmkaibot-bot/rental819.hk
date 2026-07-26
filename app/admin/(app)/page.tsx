@@ -65,11 +65,11 @@ export default async function AdminDashboard({
           <thead>
             <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-ink-muted">
               <th className="px-4 py-3">編號</th>
+              <th className="px-4 py-3">狀態</th>
               <th className="px-4 py-3">客人</th>
               <th className="px-4 py-3">出發店</th>
               <th className="px-4 py-3">取車日期</th>
               <th className="px-4 py-3">車款</th>
-              <th className="px-4 py-3">狀態</th>
             </tr>
           </thead>
           <tbody>
@@ -82,6 +82,11 @@ export default async function AdminDashboard({
                       {r.booking_ref ?? "—"}
                     </Link>
                     <div className="text-xs text-ink-muted">{fmtDate(r.request_date)}</div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
+                      {m.zh}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-medium">{r.name_en ?? r.name_zh ?? "—"}</div>
@@ -97,11 +102,6 @@ export default async function AdminDashboard({
                     {!r.confirmed_bike && r.bike_pref_1 && (
                       <div className="text-xs text-ink-muted">未確認</div>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
-                      {m.zh}
-                    </span>
                   </td>
                 </tr>
               );
