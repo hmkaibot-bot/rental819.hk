@@ -8,6 +8,7 @@ import { recordSupplierPayment } from "./actions";
 export const dynamic = "force-dynamic";
 
 const BILLED = ["invoiced", "paid", "customer_confirmed", "settled"];
+const EXCLUDED = ["cancelled", "no_response"];
 
 // Revenue = the in-app invoice total when there is one, otherwise the imported
 // customer price (單價（港幣）) from the master Excel.
@@ -24,7 +25,16 @@ function costHkd(r: Reservation) {
 
 export default async function AccountingPage() {
   const all = await listReservations();
-  const rows = all.filter((r) => BILLED.includes(r.status) || r.si_number || (r.invoice_items?.length ?? 0) > 0);
+  // A booking counts toward accounting once it is billed — an in-app pipeline
+  // status, an SI number (imported historical bookings), or an in-app invoice —
+  // and is never cancelled / no-response.
+  const rows = all.filter(
+    (r) =>
+      !EXCLUDED.includes(r.status) &&
+      (BILLED.includes(r.status) ||
+        (r.si_number ?? "") !== "" ||
+        (r.invoice_items?.length ?? 0) > 0),
+  );
 
   const totals = rows.reduce(
     (acc, r) => {
