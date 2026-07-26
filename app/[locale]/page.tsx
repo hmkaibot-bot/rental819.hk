@@ -121,36 +121,50 @@ export default function HomePage({ params }: { params: { locale: string } }) {
           intro={c.offersHead.intro}
         />
         <div className="grid gap-6 md:grid-cols-3">
-          {c.offers.map((o, i) => (
-            <Link
-              key={o.href}
-              href={localePath(locale, o.href)}
-              className="group card-hover flex flex-col overflow-hidden"
-            >
-              <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
-                <Image
-                  src={o.image}
-                  alt={o.title}
-                  fill
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-cover transition duration-500 group-hover:scale-105"
+          {c.offers.map((o, i) => {
+            const cardClass = "group card-hover flex flex-col overflow-hidden";
+            const inner = (
+              <>
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                  <Image
+                    src={o.image}
+                    alt={o.title}
+                    fill
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div
+                  className={`h-1.5 w-full ${
+                    i === 0 ? "bg-brand-600" : i === 1 ? "bg-accent-600" : "bg-brand-400"
+                  }`}
                 />
-              </div>
-              <div
-                className={`h-1.5 w-full ${
-                  i === 0 ? "bg-brand-600" : i === 1 ? "bg-accent-600" : "bg-brand-400"
-                }`}
-              />
-              <div className="flex flex-1 flex-col p-7">
-                <h3 className="text-xl font-bold">{o.title}</h3>
-                <p className="mt-3 flex-1 text-sm leading-6 text-ink-muted">{o.body}</p>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 group-hover:gap-2.5">
-                  {o.cta}
-                  <ArrowRight className="h-4 w-4 transition-all" />
-                </span>
-              </div>
-            </Link>
-          ))}
+                <div className="flex flex-1 flex-col p-7">
+                  <h3 className="text-xl font-bold">{o.title}</h3>
+                  <p className="mt-3 flex-1 text-sm leading-6 text-ink-muted">{o.body}</p>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 group-hover:gap-2.5">
+                    {o.cta}
+                    <ArrowRight className="h-4 w-4 transition-all" />
+                  </span>
+                </div>
+              </>
+            );
+            return o.external ? (
+              <a
+                key={o.href}
+                href={o.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cardClass}
+              >
+                {inner}
+              </a>
+            ) : (
+              <Link key={o.href} href={localePath(locale, o.href)} className={cardClass}>
+                {inner}
+              </Link>
+            );
+          })}
         </div>
       </Section>
 

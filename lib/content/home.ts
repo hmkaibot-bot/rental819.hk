@@ -17,6 +17,7 @@ export interface OfferCard {
   href: string;
   cta: string;
   image: string;
+  external?: boolean;
 }
 
 export interface HomeContent {
@@ -113,7 +114,8 @@ export const homeContent: Record<Locale, HomeContent> = {
       {
         title: "電單車旅行團",
         body: "由經驗領隊帶路，路線、住宿、行程一手包辦，輕鬆享受騎旅。",
-        href: "/tours",
+        href: "https://26adventure.com/tours",
+        external: true,
         image: "/images/home/way-2.png",
         cta: "查看旅行團",
       },
@@ -232,7 +234,8 @@ export const homeContent: Record<Locale, HomeContent> = {
       {
         title: "Guided motorcycle tours",
         body: "An experienced leader handles the route, stays and itinerary — you just enjoy the ride.",
-        href: "/tours",
+        href: "https://26adventure.com/tours",
+        external: true,
         image: "/images/home/way-2.png",
         cta: "See tours",
       },
