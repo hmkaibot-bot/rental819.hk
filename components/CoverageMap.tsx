@@ -1,59 +1,50 @@
+import Image from "next/image";
 import { coverageRegions, JAPAN_SHOPLIST } from "@/lib/content/coverage";
 import type { Locale } from "@/lib/i18n";
 
-const TILE_W = 94;
-const TILE_H = 38;
-
 /**
- * Nationwide branch coverage: a clickable schematic Japan map + a linked region
- * list. Each region opens the Rental819 store list anchored to that area.
+ * Nationwide branch coverage: the Japan region map with a clickable label over
+ * each region, plus a linked region/prefecture list. Each region opens the
+ * Rental819 store list anchored to that area.
  */
 export default function CoverageMap({ locale }: { locale: Locale }) {
   const isEn = locale === "en";
   const areaHref = (a: number) => `${JAPAN_SHOPLIST}#area_${a}`;
 
   return (
-    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,380px)_1fr] lg:gap-12">
-      {/* Schematic clickable map */}
+    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,460px)_1fr] lg:gap-12">
+      {/* Map with clickable region labels overlaid on each region */}
       <figure className="m-0">
-        <svg
-          viewBox="0 0 400 512"
-          role="img"
-          aria-label={isEn ? "Map of Rental819 regions in Japan" : "全日本 Rental819 取車地區地圖"}
-          className="mx-auto w-full max-w-[380px]"
-        >
-          {coverageRegions.map((r) => (
-            <a
-              key={r.area}
-              href={areaHref(r.area)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group"
-            >
-              <title>{isEn ? r.en : r.zh}</title>
-              <rect
-                x={r.x}
-                y={r.y}
-                width={TILE_W}
-                height={TILE_H}
-                rx="9"
-                fill={r.color}
-                stroke="#ffffff"
-                strokeWidth="2"
-                className="transition-opacity group-hover:opacity-75"
-              />
-              <text
-                x={r.x + TILE_W / 2}
-                y={r.y + TILE_H / 2 + 4}
-                textAnchor="middle"
-                className="pointer-events-none fill-slate-800 font-semibold"
-                style={{ fontSize: "12.5px" }}
+        <div className="mx-auto max-w-[460px] rounded-2xl bg-white p-2 shadow-card">
+          <div className="relative">
+            <Image
+              src="/images/japan-regions-map.png"
+              alt={isEn ? "Map of Rental819 regions in Japan" : "全日本 Rental819 取車地區地圖"}
+              width={920}
+              height={920}
+              className="h-auto w-full select-none"
+              sizes="(min-width: 1024px) 460px, 100vw"
+            />
+            {coverageRegions.map((r) => (
+              <a
+                key={r.area}
+                href={areaHref(r.area)}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={isEn ? r.en : r.zh}
+                className="group absolute -translate-x-1/2 -translate-y-1/2"
+                style={{ left: `${r.px}%`, top: `${r.py}%` }}
               >
-                {isEn ? r.en : r.zhShort}
-              </text>
-            </a>
-          ))}
-        </svg>
+                <span
+                  className="whitespace-nowrap rounded-full border border-white/80 px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow-sm ring-brand-600/0 transition group-hover:ring-2 group-hover:ring-brand-600/70 sm:text-xs"
+                  style={{ backgroundColor: r.color }}
+                >
+                  {isEn ? r.en : r.zhShort}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
         <figcaption className="mt-3 text-center text-xs text-ink-muted">
           {isEn
             ? "Tap a region to see its Rental819 branches"
