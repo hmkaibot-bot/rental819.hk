@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SHOPS } from "@/lib/reservations/types";
+import { SHOP_AREAS } from "@/lib/reservations/types";
 import { createReservationAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -89,8 +89,12 @@ export default function NewReservationPage() {
               <label className={label} htmlFor="shop">出發店</label>
               <select id="shop" name="shop" defaultValue="" className={`mt-1 ${input}`}>
                 <option value="">—</option>
-                {SHOPS.map((sh) => (
-                  <option key={sh} value={sh}>{sh}</option>
+                {SHOP_AREAS.map((a) => (
+                  <optgroup key={a.area} label={a.area}>
+                    {a.shops.map((sh) => (
+                      <option key={sh} value={sh}>{sh}</option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

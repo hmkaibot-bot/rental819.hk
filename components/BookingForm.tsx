@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { localePath, type Locale } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/site";
-import { SHOPS } from "@/lib/reservations/types";
+import { SHOP_AREAS } from "@/lib/reservations/types";
 import { WhatsAppIcon, CheckIcon, ArrowRight } from "./icons";
 
 type Status = "idle" | "submitting" | "done" | "error";
@@ -382,8 +382,12 @@ export default function BookingForm({ locale }: { locale: Locale }) {
           <label className={labelCls}>{c.shop} {star}</label>
           <select className={field} value={form.shop} onChange={setText("shop")}>
             <option value="">{c.shopPlaceholder}</option>
-            {SHOPS.map((s) => (
-              <option key={s} value={s}>{s}</option>
+            {SHOP_AREAS.map((a) => (
+              <optgroup key={a.area} label={a.area}>
+                {a.shops.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
           <p className="mt-1 text-xs text-ink-muted">{c.shopHint}</p>
