@@ -34,21 +34,22 @@ export default function HomePage({ params }: { params: { locale: string } }) {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-brand-950 text-white">
+      <section className="relative overflow-hidden bg-brand-700 text-white">
         <div className="pointer-events-none absolute inset-0">
-          {/* Banner photo — riders on a Japanese country road */}
+          {/* Banner photo — a Rental819 bike above the clouds at Mt. Fuji */}
           <Image
-            src="/images/tours/hokkaido-2026-07-30.jpg"
+            src="/images/home/way-2.png"
             alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-60"
+            className="object-cover object-center opacity-45"
           />
-          {/* Dark gradient keeps the left-aligned copy legible over the photo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-950 via-brand-950/80 to-brand-950/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-950 via-transparent to-brand-950/40" />
-          <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-accent-600/30 blur-3xl" />
+          {/* Faded-blue wash: a soft brand-blue gradient over the photo, kept
+              darker on the left so the copy stays legible. */}
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-800/90 via-brand-600/70 to-brand-400/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-900/75 via-brand-700/25 to-transparent" />
+          <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-brand-300/25 blur-3xl" />
         </div>
         <div className="container-x relative py-20 lg:py-28">
           <div className="max-w-3xl animate-fade-up">
