@@ -36,9 +36,9 @@ export default function HomePage({ params }: { params: { locale: string } }) {
       {/* Hero */}
       <section className="relative overflow-hidden bg-brand-700 text-white">
         <div className="pointer-events-none absolute inset-0">
-          {/* Banner photo — a Rental819 bike above the clouds at Mt. Fuji */}
+          {/* Banner photo — a Rental819 branch with its fleet lined up */}
           <Image
-            src="/images/home/way-2.png"
+            src="/images/home/hero.jpg"
             alt=""
             fill
             priority
