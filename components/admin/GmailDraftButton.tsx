@@ -12,6 +12,7 @@ export default function GmailDraftButton({
   enabled: boolean;
 }) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [detail, setDetail] = useState("");
 
   if (!enabled) {
     return (
@@ -23,14 +24,22 @@ export default function GmailDraftButton({
 
   const create = async () => {
     setState("loading");
+    setDetail("");
     try {
       const res = await fetch("/api/admin/gmail-draft", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, kind }),
       });
-      setState(res.ok ? "done" : "error");
-    } catch {
+      if (res.ok) {
+        setState("done");
+      } else {
+        const j = (await res.json().catch(() => ({}))) as { error?: string; detail?: string };
+        setDetail(j.detail || j.error || `HTTP ${res.status}`);
+        setState("error");
+      }
+    } catch (e) {
+      setDetail(e instanceof Error ? e.message : String(e));
       setState("error");
     }
   };
@@ -49,7 +58,12 @@ export default function GmailDraftButton({
           檢查並發送。
         </span>
       )}
-      {state === "error" && <span className="text-sm text-rose-600">建立失敗，請重試或用複製方式。</span>}
+      {state === "error" && (
+        <span className="text-sm text-rose-600">
+          建立失敗，請重試或用複製方式。
+          {detail && <span className="block text-xs text-rose-400">（{detail}）</span>}
+        </span>
+      )}
     </div>
   );
 }

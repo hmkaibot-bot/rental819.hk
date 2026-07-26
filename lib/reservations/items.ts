@@ -11,7 +11,7 @@ export interface Rt819Item {
   yen_cost: number; // supplier cost in JPY
   hkd_cost: number; // cost in HKD
   unit_price: number; // customer unit price in HKD (used on the invoice)
-  group: "bike" | "insurance" | "mamoride" | "helmet" | "case" | "other";
+  group: "bike" | "insurance" | "mamoride" | "helmet" | "case" | "hk" | "other";
 }
 
 /** JPY→HKD exchange rate and Kizuki rebate used in the master sheet's costing. */
@@ -83,6 +83,8 @@ export const RT819_ITEMS: Rt819Item[] = [
   { code: "RT819-SC-2D", desc_en: "RENTAL 819 SIDE CASE RENT DAY", desc_zh: "第二天或以後每天費用", yen_cost: 330, hkd_cost: 16.5, unit_price: 20, group: "case" },
   { code: "RT819-TC-1D", desc_en: "RENTAL 819 TOP CASE RENT 1ST DAY", desc_zh: "首天費用", yen_cost: 1650, hkd_cost: 82.5, unit_price: 90, group: "case" },
   { code: "RT819-TC-2D", desc_en: "RENTAL 819 TOP CASE RENT DAY", desc_zh: "第二天或以後每天費用", yen_cost: 330, hkd_cost: 16.5, unit_price: 20, group: "case" },
+  // Hong Kong value-add services (billed by Helmet King, not confirmed with Japan)
+  { code: "HK-CARDO", desc_en: "CARDO PACKTALK BOLD INTERCOM RENTAL", desc_zh: "對講機租賃", yen_cost: 0, hkd_cost: 0, unit_price: 200, group: "hk" },
 ];
 
 export const RT819_GROUP_LABELS: Record<Rt819Item["group"], string> = {
@@ -91,6 +93,7 @@ export const RT819_GROUP_LABELS: Record<Rt819Item["group"], string> = {
   mamoride: "MamoRide 補償",
   helmet: "頭盔 Helmet",
   case: "箱／袋 Case & bag",
+  hk: "香港增值服務 HK add-on",
   other: "其他 Other",
 };
 

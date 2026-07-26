@@ -95,25 +95,66 @@ function lineFromCode(code: string, qty: number): InvoiceItem | null {
   };
 }
 
+/** Suggested SI number for a reservation: SI-<booking ref>. */
+export function autoSiNumber(r: Reservation): string {
+  return r.si_number ?? (r.booking_ref ? `SI-${r.booking_ref}` : "");
+}
+
 /**
- * Seed invoice line items from the reservation's confirmed grade + duration,
- * mirroring how the master sheet bills (1st day + subsequent days for bike rent
- * and insurance). The agent can then adjust before saving.
+ * Seed invoice line items from everything Japan confirmed — grade + duration
+ * (bike rent + insurance), plus each confirmed add-on (MamoRide, helmets,
+ * cases) and the HK-side CARDO value-add — mirroring the master sheet's
+ * 1st-day + subsequent-day billing. The agent can adjust before saving.
  */
 export function defaultInvoiceItems(r: Reservation): InvoiceItem[] {
   const grade = gradeFromReservation(r); // "P1".."P7" or null
   const days = rentalDays(r);
-  const extraDays = Math.max(0, days - 1);
+  const extra = Math.max(0, days - 1);
+  const a = r.addons ?? {};
   const items: InvoiceItem[] = [];
 
   if (grade) {
     const g = grade.replace("P", "");
+    // Bike rent
+    push(items, lineFromCode(`RT819-${grade}-1D`, 1));
+    if (extra) push(items, lineFromCode(`RT819-${grade}-2D`, extra));
+    // Insurance (vehicle damage compensation)
     const insGroup = ["1", "2"].includes(g) ? "P1P2" : `P${g}`;
     push(items, lineFromCode(`RT819-INS-${insGroup}-1D`, 1));
-    if (extraDays) push(items, lineFromCode(`RT819-INS-${insGroup}-2D`, extraDays));
-    push(items, lineFromCode(`RT819-${grade}-1D`, 1));
-    if (extraDays) push(items, lineFromCode(`RT819-${grade}-2D`, extraDays));
+    if (extra) push(items, lineFromCode(`RT819-INS-${insGroup}-2D`, extra));
+    // MamoRide (optional add-on)
+    if (a.mamoride) {
+      const mamoGroup = ["1", "2"].includes(g)
+        ? "P1P2"
+        : ["4", "5"].includes(g)
+          ? "P4P5"
+          : `P${g}`;
+      push(items, lineFromCode(`RT819-MAMO-${mamoGroup}-1D`, 1));
+      if (extra) push(items, lineFromCode(`RT819-MAMO-${mamoGroup}-2D`, extra));
+    }
   }
+
+  // Helmets (full-face + open-face counts)
+  const helmets = (Number(a.full_face) || 0) + (Number(a.open_face) || 0);
+  if (helmets > 0) {
+    push(items, lineFromCode("RT819-HM-1D", helmets));
+    if (extra) push(items, lineFromCode("RT819-HM-2D", helmets * extra));
+  }
+  // Cases / bags
+  if (a.topcase) {
+    push(items, lineFromCode("RT819-TC-1D", 1));
+    if (extra) push(items, lineFromCode("RT819-TC-2D", extra));
+  }
+  if (a.sidebag) {
+    push(items, lineFromCode("RT819-SB-1D", 1));
+    if (extra) push(items, lineFromCode("RT819-SB-2D", extra));
+  }
+  if (a.pannier) {
+    push(items, lineFromCode("RT819-SC-1D", 1));
+    if (extra) push(items, lineFromCode("RT819-SC-2D", extra));
+  }
+  // CARDO — HK-side value-add, flat HK$200
+  if (a.cardo) push(items, lineFromCode("HK-CARDO", 1));
 
   if (!items.length) {
     const bike = r.confirmed_bike ?? r.bike_pref_1 ?? "電單車租賃";
@@ -126,8 +167,14 @@ function push(arr: InvoiceItem[], it: InvoiceItem | null) {
   if (it) arr.push(it);
 }
 
-/** Try to read a P-grade (P1..P7) from the confirmed bike text, e.g. "… P-4クラス". */
+/**
+ * P-grade (P1..P7): use the grade confirmed in settlement first, otherwise read
+ * it from the confirmed bike / preference text (e.g. "… P-4クラス").
+ */
 function gradeFromReservation(r: Reservation): string | null {
+  const s = (r.settlement ?? {}) as Record<string, unknown>;
+  const stored = typeof s.grade === "string" ? s.grade : "";
+  if (/^P[1-7]$/.test(stored)) return stored;
   const text = `${r.confirmed_bike ?? ""} ${r.bike_pref_1 ?? ""}`;
   const m = text.match(/P\s*-?\s*([1-7])/i);
   return m ? `P${m[1]}` : null;

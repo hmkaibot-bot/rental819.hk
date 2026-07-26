@@ -24,6 +24,9 @@ export default function AdminAppLayout({
             <Link href="/admin" className="rounded-lg px-3 py-1.5 font-medium text-ink-soft hover:bg-slate-100">
               預約
             </Link>
+            <Link href="/admin/accounting" className="rounded-lg px-3 py-1.5 font-medium text-ink-soft hover:bg-slate-100">
+              會計
+            </Link>
             <form action="/api/admin/login" method="post">
               <input type="hidden" name="_method" value="delete" />
               <button

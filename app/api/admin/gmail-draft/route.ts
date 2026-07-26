@@ -24,12 +24,14 @@ export async function POST(request: Request) {
   const isJp = kind === "jp";
   const mail = isJp ? jpReservationEmail(r) : customerConfirmEmail(r);
   const to = isJp ? process.env.RENTAL819_JP_EMAIL ?? "" : r.email ?? "";
+  const html = isJp ? undefined : (mail as { html?: string }).html;
 
   try {
-    const { draftId } = await createGmailDraft({ to, subject: mail.subject, body: mail.body });
+    const { draftId } = await createGmailDraft({ to, subject: mail.subject, body: mail.body, html });
     return NextResponse.json({ ok: true, draftId });
   } catch (err) {
     console.error("gmail draft failed", err);
-    return NextResponse.json({ ok: false, error: "draft_failed" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "draft_failed";
+    return NextResponse.json({ ok: false, error: "draft_failed", detail: message }, { status: 500 });
   }
 }

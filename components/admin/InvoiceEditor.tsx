@@ -9,6 +9,7 @@ import {
   fmtAmount,
   invoiceTotal,
   invoiceInfoRows,
+  autoSiNumber,
 } from "@/lib/reservations/invoice";
 import {
   RT819_ITEMS,
@@ -24,6 +25,7 @@ const GROUP_ORDER: Rt819Item["group"][] = [
   "mamoride",
   "helmet",
   "case",
+  "hk",
   "other",
 ];
 
@@ -36,7 +38,7 @@ export default function InvoiceEditor({
 }) {
   const r = reservation;
   const settlement = (r.settlement ?? {}) as Record<string, unknown>;
-  const [si, setSi] = useState(r.si_number ?? "");
+  const [si, setSi] = useState(autoSiNumber(r));
   const [date, setDate] = useState(r.invoice_date ?? new Date().toISOString().slice(0, 10));
   const [paymentDate, setPaymentDate] = useState(
     (settlement.invoice_payment_date as string) ?? "",

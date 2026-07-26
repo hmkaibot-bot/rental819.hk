@@ -35,7 +35,12 @@ export default async function EmailDraft({
           : "複製以下內容，發送給客人作最終確認（步驟 8）。"}
       </p>
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-        <EmailPreview subject={mail.subject} body={mail.body} to={to} />
+        <EmailPreview
+          subject={mail.subject}
+          body={mail.body}
+          to={to}
+          html={(mail as { html?: string }).html}
+        />
         <div className="mt-4 border-t border-slate-100 pt-4">
           <GmailDraftButton
             id={r.id}
