@@ -25,10 +25,8 @@ function rentalDays(r: Reservation): number {
 }
 
 function paymentStatus(r: Reservation): string {
-  return r.customer_paid_date ||
-    ["paid", "customer_confirmed", "settled"].includes(r.status)
-    ? "Paid"
-    : "Pending";
+  // 已確認預定 (confirmed) means the customer has paid.
+  return r.customer_paid_date || r.status === "confirmed" ? "Paid" : "Pending";
 }
 
 /** Email to Japan Rental819 to request/confirm the booking (step 4). Plain text. */

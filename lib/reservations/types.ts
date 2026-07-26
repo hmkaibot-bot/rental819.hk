@@ -1,13 +1,12 @@
+// Status set mirrors the master Excel 狀態 dropdown (data-validation list) exactly.
 export type ReservationStatus =
-  | "new"
-  | "sent_to_jp"
-  | "confirmed"
-  | "invoiced"
-  | "paid"
-  | "customer_confirmed"
-  | "settled"
-  | "cancelled"
-  | "no_response";
+  | "new" // 未處理
+  | "notified_jp" // 已通知日本
+  | "awaiting_si" // 待SI
+  | "awaiting_payment" // 待付款
+  | "confirmed" // 已確認預定
+  | "change_pending" // 變更溝通中
+  | "cancelled"; // 顧客無反應/已取消
 
 export interface ReservationAddons {
   cardo?: boolean; // CARDO 對講機
@@ -85,13 +84,11 @@ export const STATUS_FLOW: {
   en: string;
   tone: string;
 }[] = [
-  { key: "new", zh: "新預約", en: "New", tone: "bg-accent-100 text-accent-800" },
-  { key: "sent_to_jp", zh: "已向日本確認", en: "Sent to JP", tone: "bg-amber-100 text-amber-800" },
-  { key: "confirmed", zh: "日本已確認", en: "Confirmed", tone: "bg-sky-100 text-sky-800" },
-  { key: "invoiced", zh: "已開單", en: "Invoiced", tone: "bg-indigo-100 text-indigo-800" },
-  { key: "paid", zh: "客人已付款", en: "Paid", tone: "bg-emerald-100 text-emerald-800" },
-  { key: "customer_confirmed", zh: "已發確認信", en: "Customer confirmed", tone: "bg-teal-100 text-teal-800" },
-  { key: "settled", zh: "月結已對帳", en: "Settled", tone: "bg-slate-200 text-slate-700" },
+  { key: "new", zh: "未處理", en: "New", tone: "bg-slate-100 text-slate-700" },
+  { key: "notified_jp", zh: "已通知日本", en: "Notified Japan", tone: "bg-amber-100 text-amber-800" },
+  { key: "awaiting_si", zh: "待SI", en: "Awaiting SI", tone: "bg-indigo-100 text-indigo-800" },
+  { key: "awaiting_payment", zh: "待付款", en: "Awaiting payment", tone: "bg-orange-100 text-orange-800" },
+  { key: "confirmed", zh: "已確認預定", en: "Confirmed", tone: "bg-emerald-100 text-emerald-800" },
 ];
 
 export const TERMINAL_STATUS: {
@@ -100,8 +97,8 @@ export const TERMINAL_STATUS: {
   en: string;
   tone: string;
 }[] = [
-  { key: "cancelled", zh: "已取消", en: "Cancelled", tone: "bg-rose-100 text-rose-700" },
-  { key: "no_response", zh: "客人無反應", en: "No response", tone: "bg-slate-200 text-slate-600" },
+  { key: "change_pending", zh: "變更溝通中", en: "Change pending", tone: "bg-violet-100 text-violet-800" },
+  { key: "cancelled", zh: "顧客無反應/已取消", en: "No response / cancelled", tone: "bg-rose-100 text-rose-700" },
 ];
 
 const ALL = [...STATUS_FLOW, ...TERMINAL_STATUS];

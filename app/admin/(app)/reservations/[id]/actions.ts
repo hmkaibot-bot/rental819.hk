@@ -84,7 +84,7 @@ export async function confirmReservation(formData: FormData) {
     return_time: text("return_time"),
     addons,
     settlement,
-    status: "confirmed",
+    status: "awaiting_si", // Japan confirmed availability → next step is to issue the SI
   });
   revalidatePath(`/admin/reservations/${id}`);
   revalidatePath("/admin");

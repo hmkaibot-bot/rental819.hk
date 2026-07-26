@@ -10,10 +10,11 @@ export async function recordSupplierPayment(formData: FormData) {
 
   await Promise.all(
     ids.map((id) =>
+      // Supplier settlement is tracked by paid_to_supplier / supplier_paid_date,
+      // not the booking status (which follows the Excel customer-facing pipeline).
       updateReservation(id, {
         paid_to_supplier: true,
         supplier_paid_date: date,
-        ...(date ? { status: "settled" as const } : {}),
       }),
     ),
   );

@@ -7,8 +7,9 @@ import { recordSupplierPayment } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-const BILLED = ["invoiced", "paid", "customer_confirmed", "settled"];
-const EXCLUDED = ["cancelled", "no_response"];
+// Post-SI states in the Excel pipeline (an SI/invoice exists): 待付款 + 已確認預定.
+const BILLED = ["awaiting_payment", "confirmed"];
+const EXCLUDED = ["cancelled"];
 
 // Revenue = the in-app invoice total when there is one, otherwise the imported
 // customer price (單價（港幣）) from the master Excel.
