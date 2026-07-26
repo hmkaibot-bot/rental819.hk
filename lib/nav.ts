@@ -1,8 +1,9 @@
 import type { Dictionary } from "@/lib/dictionaries";
 
 export interface NavItem {
-  href: string; // path WITHOUT locale prefix, e.g. "/rental"
+  href: string; // internal path WITHOUT locale prefix (e.g. "/rental"), or a full URL when external
   label: string;
+  external?: boolean; // links to another site (opens in a new tab, no locale prefix)
   children?: NavItem[];
 }
 
@@ -11,8 +12,9 @@ export function buildNav(d: Dictionary): NavItem[] {
   return [
     { href: "/", label: d.nav.home },
     { href: "/rental", label: d.nav.rental },
-    { href: "/tours", label: d.nav.tours },
+    { href: "https://26adventure.com/tours", label: d.nav.tours, external: true },
     { href: "/packages", label: d.nav.packages },
+    { href: "/roads", label: d.nav.roads },
     {
       href: "/guide",
       label: d.nav.guide,

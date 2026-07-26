@@ -9,6 +9,7 @@ export interface Dictionary {
     rental: string;
     tours: string;
     packages: string;
+    roads: string;
     guide: string;
     about: string;
     faq: string;

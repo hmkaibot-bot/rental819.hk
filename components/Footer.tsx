@@ -79,12 +79,23 @@ export default function Footer({
           <ul className="mt-4 space-y-2.5 text-sm">
             {primary.map((item) => (
               <li key={item.href}>
-                <Link
-                  href={lp(item.href)}
-                  className="text-brand-200 transition hover:text-white"
-                >
-                  {item.label}
-                </Link>
+                {item.external ? (
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-200 transition hover:text-white"
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    href={lp(item.href)}
+                    className="text-brand-200 transition hover:text-white"
+                  >
+                    {item.label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

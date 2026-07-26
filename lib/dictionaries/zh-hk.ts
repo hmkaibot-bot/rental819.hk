@@ -10,6 +10,7 @@ const dict: Dictionary = {
     rental: "租車",
     tours: "電單車旅行團",
     packages: "自駕套票",
+    roads: "日本名道",
     guide: "自駕攻略",
     about: "關於我們",
     faq: "常見問題",

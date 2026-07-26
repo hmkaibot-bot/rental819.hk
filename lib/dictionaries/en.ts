@@ -10,6 +10,7 @@ const dict: Dictionary = {
     rental: "Rent a Bike",
     tours: "Guided Tours",
     packages: "Packages",
+    roads: "Japan Roads",
     guide: "Ride Guide",
     about: "About",
     faq: "FAQ",
