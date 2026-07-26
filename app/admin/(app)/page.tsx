@@ -77,6 +77,7 @@ const num = (v?: number): ReactNode => (v && v > 0 ? `×${v}` : dash);
 
 type Column = {
   label: string;
+  ja?: string; // Japanese header (中日對照, from the master Excel)
   sort?: SortKey;
   filter?: boolean;
   cls?: string;
@@ -86,6 +87,7 @@ type Column = {
 const COLUMNS: Column[] = [
   {
     label: "編號",
+    ja: "予約番号",
     sort: "booking_ref",
     cls: "whitespace-nowrap",
     cell: (r) => (
@@ -99,6 +101,7 @@ const COLUMNS: Column[] = [
   },
   {
     label: "狀態",
+    ja: "状態",
     sort: "status",
     filter: true,
     cls: "whitespace-nowrap",
@@ -111,44 +114,56 @@ const COLUMNS: Column[] = [
       );
     },
   },
-  { label: "電郵", cls: "whitespace-nowrap", cell: (r) => txt(r.email) },
-  { label: "香港聯絡電話", cls: "whitespace-nowrap", cell: (r) => txt(r.hk_phone) },
-  { label: "中文姓名", cls: "whitespace-nowrap", cell: (r) => txt(r.name_zh) },
-  { label: "英文姓名", sort: "name", cls: "whitespace-nowrap", cell: (r) => txt(r.name_en) },
-  { label: "性別", cls: "whitespace-nowrap", cell: (r) => txt(r.gender) },
-  { label: "出生年月日", cls: "whitespace-nowrap", cell: (r) => txt(r.dob) },
-  { label: "國籍居住地址", cell: (r) => trunc(r.hk_address, "max-w-[220px]") },
-  { label: "日本住宿地址", cell: (r) => trunc(r.jp_address, "max-w-[220px]") },
-  { label: "日本手提電話", cls: "whitespace-nowrap", cell: (r) => txt(r.jp_phone) },
-  { label: "日語能力", cell: (r) => trunc(r.japanese_ability, "max-w-[160px]") },
-  { label: "英語能力", cell: (r) => trunc(r.english_ability, "max-w-[160px]") },
-  { label: "出發店", sort: "shop", cls: "whitespace-nowrap", cell: (r) => txt(r.shop) },
-  { label: "首選", cell: (r) => trunc(r.bike_pref_1, "max-w-[200px]") },
-  { label: "次選", cell: (r) => trunc(r.bike_pref_2, "max-w-[200px]") },
-  { label: "第三選", cell: (r) => trunc(r.bike_pref_3, "max-w-[200px]") },
-  { label: "取車日期", sort: "pickup_date", cls: "whitespace-nowrap", cell: (r) => txt(r.pickup_date) },
-  { label: "取車時間", cls: "whitespace-nowrap", cell: (r) => txt(r.pickup_time) },
-  { label: "還車日期", cls: "whitespace-nowrap", cell: (r) => txt(r.return_date) },
-  { label: "還車時間", cls: "whitespace-nowrap", cell: (r) => txt(r.return_time) },
-  { label: "CARDO", cls: "text-center", cell: (r) => tick(r.addons?.cardo) },
-  { label: "尾箱", cls: "text-center", cell: (r) => tick(r.addons?.topcase) },
-  { label: "側袋", cls: "text-center", cell: (r) => tick(r.addons?.sidebag) },
-  { label: "側箱", cls: "text-center", cell: (r) => tick(r.addons?.pannier) },
-  { label: "全盔", cls: "whitespace-nowrap text-center", cell: (r) => num(r.addons?.full_face) },
-  { label: "開面盔", cls: "whitespace-nowrap text-center", cell: (r) => num(r.addons?.open_face) },
-  { label: "MamoRide 保險", cls: "text-center", cell: (r) => tick(r.addons?.mamoride) },
-  { label: "穿梭巴士", cls: "text-center", cell: (r) => tick(r.addons?.shuttle_bus) },
-  { label: "行李寄存", cls: "text-center", cell: (r) => tick(r.addons?.luggage_storage) },
-  { label: "ETC", cls: "text-center", cell: (r) => tick(r.addons?.etc) },
-  { label: "緊急聯絡人", cls: "whitespace-nowrap", cell: (r) => txt(r.emergency_contact) },
-  { label: "緊急聯絡人號碼", cls: "whitespace-nowrap", cell: (r) => txt(r.emergency_phone) },
-  { label: "優惠", cls: "whitespace-nowrap", cell: (r) => txt(r.promo) },
+  { label: "電郵", ja: "メール", cls: "whitespace-nowrap", cell: (r) => txt(r.email) },
+  { label: "香港聯絡電話", ja: "連絡先番号", cls: "whitespace-nowrap", cell: (r) => txt(r.hk_phone) },
+  { label: "中文姓名", ja: "中国語名", cls: "whitespace-nowrap", cell: (r) => txt(r.name_zh) },
+  { label: "英文姓名", ja: "英語名", sort: "name", cls: "whitespace-nowrap", cell: (r) => txt(r.name_en) },
+  { label: "性別", ja: "性別", cls: "whitespace-nowrap", cell: (r) => txt(r.gender) },
+  { label: "出生年月日", ja: "生年月日", cls: "whitespace-nowrap", cell: (r) => txt(r.dob) },
+  { label: "國籍居住地址", ja: "香港住所", cell: (r) => trunc(r.hk_address, "max-w-[220px]") },
+  { label: "日本住宿地址", ja: "JPアドレス", cell: (r) => trunc(r.jp_address, "max-w-[220px]") },
+  { label: "日本手提電話", ja: "JP連絡先番号", cls: "whitespace-nowrap", cell: (r) => txt(r.jp_phone) },
+  { label: "日語能力", ja: "日本語能力", cell: (r) => trunc(r.japanese_ability, "max-w-[160px]") },
+  { label: "英語能力", ja: "英語力", cell: (r) => trunc(r.english_ability, "max-w-[160px]") },
+  { label: "出發店", ja: "店", sort: "shop", cls: "whitespace-nowrap", cell: (r) => txt(r.shop) },
+  { label: "首選", ja: "バイクの好み #1", cell: (r) => trunc(r.bike_pref_1, "max-w-[200px]") },
+  { label: "次選", ja: "バイクの好み #2", cell: (r) => trunc(r.bike_pref_2, "max-w-[200px]") },
+  { label: "第三選", ja: "バイクの好み #3", cell: (r) => trunc(r.bike_pref_3, "max-w-[200px]") },
+  { label: "取車日期", ja: "レンタル日", sort: "pickup_date", cls: "whitespace-nowrap", cell: (r) => txt(r.pickup_date) },
+  { label: "取車時間", ja: "レンタル時間", cls: "whitespace-nowrap", cell: (r) => txt(r.pickup_time) },
+  { label: "還車日期", ja: "返却日", cls: "whitespace-nowrap", cell: (r) => txt(r.return_date) },
+  { label: "還車時間", ja: "帰還の時間", cls: "whitespace-nowrap", cell: (r) => txt(r.return_time) },
+  { label: "CARDO", ja: "CARDO", cls: "text-center", cell: (r) => tick(r.addons?.cardo) },
+  { label: "尾箱", ja: "トップケース", cls: "text-center", cell: (r) => tick(r.addons?.topcase) },
+  { label: "側袋", ja: "サイドバッグ", cls: "text-center", cell: (r) => tick(r.addons?.sidebag) },
+  { label: "側箱", ja: "サイドケース", cls: "text-center", cell: (r) => tick(r.addons?.pannier) },
+  { label: "全盔", ja: "フルフェイス", cls: "whitespace-nowrap text-center", cell: (r) => num(r.addons?.full_face) },
+  { label: "開面盔", ja: "オープンフェイス", cls: "whitespace-nowrap text-center", cell: (r) => num(r.addons?.open_face) },
+  { label: "MamoRide 保險", ja: "MAMO RIDE 保険料", cls: "text-center", cell: (r) => tick(r.addons?.mamoride) },
+  { label: "穿梭巴士", ja: "シャトルバス", cls: "text-center", cell: (r) => tick(r.addons?.shuttle_bus) },
+  { label: "行李寄存", ja: "荷物預かり", cls: "text-center", cell: (r) => tick(r.addons?.luggage_storage) },
+  { label: "ETC", ja: "ETC", cls: "text-center", cell: (r) => tick(r.addons?.etc) },
+  { label: "緊急聯絡人", ja: "緊急連絡先", cls: "whitespace-nowrap", cell: (r) => txt(r.emergency_contact) },
+  { label: "緊急聯絡人號碼", ja: "緊急連絡先番号", cls: "whitespace-nowrap", cell: (r) => txt(r.emergency_phone) },
+  { label: "優惠", ja: "利点", cls: "whitespace-nowrap", cell: (r) => txt(r.promo) },
 ];
+
+// Fields a keyword search scans (case-insensitive substring).
+function searchable(r: Reservation): string {
+  return [
+    r.booking_ref, r.name_zh, r.name_en, r.email, r.hk_phone, r.jp_phone,
+    r.shop, r.bike_pref_1, r.bike_pref_2, r.bike_pref_3,
+    r.emergency_contact, r.emergency_phone, r.promo, r.si_number,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
 
 export default async function AdminDashboard({
   searchParams,
 }: {
-  searchParams: { tab?: string; status?: string; sort?: string; dir?: string };
+  searchParams: { tab?: string; status?: string; sort?: string; dir?: string; q?: string };
 }) {
   const all = await listReservations();
 
@@ -160,6 +175,8 @@ export default async function AdminDashboard({
     ? (searchParams.sort as SortKey)
     : undefined;
   const dir: "asc" | "desc" = searchParams.dir === "desc" ? "desc" : "asc";
+  const q = (searchParams.q ?? "").trim();
+  const qLower = q.toLowerCase();
 
   const tabCount = (k: TabKey) => all.filter((r) => tabOf(r) === k).length;
   const tabRows = all.filter((r) => tabOf(r) === tab);
@@ -168,7 +185,8 @@ export default async function AdminDashboard({
   const counts = new Map<string, number>();
   for (const r of tabRows) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
 
-  const list = activeStatus ? tabRows.filter((r) => r.status === activeStatus) : [...tabRows];
+  let list = q ? tabRows.filter((r) => searchable(r).includes(qLower)) : [...tabRows];
+  if (activeStatus) list = list.filter((r) => r.status === activeStatus);
   if (sortKey) list.sort((a, b) => compare(a, b, sortKey) * (dir === "desc" ? -1 : 1));
 
   const th = "px-3 py-3 text-left align-middle whitespace-nowrap";
@@ -180,18 +198,33 @@ export default async function AdminDashboard({
           <h1 className="text-xl font-bold">租車預約</h1>
           <p className="text-sm text-ink-muted">
             共 {tabRows.length} 張預約
-            {activeStatus
-              ? ` · 篩選：${statusMeta(activeStatus).zh}（${list.length}）`
-              : ""}
+            {q ? ` · 搜尋「${q}」（${list.length}）` : ""}
+            {activeStatus ? ` · 篩選：${statusMeta(activeStatus).zh}（${list.length}）` : ""}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {activeStatus && (
+        <div className="flex flex-wrap items-center gap-3">
+          <form method="get" action="/admin" className="flex items-center gap-2">
+            <input type="hidden" name="tab" value={tab} />
+            {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
+            {sortKey && <input type="hidden" name="sort" value={sortKey} />}
+            {sortKey && <input type="hidden" name="dir" value={dir} />}
+            <input
+              type="search"
+              name="q"
+              defaultValue={q}
+              placeholder="搜尋 編號／姓名／電郵／電話…"
+              className="w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm outline-none focus:border-brand-500"
+            />
+            <button className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-ink-soft hover:bg-slate-200">
+              搜尋
+            </button>
+          </form>
+          {(activeStatus || q) && (
             <Link
               href={`/admin${qs({ tab, sort: sortKey, dir: sortKey ? dir : undefined })}`}
               className="text-sm text-brand-700 hover:underline"
             >
-              清除篩選 ✕
+              清除 ✕
             </Link>
           )}
           <Link href="/admin/reservations/new" className="btn-brand text-sm">
@@ -207,7 +240,7 @@ export default async function AdminDashboard({
           return (
             <Link
               key={t.key}
-              href={`/admin${qs({ tab: t.key, status: activeStatus, sort: sortKey, dir: sortKey ? dir : undefined })}`}
+              href={`/admin${qs({ tab: t.key, status: activeStatus, sort: sortKey, dir: sortKey ? dir : undefined, q: q || undefined })}`}
               className={`-mb-px inline-flex items-center gap-1.5 rounded-t-lg border-b-2 px-4 py-2 text-sm font-medium ${
                 activeT
                   ? "border-brand-600 text-brand-700"
@@ -241,7 +274,7 @@ export default async function AdminDashboard({
                     <div className="flex items-center gap-1.5">
                       {c.sort ? (
                         <Link
-                          href={`/admin${qs({ tab, status: activeStatus, sort: c.sort, dir: nextDir })}`}
+                          href={`/admin${qs({ tab, status: activeStatus, sort: c.sort, dir: nextDir, q: q || undefined })}`}
                           className={`inline-flex items-center gap-1 hover:text-ink ${active ? "text-ink" : ""}`}
                         >
                           {c.label}
@@ -256,7 +289,7 @@ export default async function AdminDashboard({
                       {c.filter && (
                         <StatusFilter
                           value={activeStatus ?? ""}
-                          keep={{ tab, sort: sortKey, dir: sortKey ? dir : undefined }}
+                          keep={{ tab, sort: sortKey, dir: sortKey ? dir : undefined, q: q || undefined }}
                           options={[
                             { key: "", label: "全部", count: tabRows.length },
                             ...STATUS_ORDER.map((s) => ({
@@ -268,6 +301,11 @@ export default async function AdminDashboard({
                         />
                       )}
                     </div>
+                    {c.ja && (
+                      <div className="mt-0.5 text-[10px] font-normal normal-case tracking-normal text-ink-muted/70">
+                        {c.ja}
+                      </div>
+                    )}
                   </th>
                 );
               })}

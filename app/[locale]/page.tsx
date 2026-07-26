@@ -34,22 +34,22 @@ export default function HomePage({ params }: { params: { locale: string } }) {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-brand-700 text-white">
+      <section className="relative overflow-hidden bg-brand-950 text-white">
         <div className="pointer-events-none absolute inset-0">
-          {/* Banner photo — a Rental819 branch with its fleet lined up */}
+          {/* Banner photo — a Rental819 branch with its fleet lined up. Shown at
+              full strength so it stays eye-catching; only the left is darkened
+              (a soft navy gradient) enough for the copy, fading to the clear
+              photo on the right. */}
           <Image
             src="/images/home/hero.jpg"
             alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-45"
+            className="object-cover object-center"
           />
-          {/* Faded-blue wash: a soft brand-blue gradient over the photo, kept
-              darker on the left so the copy stays legible. */}
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-800/90 via-brand-600/70 to-brand-400/40" />
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-900/75 via-brand-700/25 to-transparent" />
-          <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-brand-300/25 blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-950/85 via-brand-950/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-950/45 via-transparent to-transparent" />
         </div>
         <div className="container-x relative py-20 lg:py-28">
           <div className="max-w-3xl animate-fade-up">

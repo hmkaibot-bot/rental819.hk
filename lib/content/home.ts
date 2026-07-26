@@ -45,7 +45,7 @@ export interface HomeContent {
 export const homeContent: Record<Locale, HomeContent> = {
   "zh-hk": {
     hero: {
-      badge: "頭盔王 × Rental819 官方香港合作夥伴",
+      badge: "頭盔王 × Rental819 官方合作夥伴",
       title: "在日本，親手駕馭你的",
       highlight: "電單車自駕遊",
       tagline: "體驗日本道路之美，感受日本二輪文化",
@@ -164,7 +164,7 @@ export const homeContent: Record<Locale, HomeContent> = {
 
   en: {
     hero: {
-      badge: "Helmet King × Rental819 — official Hong Kong partner",
+      badge: "Helmet King × Rental819 — official partner",
       title: "Ride Japan your way on a",
       highlight: "self-drive motorcycle tour",
       tagline: "Experience the beauty of Japan's roads and the spirit of its riding culture",
