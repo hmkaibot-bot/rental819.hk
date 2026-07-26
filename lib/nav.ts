@@ -15,6 +15,7 @@ export function buildNav(d: Dictionary): NavItem[] {
     { href: "https://26adventure.com/tours", label: d.nav.tours, external: true },
     { href: "/packages", label: d.nav.packages },
     { href: "/roads", label: d.nav.roads },
+    { href: "https://26adventure.com/blog", label: d.nav.blog, external: true },
     {
       href: "/guide",
       label: d.nav.guide,

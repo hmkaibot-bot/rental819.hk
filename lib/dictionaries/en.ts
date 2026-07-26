@@ -11,6 +11,7 @@ const dict: Dictionary = {
     tours: "Guided Tours",
     packages: "Packages",
     roads: "Japan Roads",
+    blog: "Travelogue",
     guide: "Ride Guide",
     about: "About",
     faq: "FAQ",
