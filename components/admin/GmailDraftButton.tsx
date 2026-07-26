@@ -5,10 +5,12 @@ import { useState } from "react";
 export default function GmailDraftButton({
   id,
   kind,
+  lang,
   enabled,
 }: {
   id: string;
   kind: "jp" | "customer";
+  lang?: "en" | "zh";
   enabled: boolean;
 }) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -29,7 +31,7 @@ export default function GmailDraftButton({
       const res = await fetch("/api/admin/gmail-draft", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, kind }),
+        body: JSON.stringify({ id, kind, lang }),
       });
       if (res.ok) {
         setState("done");

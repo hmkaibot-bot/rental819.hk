@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { listReservations } from "@/lib/reservations/store";
 import {
   STATUS_FLOW,
@@ -65,13 +66,83 @@ function qs(p: Record<string, string | undefined>) {
   return s ? `?${s}` : "";
 }
 
-const COLUMNS: { label: string; sort?: SortKey; filter?: boolean }[] = [
-  { label: "編號", sort: "booking_ref" },
-  { label: "狀態", sort: "status", filter: true },
-  { label: "客人", sort: "name" },
-  { label: "出發店", sort: "shop" },
-  { label: "取車日期", sort: "pickup_date" },
-  { label: "車款" },
+// ---- Cell renderers (columns mirror the master Excel sheet, left → right) ----
+const dash = <span className="text-ink-muted">—</span>;
+const txt = (v?: string | null): ReactNode => (v ? v : dash);
+const trunc = (v: string | null | undefined, cls: string): ReactNode =>
+  v ? <div className={`truncate ${cls}`}>{v}</div> : dash;
+const tick = (v?: boolean): ReactNode =>
+  v ? <span className="font-semibold text-emerald-600">✔</span> : dash;
+const num = (v?: number): ReactNode => (v && v > 0 ? `×${v}` : dash);
+
+type Column = {
+  label: string;
+  sort?: SortKey;
+  filter?: boolean;
+  cls?: string;
+  cell: (r: Reservation) => ReactNode;
+};
+
+const COLUMNS: Column[] = [
+  {
+    label: "編號",
+    sort: "booking_ref",
+    cls: "whitespace-nowrap",
+    cell: (r) => (
+      <>
+        <Link href={`/admin/reservations/${r.id}`} className="font-semibold text-brand-700 hover:underline">
+          {r.booking_ref ?? "—"}
+        </Link>
+        <div className="text-xs text-ink-muted">{fmtDate(r.request_date)}</div>
+      </>
+    ),
+  },
+  {
+    label: "狀態",
+    sort: "status",
+    filter: true,
+    cls: "whitespace-nowrap",
+    cell: (r) => {
+      const m = statusMeta(r.status);
+      return (
+        <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
+          {m.zh}
+        </span>
+      );
+    },
+  },
+  { label: "電郵", cls: "whitespace-nowrap", cell: (r) => txt(r.email) },
+  { label: "香港聯絡電話", cls: "whitespace-nowrap", cell: (r) => txt(r.hk_phone) },
+  { label: "中文姓名", cls: "whitespace-nowrap", cell: (r) => txt(r.name_zh) },
+  { label: "英文姓名", sort: "name", cls: "whitespace-nowrap", cell: (r) => txt(r.name_en) },
+  { label: "性別", cls: "whitespace-nowrap", cell: (r) => txt(r.gender) },
+  { label: "出生年月日", cls: "whitespace-nowrap", cell: (r) => txt(r.dob) },
+  { label: "國籍居住地址", cell: (r) => trunc(r.hk_address, "max-w-[220px]") },
+  { label: "日本住宿地址", cell: (r) => trunc(r.jp_address, "max-w-[220px]") },
+  { label: "日本手提電話", cls: "whitespace-nowrap", cell: (r) => txt(r.jp_phone) },
+  { label: "日語能力", cell: (r) => trunc(r.japanese_ability, "max-w-[160px]") },
+  { label: "英語能力", cell: (r) => trunc(r.english_ability, "max-w-[160px]") },
+  { label: "出發店", sort: "shop", cls: "whitespace-nowrap", cell: (r) => txt(r.shop) },
+  { label: "首選", cell: (r) => trunc(r.bike_pref_1, "max-w-[200px]") },
+  { label: "次選", cell: (r) => trunc(r.bike_pref_2, "max-w-[200px]") },
+  { label: "第三選", cell: (r) => trunc(r.bike_pref_3, "max-w-[200px]") },
+  { label: "取車日期", sort: "pickup_date", cls: "whitespace-nowrap", cell: (r) => txt(r.pickup_date) },
+  { label: "取車時間", cls: "whitespace-nowrap", cell: (r) => txt(r.pickup_time) },
+  { label: "還車日期", cls: "whitespace-nowrap", cell: (r) => txt(r.return_date) },
+  { label: "還車時間", cls: "whitespace-nowrap", cell: (r) => txt(r.return_time) },
+  { label: "CARDO", cls: "text-center", cell: (r) => tick(r.addons?.cardo) },
+  { label: "尾箱", cls: "text-center", cell: (r) => tick(r.addons?.topcase) },
+  { label: "側袋", cls: "text-center", cell: (r) => tick(r.addons?.sidebag) },
+  { label: "側箱", cls: "text-center", cell: (r) => tick(r.addons?.pannier) },
+  { label: "全盔", cls: "whitespace-nowrap text-center", cell: (r) => num(r.addons?.full_face) },
+  { label: "開面盔", cls: "whitespace-nowrap text-center", cell: (r) => num(r.addons?.open_face) },
+  { label: "MamoRide 保險", cls: "text-center", cell: (r) => tick(r.addons?.mamoride) },
+  { label: "穿梭巴士", cls: "text-center", cell: (r) => tick(r.addons?.shuttle_bus) },
+  { label: "行李寄存", cls: "text-center", cell: (r) => tick(r.addons?.luggage_storage) },
+  { label: "ETC", cls: "text-center", cell: (r) => tick(r.addons?.etc) },
+  { label: "緊急聯絡人", cls: "whitespace-nowrap", cell: (r) => txt(r.emergency_contact) },
+  { label: "緊急聯絡人號碼", cls: "whitespace-nowrap", cell: (r) => txt(r.emergency_phone) },
+  { label: "優惠", cls: "whitespace-nowrap", cell: (r) => txt(r.promo) },
 ];
 
 export default async function AdminDashboard({
@@ -100,11 +171,11 @@ export default async function AdminDashboard({
   const list = activeStatus ? tabRows.filter((r) => r.status === activeStatus) : [...tabRows];
   if (sortKey) list.sort((a, b) => compare(a, b, sortKey) * (dir === "desc" ? -1 : 1));
 
-  const th = "px-4 py-3 text-left align-middle";
+  const th = "px-3 py-3 text-left align-middle whitespace-nowrap";
 
   return (
     <div>
-      <div className="mb-4 flex items-end justify-between">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold">租車預約</h1>
           <p className="text-sm text-ink-muted">
@@ -114,14 +185,19 @@ export default async function AdminDashboard({
               : ""}
           </p>
         </div>
-        {activeStatus && (
-          <Link
-            href={`/admin${qs({ tab, sort: sortKey, dir: sortKey ? dir : undefined })}`}
-            className="text-sm text-brand-700 hover:underline"
-          >
-            清除篩選 ✕
+        <div className="flex items-center gap-3">
+          {activeStatus && (
+            <Link
+              href={`/admin${qs({ tab, sort: sortKey, dir: sortKey ? dir : undefined })}`}
+              className="text-sm text-brand-700 hover:underline"
+            >
+              清除篩選 ✕
+            </Link>
+          )}
+          <Link href="/admin/reservations/new" className="btn-brand text-sm">
+            ＋ 新增預約
           </Link>
-        )}
+        </div>
       </div>
 
       {/* Books — one per master-Excel sheet */}
@@ -151,9 +227,10 @@ export default async function AdminDashboard({
         })}
       </div>
 
-      {/* Table — sorting & status filter live in the header row */}
+      {/* Table — sorting & status filter live in the header row; columns keep
+          their width and the whole table scrolls sideways on narrow screens. */}
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
-        <table className="w-full min-w-[820px] text-sm">
+        <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-ink-muted">
               {COLUMNS.map((c) => {
@@ -197,42 +274,18 @@ export default async function AdminDashboard({
             </tr>
           </thead>
           <tbody>
-            {list.map((r) => {
-              const m = statusMeta(r.status);
-              return (
-                <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50/60">
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/reservations/${r.id}`} className="font-semibold text-brand-700 hover:underline">
-                      {r.booking_ref ?? "—"}
-                    </Link>
-                    <div className="text-xs text-ink-muted">{fmtDate(r.request_date)}</div>
+            {list.map((r) => (
+              <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50/60">
+                {COLUMNS.map((c) => (
+                  <td key={c.label} className={`px-3 py-3 align-top ${c.cls ?? ""}`}>
+                    {c.cell(r)}
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
-                      {m.zh}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium">{r.name_en ?? r.name_zh ?? "—"}</div>
-                    <div className="text-xs text-ink-muted">{r.name_zh ?? ""}</div>
-                  </td>
-                  <td className="px-4 py-3">{r.shop ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    {fmtDate(r.pickup_date)}
-                    {r.return_date ? <span className="text-ink-muted"> → {r.return_date}</span> : null}
-                  </td>
-                  <td className="px-4 py-3 max-w-[220px]">
-                    <div className="truncate">{r.confirmed_bike ?? r.bike_pref_1 ?? "—"}</div>
-                    {!r.confirmed_bike && r.bike_pref_1 && (
-                      <div className="text-xs text-ink-muted">未確認</div>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+                ))}
+              </tr>
+            ))}
             {list.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-ink-muted">
+                <td colSpan={COLUMNS.length} className="px-4 py-10 text-center text-ink-muted">
                   沒有符合的預約。
                 </td>
               </tr>
