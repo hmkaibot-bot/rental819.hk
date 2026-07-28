@@ -14,15 +14,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "gmail_not_configured" }, { status: 400 });
   }
 
-  const { id, kind } = (await request.json().catch(() => ({}))) as {
+  const { id, kind, lang } = (await request.json().catch(() => ({}))) as {
     id?: string;
     kind?: string;
+    lang?: string;
   };
   const r = id ? await getReservation(id) : null;
   if (!r) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
 
   const isJp = kind === "jp";
-  const mail = isJp ? jpReservationEmail(r) : customerConfirmEmail(r);
+  const mail = isJp
+    ? jpReservationEmail(r)
+    : customerConfirmEmail(r, lang === "zh" ? "zh" : "en");
   const to = isJp ? process.env.RENTAL819_JP_EMAIL ?? "" : r.email ?? "";
   const html = isJp ? undefined : (mail as { html?: string }).html;
 

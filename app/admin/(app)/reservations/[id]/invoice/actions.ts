@@ -17,7 +17,7 @@ export async function saveInvoice(input: {
     invoice_date: input.invoice_date || null,
     invoice_items: input.invoice_items,
     ...(input.settlement ? { settlement: input.settlement } : {}),
-    ...(input.markInvoiced ? { status: "invoiced" as const } : {}),
+    ...(input.markInvoiced ? { status: "awaiting_payment" as const } : {}),
   });
   revalidatePath(`/admin/reservations/${input.id}`);
   revalidatePath(`/admin/reservations/${input.id}/invoice`);

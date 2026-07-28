@@ -6,6 +6,7 @@ import { getDictionary } from "@/lib/dictionaries";
 import { rentalContent } from "@/lib/content/rental";
 import PageHero from "@/components/PageHero";
 import CTABand from "@/components/CTABand";
+import CoverageMap from "@/components/CoverageMap";
 import { ArrowRight } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
@@ -62,14 +63,7 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
             <h2 className="text-2xl font-bold sm:text-3xl">{c.coverageHead}</h2>
             <p className="mt-3 text-ink-muted">{c.coverageIntro}</p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {c.regions.map((r) => (
-              <div key={r.name} className="rounded-xl border border-slate-100 bg-white p-5">
-                <h3 className="font-bold text-brand-700">{r.name}</h3>
-                <p className="mt-1 text-sm text-ink-muted">{r.prefectures}</p>
-              </div>
-            ))}
-          </div>
+          <CoverageMap locale={locale} />
         </div>
       </section>
 

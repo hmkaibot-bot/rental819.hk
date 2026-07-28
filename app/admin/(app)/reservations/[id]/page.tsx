@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getReservation } from "@/lib/reservations/store";
 import {
   STATUS_FLOW,
+  TERMINAL_STATUS,
   statusMeta,
   ADDON_LABELS,
   type Reservation,
@@ -175,14 +176,19 @@ export default async function ReservationDetail({
               </Link>
             </div>
 
-            {/* Advance status quick buttons */}
-            <form action={patchReservation} className="flex flex-wrap gap-2">
+            {/* Status — the master-Excel 狀態 dropdown */}
+            <form action={patchReservation} className="flex flex-wrap items-center gap-2">
               <input type="hidden" name="id" value={r.id} />
-              <button name="status" value="sent_to_jp" className="rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-200">
-                標記已向日本確認
-              </button>
-              <button name="status" value="customer_confirmed" className="rounded-lg bg-teal-100 px-3 py-1.5 text-xs font-medium text-teal-800 hover:bg-teal-200">
-                已發客人確認信
+              <label className="text-xs font-medium text-ink-soft">狀態</label>
+              <select name="status" defaultValue={r.status} className={`${input} max-w-[210px]`}>
+                {[...STATUS_FLOW, ...TERMINAL_STATUS].map((s) => (
+                  <option key={s.key} value={s.key}>
+                    {s.zh}
+                  </option>
+                ))}
+              </select>
+              <button className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-slate-200">
+                更新狀態
               </button>
             </form>
 
@@ -247,7 +253,7 @@ export default async function ReservationDetail({
                   <input type="number" min="0" name="helmet_open" defaultValue={r.addons?.open_face ?? 0} className={input} />
                 </div>
               </div>
-              <button className="btn-brand w-full text-xs">儲存並標記日本已確認</button>
+              <button className="btn-brand w-full text-xs">儲存並標記「待SI」（日本已確認車款）</button>
             </form>
 
             {/* CARDO — HK-side value-add (not Japan-confirmed) */}
@@ -274,8 +280,8 @@ export default async function ReservationDetail({
               <div className="col-span-2 text-xs font-medium text-ink-soft">開單</div>
               <input name="si_number" defaultValue={autoSiNumber(r)} className={input} placeholder="SI-26-xxxxx" />
               <input name="cost_jpy" type="number" defaultValue={r.cost_jpy ?? ""} className={input} placeholder="成本 ¥" />
-              <input type="hidden" name="status" value="invoiced" />
-              <button className="btn-brand col-span-2 text-xs">儲存單號並標記已開單</button>
+              <input type="hidden" name="status" value="awaiting_payment" />
+              <button className="btn-brand col-span-2 text-xs">儲存單號並標記「待付款」</button>
             </form>
 
             {/* Customer paid → paid */}
@@ -283,8 +289,8 @@ export default async function ReservationDetail({
               <input type="hidden" name="id" value={r.id} />
               <label className="text-xs font-medium text-ink-soft">客人付款日期</label>
               <input name="customer_paid_date" type="date" defaultValue={r.customer_paid_date ?? ""} className={input} />
-              <input type="hidden" name="status" value="paid" />
-              <button className="btn-brand w-full text-xs">記錄付款並標記已付款</button>
+              <input type="hidden" name="status" value="confirmed" />
+              <button className="btn-brand w-full text-xs">記錄付款並標記「已確認預定」</button>
             </form>
 
             {/* Settlement moved to the accounting module */}
@@ -294,16 +300,6 @@ export default async function ReservationDetail({
               ，可一次過剔選多個預約記錄付款。
             </div>
 
-            {/* Terminal */}
-            <form action={patchReservation} className="flex gap-2 border-t border-slate-100 pt-3">
-              <input type="hidden" name="id" value={r.id} />
-              <button name="status" value="cancelled" className="flex-1 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100">
-                取消
-              </button>
-              <button name="status" value="no_response" className="flex-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200">
-                客人無反應
-              </button>
-            </form>
           </section>
 
           {/* Billing summary */}

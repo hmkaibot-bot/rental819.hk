@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getReservation } from "@/lib/reservations/store";
+import { getCatalog } from "@/lib/reservations/items-store";
 import { defaultInvoiceItems } from "@/lib/reservations/invoice";
 import InvoiceEditor from "@/components/admin/InvoiceEditor";
 
@@ -13,6 +14,7 @@ export default async function InvoicePage({
 }) {
   const r = await getReservation(params.id);
   if (!r) notFound();
+  const catalog = await getCatalog();
 
   return (
     <div>
@@ -25,7 +27,11 @@ export default async function InvoicePage({
           填入項目與金額，儲存後可列印或儲存為 PDF 發給客人。
         </p>
       </div>
-      <InvoiceEditor reservation={r} seed={defaultInvoiceItems(r)} />
+      <InvoiceEditor
+        reservation={r}
+        seed={defaultInvoiceItems(r, catalog)}
+        catalog={catalog}
+      />
     </div>
   );
 }

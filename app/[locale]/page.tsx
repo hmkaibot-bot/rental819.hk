@@ -36,19 +36,20 @@ export default function HomePage({ params }: { params: { locale: string } }) {
       {/* Hero */}
       <section className="relative overflow-hidden bg-brand-950 text-white">
         <div className="pointer-events-none absolute inset-0">
-          {/* Banner photo — riders on a Japanese country road */}
+          {/* Banner photo — a Rental819 branch with its fleet lined up. Shown at
+              full strength so it stays eye-catching; only the left is darkened
+              (a soft navy gradient) enough for the copy, fading to the clear
+              photo on the right. */}
           <Image
-            src="/images/tours/hokkaido-2026-07-30.jpg"
+            src="/images/home/hero.jpg"
             alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-60"
+            className="object-cover object-center"
           />
-          {/* Dark gradient keeps the left-aligned copy legible over the photo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-950 via-brand-950/80 to-brand-950/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-950 via-transparent to-brand-950/40" />
-          <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-accent-600/30 blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-950/85 via-brand-950/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-950/45 via-transparent to-transparent" />
         </div>
         <div className="container-x relative py-20 lg:py-28">
           <div className="max-w-3xl animate-fade-up">
@@ -120,27 +121,50 @@ export default function HomePage({ params }: { params: { locale: string } }) {
           intro={c.offersHead.intro}
         />
         <div className="grid gap-6 md:grid-cols-3">
-          {c.offers.map((o, i) => (
-            <Link
-              key={o.href}
-              href={localePath(locale, o.href)}
-              className="group card-hover flex flex-col overflow-hidden"
-            >
-              <div
-                className={`h-2 w-full ${
-                  i === 0 ? "bg-brand-600" : i === 1 ? "bg-accent-600" : "bg-brand-400"
-                }`}
-              />
-              <div className="flex flex-1 flex-col p-7">
-                <h3 className="text-xl font-bold">{o.title}</h3>
-                <p className="mt-3 flex-1 text-sm leading-6 text-ink-muted">{o.body}</p>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 group-hover:gap-2.5">
-                  {o.cta}
-                  <ArrowRight className="h-4 w-4 transition-all" />
-                </span>
-              </div>
-            </Link>
-          ))}
+          {c.offers.map((o, i) => {
+            const cardClass = "group card-hover flex flex-col overflow-hidden";
+            const inner = (
+              <>
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                  <Image
+                    src={o.image}
+                    alt={o.title}
+                    fill
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div
+                  className={`h-1.5 w-full ${
+                    i === 0 ? "bg-brand-600" : i === 1 ? "bg-accent-600" : "bg-brand-400"
+                  }`}
+                />
+                <div className="flex flex-1 flex-col p-7">
+                  <h3 className="text-xl font-bold">{o.title}</h3>
+                  <p className="mt-3 flex-1 text-sm leading-6 text-ink-muted">{o.body}</p>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 group-hover:gap-2.5">
+                    {o.cta}
+                    <ArrowRight className="h-4 w-4 transition-all" />
+                  </span>
+                </div>
+              </>
+            );
+            return o.external ? (
+              <a
+                key={o.href}
+                href={o.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cardClass}
+              >
+                {inner}
+              </a>
+            ) : (
+              <Link key={o.href} href={localePath(locale, o.href)} className={cardClass}>
+                {inner}
+              </Link>
+            );
+          })}
         </div>
       </Section>
 

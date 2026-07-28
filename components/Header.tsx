@@ -85,6 +85,16 @@ export default function Header({
                   </div>
                 )}
               </div>
+            ) : item.external ? (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition hover:text-brand-700"
+              >
+                {item.label}
+              </a>
             ) : (
               <Link
                 key={item.href}
@@ -139,7 +149,14 @@ export default function Header({
           />
           <div className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-white shadow-2xl">
             <div className="flex h-16 items-center justify-between border-b border-slate-100 px-5">
-              <span className="font-bold text-brand-700">{site.name}</span>
+              <Link
+                href={lp("/")}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center"
+                aria-label={site.name}
+              >
+                <Image src="/logo-lg.png" alt="RENTAL819" width={768} height={488} className="h-8 w-auto" />
+              </Link>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
@@ -152,15 +169,27 @@ export default function Header({
             <nav className="flex-1 overflow-y-auto px-3 py-4">
               {nav.map((item) => (
                 <div key={item.href}>
-                  <Link
-                    href={lp(item.href)}
-                    onClick={() => setMobileOpen(false)}
-                    className={`block rounded-lg px-3 py-3 text-base font-medium ${
-                      isActive(item.href) ? "text-brand-700" : "text-ink"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
+                  {item.external ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileOpen(false)}
+                      className="block rounded-lg px-3 py-3 text-base font-medium text-ink"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={lp(item.href)}
+                      onClick={() => setMobileOpen(false)}
+                      className={`block rounded-lg px-3 py-3 text-base font-medium ${
+                        isActive(item.href) ? "text-brand-700" : "text-ink"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                   {item.children && (
                     <div className="ml-3 border-l border-slate-100 pl-3">
                       {item.children.map((child) => (

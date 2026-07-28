@@ -1,5 +1,5 @@
 import type { InvoiceItem, Reservation } from "./types";
-import { RT819_ITEMS, rt819Label } from "./items";
+import { RT819_ITEMS, rt819Label, type Rt819Item } from "./items";
 
 /** Invoice issuer — matches the SI-24 template (Helmet King / MOTOBLOG). */
 export const ISSUER = {
@@ -82,10 +82,12 @@ function rentalDays(r: Reservation): number {
   return Math.max(1, Math.round(diff));
 }
 
-const itemByCode = (code: string) => RT819_ITEMS.find((it) => it.code === code);
-
-function lineFromCode(code: string, qty: number): InvoiceItem | null {
-  const it = itemByCode(code);
+function lineFromCode(
+  catalog: Rt819Item[],
+  code: string,
+  qty: number,
+): InvoiceItem | null {
+  const it = catalog.find((x) => x.code === code);
   if (!it || qty <= 0) return null;
   return {
     description: rt819Label(it),
@@ -106,22 +108,26 @@ export function autoSiNumber(r: Reservation): string {
  * cases) and the HK-side CARDO value-add — mirroring the master sheet's
  * 1st-day + subsequent-day billing. The agent can adjust before saving.
  */
-export function defaultInvoiceItems(r: Reservation): InvoiceItem[] {
+export function defaultInvoiceItems(
+  r: Reservation,
+  catalog: Rt819Item[] = RT819_ITEMS,
+): InvoiceItem[] {
   const grade = gradeFromReservation(r); // "P1".."P7" or null
   const days = rentalDays(r);
   const extra = Math.max(0, days - 1);
   const a = r.addons ?? {};
   const items: InvoiceItem[] = [];
+  const L = (code: string, qty: number) => lineFromCode(catalog, code, qty);
 
   if (grade) {
     const g = grade.replace("P", "");
     // Bike rent
-    push(items, lineFromCode(`RT819-${grade}-1D`, 1));
-    if (extra) push(items, lineFromCode(`RT819-${grade}-2D`, extra));
+    push(items, L(`RT819-${grade}-1D`, 1));
+    if (extra) push(items, L(`RT819-${grade}-2D`, extra));
     // Insurance (vehicle damage compensation)
     const insGroup = ["1", "2"].includes(g) ? "P1P2" : `P${g}`;
-    push(items, lineFromCode(`RT819-INS-${insGroup}-1D`, 1));
-    if (extra) push(items, lineFromCode(`RT819-INS-${insGroup}-2D`, extra));
+    push(items, L(`RT819-INS-${insGroup}-1D`, 1));
+    if (extra) push(items, L(`RT819-INS-${insGroup}-2D`, extra));
     // MamoRide (optional add-on)
     if (a.mamoride) {
       const mamoGroup = ["1", "2"].includes(g)
@@ -129,32 +135,32 @@ export function defaultInvoiceItems(r: Reservation): InvoiceItem[] {
         : ["4", "5"].includes(g)
           ? "P4P5"
           : `P${g}`;
-      push(items, lineFromCode(`RT819-MAMO-${mamoGroup}-1D`, 1));
-      if (extra) push(items, lineFromCode(`RT819-MAMO-${mamoGroup}-2D`, extra));
+      push(items, L(`RT819-MAMO-${mamoGroup}-1D`, 1));
+      if (extra) push(items, L(`RT819-MAMO-${mamoGroup}-2D`, extra));
     }
   }
 
   // Helmets (full-face + open-face counts)
   const helmets = (Number(a.full_face) || 0) + (Number(a.open_face) || 0);
   if (helmets > 0) {
-    push(items, lineFromCode("RT819-HM-1D", helmets));
-    if (extra) push(items, lineFromCode("RT819-HM-2D", helmets * extra));
+    push(items, L("RT819-HM-1D", helmets));
+    if (extra) push(items, L("RT819-HM-2D", helmets * extra));
   }
   // Cases / bags
   if (a.topcase) {
-    push(items, lineFromCode("RT819-TC-1D", 1));
-    if (extra) push(items, lineFromCode("RT819-TC-2D", extra));
+    push(items, L("RT819-TC-1D", 1));
+    if (extra) push(items, L("RT819-TC-2D", extra));
   }
   if (a.sidebag) {
-    push(items, lineFromCode("RT819-SB-1D", 1));
-    if (extra) push(items, lineFromCode("RT819-SB-2D", extra));
+    push(items, L("RT819-SB-1D", 1));
+    if (extra) push(items, L("RT819-SB-2D", extra));
   }
   if (a.pannier) {
-    push(items, lineFromCode("RT819-SC-1D", 1));
-    if (extra) push(items, lineFromCode("RT819-SC-2D", extra));
+    push(items, L("RT819-SC-1D", 1));
+    if (extra) push(items, L("RT819-SC-2D", extra));
   }
   // CARDO — HK-side value-add, flat HK$200
-  if (a.cardo) push(items, lineFromCode("HK-CARDO", 1));
+  if (a.cardo) push(items, L("HK-CARDO", 1));
 
   if (!items.length) {
     const bike = r.confirmed_bike ?? r.bike_pref_1 ?? "電單車租賃";

@@ -4,13 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { localePath, type Locale } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/site";
-import { SHOPS } from "@/lib/reservations/types";
-import { WhatsAppIcon, CheckIcon } from "./icons";
+import { SHOP_AREAS } from "@/lib/reservations/types";
+import { WhatsAppIcon, CheckIcon, ArrowRight } from "./icons";
 
 type Status = "idle" | "submitting" | "done" | "error";
 
 const t = {
   "zh-hk": {
+    // choose-a-bike shortcut (above the form)
+    chooseBike: "選擇車款",
+    chooseBikeHint: "想先睇下有咩車？瀏覽「在日本租電單車自駕遊」再返嚟填表。",
     // section headings
     secRental: "租車詳情",
     secBike: "車款偏好",
@@ -102,6 +105,8 @@ const t = {
     optional: "可選",
   },
   en: {
+    chooseBike: "Choose a bike",
+    chooseBikeHint: "Want to see the bikes first? Browse the rental page, then come back to fill in the form.",
     secRental: "Rental details",
     secBike: "Bike preference",
     secRider: "Rider details",
@@ -359,14 +364,30 @@ export default function BookingForm({ locale }: { locale: Locale }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
+      {/* Choose-a-bike shortcut — jump to the rental page to browse the fleet */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-brand-100 bg-brand-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm leading-6 text-ink-soft">{c.chooseBikeHint}</p>
+        <Link
+          href={localePath(locale, "/rental")}
+          className="btn-brand shrink-0 whitespace-nowrap text-sm"
+        >
+          {c.chooseBike}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+
       {/* Rental details */}
       <Section title={c.secRental}>
         <div>
           <label className={labelCls}>{c.shop} {star}</label>
           <select className={field} value={form.shop} onChange={setText("shop")}>
             <option value="">{c.shopPlaceholder}</option>
-            {SHOPS.map((s) => (
-              <option key={s} value={s}>{s}</option>
+            {SHOP_AREAS.map((a) => (
+              <optgroup key={a.area} label={a.area}>
+                {a.shops.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
           <p className="mt-1 text-xs text-ink-muted">{c.shopHint}</p>

@@ -10,6 +10,8 @@ const dict: Dictionary = {
     rental: "租車",
     tours: "電單車旅行團",
     packages: "自駕套票",
+    roads: "日本名道",
+    blog: "遊記",
     guide: "自駕攻略",
     about: "關於我們",
     faq: "常見問題",
@@ -40,7 +42,7 @@ const dict: Dictionary = {
   },
   footer: {
     about:
-      "RENTAL819 香港 — 頭盔王 × Rental819 合作，為香港騎士提供日本電單車租賃及自駕遊團，橫跨全日本 99 間分店。",
+      "RENTAL819 香港 — 頭盔王 × Rental819 合作，為港澳騎士提供日本電單車租賃及自駕遊團，橫跨全日本 99 間分店。",
     quickLinks: "快速連結",
     guideLinks: "自駕攻略",
     contact: "聯絡我們",

@@ -1,114 +1,329 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { listReservations } from "@/lib/reservations/store";
 import {
   STATUS_FLOW,
   TERMINAL_STATUS,
   statusMeta,
+  type Reservation,
   type ReservationStatus,
 } from "@/lib/reservations/types";
+import { StatusFilter } from "./status-filter";
 
 export const dynamic = "force-dynamic";
 
+const STATUS_ORDER = [...STATUS_FLOW, ...TERMINAL_STATUS];
+const statusIndex = (s: ReservationStatus) => {
+  const i = STATUS_ORDER.findIndex((x) => x.key === s);
+  return i < 0 ? 99 : i;
+};
+
+// Three books, mirroring the master Excel sheets: 2026 FIT / 2025 FIT / 2025 PKG.
+type TabKey = "2026" | "2025" | "pkg";
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "2026", label: "2026" },
+  { key: "2025", label: "2025" },
+  { key: "pkg", label: "2025 PKG" },
+];
+function tabOf(r: Reservation): TabKey {
+  const ref = r.booking_ref ?? "";
+  if (ref.startsWith("P-")) return "pkg"; // 套票 P-YYYY-nnn
+  if (ref.startsWith("2026")) return "2026";
+  return "2025";
+}
+
+type SortKey = "booking_ref" | "status" | "name" | "shop" | "pickup_date";
+const SORT_KEYS: SortKey[] = ["booking_ref", "status", "name", "shop", "pickup_date"];
+
 function fmtDate(d: string | null) {
   return d ? d : "—";
+}
+function nameOf(r: Reservation) {
+  return r.name_en ?? r.name_zh ?? "";
+}
+function compare(a: Reservation, b: Reservation, key: SortKey): number {
+  switch (key) {
+    case "booking_ref":
+      return (a.booking_ref ?? "").localeCompare(b.booking_ref ?? "");
+    case "status":
+      return statusIndex(a.status) - statusIndex(b.status);
+    case "name":
+      return nameOf(a).localeCompare(nameOf(b));
+    case "shop":
+      return (a.shop ?? "").localeCompare(b.shop ?? "");
+    case "pickup_date":
+      return (a.pickup_date ?? "").localeCompare(b.pickup_date ?? "");
+    default:
+      return 0;
+  }
+}
+
+/** Build a /admin query string, dropping empty values. */
+function qs(p: Record<string, string | undefined>) {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(p)) if (v) sp.set(k, v);
+  const s = sp.toString();
+  return s ? `?${s}` : "";
+}
+
+// ---- Cell renderers (columns mirror the master Excel sheet, left → right) ----
+const dash = <span className="text-ink-muted">—</span>;
+const txt = (v?: string | null): ReactNode => (v ? v : dash);
+const trunc = (v: string | null | undefined, cls: string): ReactNode =>
+  v ? <div className={`truncate ${cls}`}>{v}</div> : dash;
+const tick = (v?: boolean): ReactNode =>
+  v ? <span className="font-semibold text-emerald-600">✔</span> : dash;
+const num = (v?: number): ReactNode => (v && v > 0 ? `×${v}` : dash);
+
+type Column = {
+  label: string;
+  ja?: string; // Japanese header (中日對照, from the master Excel)
+  sort?: SortKey;
+  filter?: boolean;
+  cls?: string;
+  cell: (r: Reservation) => ReactNode;
+};
+
+const COLUMNS: Column[] = [
+  {
+    label: "編號",
+    ja: "予約番号",
+    sort: "booking_ref",
+    cls: "whitespace-nowrap",
+    cell: (r) => (
+      <>
+        <Link href={`/admin/reservations/${r.id}`} className="font-semibold text-brand-700 hover:underline">
+          {r.booking_ref ?? "—"}
+        </Link>
+        <div className="text-xs text-ink-muted">{fmtDate(r.request_date)}</div>
+      </>
+    ),
+  },
+  {
+    label: "狀態",
+    ja: "状態",
+    sort: "status",
+    filter: true,
+    cls: "whitespace-nowrap",
+    cell: (r) => {
+      const m = statusMeta(r.status);
+      return (
+        <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
+          {m.zh}
+        </span>
+      );
+    },
+  },
+  { label: "電郵", ja: "メール", cls: "whitespace-nowrap", cell: (r) => txt(r.email) },
+  { label: "香港聯絡電話", ja: "連絡先番号", cls: "whitespace-nowrap", cell: (r) => txt(r.hk_phone) },
+  { label: "中文姓名", ja: "中国語名", cls: "whitespace-nowrap", cell: (r) => txt(r.name_zh) },
+  { label: "英文姓名", ja: "英語名", sort: "name", cls: "whitespace-nowrap", cell: (r) => txt(r.name_en) },
+  { label: "性別", ja: "性別", cls: "whitespace-nowrap", cell: (r) => txt(r.gender) },
+  { label: "出生年月日", ja: "生年月日", cls: "whitespace-nowrap", cell: (r) => txt(r.dob) },
+  { label: "國籍居住地址", ja: "香港住所", cell: (r) => trunc(r.hk_address, "max-w-[220px]") },
+  { label: "日本住宿地址", ja: "JPアドレス", cell: (r) => trunc(r.jp_address, "max-w-[220px]") },
+  { label: "日本手提電話", ja: "JP連絡先番号", cls: "whitespace-nowrap", cell: (r) => txt(r.jp_phone) },
+  { label: "日語能力", ja: "日本語能力", cell: (r) => trunc(r.japanese_ability, "max-w-[160px]") },
+  { label: "英語能力", ja: "英語力", cell: (r) => trunc(r.english_ability, "max-w-[160px]") },
+  { label: "出發店", ja: "店", sort: "shop", cls: "whitespace-nowrap", cell: (r) => txt(r.shop) },
+  { label: "首選", ja: "バイクの好み #1", cell: (r) => trunc(r.bike_pref_1, "max-w-[200px]") },
+  { label: "次選", ja: "バイクの好み #2", cell: (r) => trunc(r.bike_pref_2, "max-w-[200px]") },
+  { label: "第三選", ja: "バイクの好み #3", cell: (r) => trunc(r.bike_pref_3, "max-w-[200px]") },
+  { label: "取車日期", ja: "レンタル日", sort: "pickup_date", cls: "whitespace-nowrap", cell: (r) => txt(r.pickup_date) },
+  { label: "取車時間", ja: "レンタル時間", cls: "whitespace-nowrap", cell: (r) => txt(r.pickup_time) },
+  { label: "還車日期", ja: "返却日", cls: "whitespace-nowrap", cell: (r) => txt(r.return_date) },
+  { label: "還車時間", ja: "帰還の時間", cls: "whitespace-nowrap", cell: (r) => txt(r.return_time) },
+  { label: "CARDO", ja: "CARDO", cls: "text-center", cell: (r) => tick(r.addons?.cardo) },
+  { label: "尾箱", ja: "トップケース", cls: "text-center", cell: (r) => tick(r.addons?.topcase) },
+  { label: "側袋", ja: "サイドバッグ", cls: "text-center", cell: (r) => tick(r.addons?.sidebag) },
+  { label: "側箱", ja: "サイドケース", cls: "text-center", cell: (r) => tick(r.addons?.pannier) },
+  { label: "全盔", ja: "フルフェイス", cls: "whitespace-nowrap text-center", cell: (r) => num(r.addons?.full_face) },
+  { label: "開面盔", ja: "オープンフェイス", cls: "whitespace-nowrap text-center", cell: (r) => num(r.addons?.open_face) },
+  { label: "MamoRide 保險", ja: "MAMO RIDE 保険料", cls: "text-center", cell: (r) => tick(r.addons?.mamoride) },
+  { label: "穿梭巴士", ja: "シャトルバス", cls: "text-center", cell: (r) => tick(r.addons?.shuttle_bus) },
+  { label: "行李寄存", ja: "荷物預かり", cls: "text-center", cell: (r) => tick(r.addons?.luggage_storage) },
+  { label: "ETC", ja: "ETC", cls: "text-center", cell: (r) => tick(r.addons?.etc) },
+  { label: "緊急聯絡人", ja: "緊急連絡先", cls: "whitespace-nowrap", cell: (r) => txt(r.emergency_contact) },
+  { label: "緊急聯絡人號碼", ja: "緊急連絡先番号", cls: "whitespace-nowrap", cell: (r) => txt(r.emergency_phone) },
+  { label: "優惠", ja: "利点", cls: "whitespace-nowrap", cell: (r) => txt(r.promo) },
+];
+
+// Fields a keyword search scans (case-insensitive substring).
+function searchable(r: Reservation): string {
+  return [
+    r.booking_ref, r.name_zh, r.name_en, r.email, r.hk_phone, r.jp_phone,
+    r.shop, r.bike_pref_1, r.bike_pref_2, r.bike_pref_3,
+    r.emergency_contact, r.emergency_phone, r.promo, r.si_number,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 }
 
 export default async function AdminDashboard({
   searchParams,
 }: {
-  searchParams: { status?: string };
+  searchParams: { tab?: string; status?: string; sort?: string; dir?: string; q?: string };
 }) {
   const all = await listReservations();
-  const active = searchParams.status as ReservationStatus | undefined;
-  const list = active ? all.filter((r) => r.status === active) : all;
 
+  const tab: TabKey = TABS.some((t) => t.key === searchParams.tab)
+    ? (searchParams.tab as TabKey)
+    : "2026";
+  const activeStatus = searchParams.status as ReservationStatus | undefined;
+  const sortKey = SORT_KEYS.includes(searchParams.sort as SortKey)
+    ? (searchParams.sort as SortKey)
+    : undefined;
+  const dir: "asc" | "desc" = searchParams.dir === "desc" ? "desc" : "asc";
+  const q = (searchParams.q ?? "").trim();
+  const qLower = q.toLowerCase();
+
+  const tabCount = (k: TabKey) => all.filter((r) => tabOf(r) === k).length;
+  const tabRows = all.filter((r) => tabOf(r) === tab);
+
+  // Status counts are scoped to the active tab so the filter reflects this book.
   const counts = new Map<string, number>();
-  for (const r of all) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
+  for (const r of tabRows) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
+
+  let list = q ? tabRows.filter((r) => searchable(r).includes(qLower)) : [...tabRows];
+  if (activeStatus) list = list.filter((r) => r.status === activeStatus);
+  if (sortKey) list.sort((a, b) => compare(a, b, sortKey) * (dir === "desc" ? -1 : 1));
+
+  const th = "px-3 py-3 text-left align-middle whitespace-nowrap";
 
   return (
     <div>
-      <div className="mb-6 flex items-end justify-between">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold">租車預約</h1>
-          <p className="text-sm text-ink-muted">共 {all.length} 張預約</p>
+          <p className="text-sm text-ink-muted">
+            共 {tabRows.length} 張預約
+            {q ? ` · 搜尋「${q}」（${list.length}）` : ""}
+            {activeStatus ? ` · 篩選：${statusMeta(activeStatus).zh}（${list.length}）` : ""}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <form method="get" action="/admin" className="flex items-center gap-2">
+            <input type="hidden" name="tab" value={tab} />
+            {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
+            {sortKey && <input type="hidden" name="sort" value={sortKey} />}
+            {sortKey && <input type="hidden" name="dir" value={dir} />}
+            <input
+              type="search"
+              name="q"
+              defaultValue={q}
+              placeholder="搜尋 編號／姓名／電郵／電話…"
+              className="w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm outline-none focus:border-brand-500"
+            />
+            <button className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-ink-soft hover:bg-slate-200">
+              搜尋
+            </button>
+          </form>
+          {(activeStatus || q) && (
+            <Link
+              href={`/admin${qs({ tab, sort: sortKey, dir: sortKey ? dir : undefined })}`}
+              className="text-sm text-brand-700 hover:underline"
+            >
+              清除 ✕
+            </Link>
+          )}
+          <Link href="/admin/reservations/new" className="btn-brand text-sm">
+            ＋ 新增預約
+          </Link>
         </div>
       </div>
 
-      {/* Pipeline summary */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <Link
-          href="/admin"
-          className={`rounded-full border px-3 py-1.5 text-sm ${
-            !active ? "border-brand-500 bg-brand-50 text-brand-700" : "border-slate-200 bg-white text-ink-soft hover:bg-slate-50"
-          }`}
-        >
-          全部 <span className="ml-1 font-semibold">{all.length}</span>
-        </Link>
-        {[...STATUS_FLOW, ...TERMINAL_STATUS].map((s) => (
-          <Link
-            key={s.key}
-            href={`/admin?status=${s.key}`}
-            className={`rounded-full border px-3 py-1.5 text-sm ${
-              active === s.key
-                ? "border-brand-500 bg-brand-50 text-brand-700"
-                : "border-slate-200 bg-white text-ink-soft hover:bg-slate-50"
-            }`}
-          >
-            {s.zh} <span className="ml-1 font-semibold">{counts.get(s.key) ?? 0}</span>
-          </Link>
-        ))}
+      {/* Books — one per master-Excel sheet */}
+      <div className="mb-5 flex gap-1 border-b border-slate-200">
+        {TABS.map((t) => {
+          const activeT = tab === t.key;
+          return (
+            <Link
+              key={t.key}
+              href={`/admin${qs({ tab: t.key, status: activeStatus, sort: sortKey, dir: sortKey ? dir : undefined, q: q || undefined })}`}
+              className={`-mb-px inline-flex items-center gap-1.5 rounded-t-lg border-b-2 px-4 py-2 text-sm font-medium ${
+                activeT
+                  ? "border-brand-600 text-brand-700"
+                  : "border-transparent text-ink-muted hover:text-ink hover:border-slate-300"
+              }`}
+            >
+              {t.label}
+              <span
+                className={`rounded-full px-1.5 py-0.5 text-xs tabular-nums ${
+                  activeT ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-ink-muted"
+                }`}
+              >
+                {tabCount(t.key)}
+              </span>
+            </Link>
+          );
+        })}
       </div>
 
-      {/* Table */}
+      {/* Table — sorting & status filter live in the header row; columns keep
+          their width and the whole table scrolls sideways on narrow screens. */}
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
-        <table className="w-full min-w-[820px] text-sm">
+        <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-ink-muted">
-              <th className="px-4 py-3">編號</th>
-              <th className="px-4 py-3">客人</th>
-              <th className="px-4 py-3">出發店</th>
-              <th className="px-4 py-3">取車日期</th>
-              <th className="px-4 py-3">車款</th>
-              <th className="px-4 py-3">狀態</th>
+              {COLUMNS.map((c) => {
+                const active = !!c.sort && sortKey === c.sort;
+                const nextDir = active && dir === "asc" ? "desc" : "asc";
+                return (
+                  <th key={c.label} className={th}>
+                    <div className="flex items-center gap-1.5">
+                      {c.sort ? (
+                        <Link
+                          href={`/admin${qs({ tab, status: activeStatus, sort: c.sort, dir: nextDir, q: q || undefined })}`}
+                          className={`inline-flex items-center gap-1 hover:text-ink ${active ? "text-ink" : ""}`}
+                        >
+                          {c.label}
+                          <span className="text-[10px] leading-none">
+                            {active ? (dir === "asc" ? "▲" : "▼") : "↕"}
+                          </span>
+                        </Link>
+                      ) : (
+                        <span>{c.label}</span>
+                      )}
+
+                      {c.filter && (
+                        <StatusFilter
+                          value={activeStatus ?? ""}
+                          keep={{ tab, sort: sortKey, dir: sortKey ? dir : undefined, q: q || undefined }}
+                          options={[
+                            { key: "", label: "全部", count: tabRows.length },
+                            ...STATUS_ORDER.map((s) => ({
+                              key: s.key,
+                              label: s.zh,
+                              count: counts.get(s.key) ?? 0,
+                            })),
+                          ]}
+                        />
+                      )}
+                    </div>
+                    {c.ja && (
+                      <div className="mt-0.5 text-[10px] font-normal normal-case tracking-normal text-ink-muted/70">
+                        {c.ja}
+                      </div>
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {list.map((r) => {
-              const m = statusMeta(r.status);
-              return (
-                <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50/60">
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/reservations/${r.id}`} className="font-semibold text-brand-700 hover:underline">
-                      {r.booking_ref ?? "—"}
-                    </Link>
-                    <div className="text-xs text-ink-muted">{fmtDate(r.request_date)}</div>
+            {list.map((r) => (
+              <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50/60">
+                {COLUMNS.map((c) => (
+                  <td key={c.label} className={`px-3 py-3 align-top ${c.cls ?? ""}`}>
+                    {c.cell(r)}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium">{r.name_en ?? r.name_zh ?? "—"}</div>
-                    <div className="text-xs text-ink-muted">{r.name_zh ?? ""}</div>
-                  </td>
-                  <td className="px-4 py-3">{r.shop ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    {fmtDate(r.pickup_date)}
-                    {r.return_date ? <span className="text-ink-muted"> → {r.return_date}</span> : null}
-                  </td>
-                  <td className="px-4 py-3 max-w-[220px]">
-                    <div className="truncate">{r.confirmed_bike ?? r.bike_pref_1 ?? "—"}</div>
-                    {!r.confirmed_bike && r.bike_pref_1 && (
-                      <div className="text-xs text-ink-muted">未確認</div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
-                      {m.zh}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
+                ))}
+              </tr>
+            ))}
             {list.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-ink-muted">
+                <td colSpan={COLUMNS.length} className="px-4 py-10 text-center text-ink-muted">
                   沒有符合的預約。
                 </td>
               </tr>

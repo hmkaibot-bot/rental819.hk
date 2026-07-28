@@ -16,6 +16,8 @@ export interface OfferCard {
   body: string;
   href: string;
   cta: string;
+  image: string;
+  external?: boolean;
 }
 
 export interface HomeContent {
@@ -44,7 +46,7 @@ export interface HomeContent {
 export const homeContent: Record<Locale, HomeContent> = {
   "zh-hk": {
     hero: {
-      badge: "頭盔王 × Rental819 官方香港合作夥伴",
+      badge: "頭盔王 × Rental819 官方合作夥伴",
       title: "在日本，親手駕馭你的",
       highlight: "電單車自駕遊",
       tagline: "體驗日本道路之美，感受日本二輪文化",
@@ -60,7 +62,7 @@ export const homeContent: Record<Locale, HomeContent> = {
     },
     featuresHead: {
       eyebrow: "為何選擇 RENTAL819",
-      title: "全日本最大電單車租賃網絡，香港騎士專屬支援",
+      title: "全日本最大電單車租賃網絡，港澳騎士專屬支援",
       intro:
         "由選車、預約到取車，全程以你熟悉的語言處理。無論你是首次挑戰日本自駕，還是資深騎士，都能輕鬆上路。",
     },
@@ -106,18 +108,22 @@ export const homeContent: Record<Locale, HomeContent> = {
         title: "租車自駕",
         body: "自選車款、日期同取車分店，完全按自己節奏走遍日本。",
         href: "/rental",
+        image: "/images/home/way-1.png",
         cta: "了解租車詳情",
       },
       {
         title: "電單車旅行團",
         body: "由經驗領隊帶路，路線、住宿、行程一手包辦，輕鬆享受騎旅。",
-        href: "/tours",
+        href: "https://26adventure.com/tours",
+        external: true,
+        image: "/images/home/way-2.png",
         cta: "查看旅行團",
       },
       {
         title: "自駕套票",
         body: "租車＋住宿＋行程建議一次搞掂，最抵最方便的自由行組合。",
         href: "/packages",
+        image: "/images/home/way-3.png",
         cta: "瀏覽套票",
       },
     ],
@@ -160,7 +166,7 @@ export const homeContent: Record<Locale, HomeContent> = {
 
   en: {
     hero: {
-      badge: "Helmet King × Rental819 — official Hong Kong partner",
+      badge: "Helmet King × Rental819 — official partner",
       title: "Ride Japan your way on a",
       highlight: "self-drive motorcycle tour",
       tagline: "Experience the beauty of Japan's roads and the spirit of its riding culture",
@@ -176,7 +182,7 @@ export const homeContent: Record<Locale, HomeContent> = {
     },
     featuresHead: {
       eyebrow: "Why RENTAL819",
-      title: "Japan's largest rental network, with support built for Hong Kong riders",
+      title: "Japan's largest rental network, with support built for Hong Kong & Macau riders",
       intro:
         "From choosing a bike to picking it up, the whole journey is handled in a language you're comfortable with — whether it's your first ride in Japan or your fiftieth.",
     },
@@ -222,18 +228,22 @@ export const homeContent: Record<Locale, HomeContent> = {
         title: "Rent & self-drive",
         body: "Choose your bike, dates and pick-up branch and explore Japan entirely at your own pace.",
         href: "/rental",
+        image: "/images/home/way-1.png",
         cta: "Rental details",
       },
       {
         title: "Guided motorcycle tours",
         body: "An experienced leader handles the route, stays and itinerary — you just enjoy the ride.",
-        href: "/tours",
+        href: "https://26adventure.com/tours",
+        external: true,
+        image: "/images/home/way-2.png",
         cta: "See tours",
       },
       {
         title: "Self-drive packages",
         body: "Bike, accommodation and a suggested itinerary bundled together — the easy-value way to go independent.",
         href: "/packages",
+        image: "/images/home/way-3.png",
         cta: "Browse packages",
       },
     ],

@@ -32,9 +32,11 @@ const GROUP_ORDER: Rt819Item["group"][] = [
 export default function InvoiceEditor({
   reservation,
   seed,
+  catalog = RT819_ITEMS,
 }: {
   reservation: Reservation;
   seed: InvoiceItem[];
+  catalog?: Rt819Item[];
 }) {
   const r = reservation;
   const settlement = (r.settlement ?? {}) as Record<string, unknown>;
@@ -71,7 +73,7 @@ export default function InvoiceEditor({
   const removeRow = (i: number) => setItems((prev) => prev.filter((_, idx) => idx !== i));
 
   const addCatalogItem = (code: string) => {
-    const it = RT819_ITEMS.find((x) => x.code === code);
+    const it = catalog.find((x) => x.code === code);
     if (!it) return;
     setItems((prev) => [
       ...prev,
@@ -143,7 +145,7 @@ export default function InvoiceEditor({
             <option value="">＋ 選擇項目加入單據…</option>
             {GROUP_ORDER.map((g) => (
               <optgroup key={g} label={RT819_GROUP_LABELS[g]}>
-                {RT819_ITEMS.filter((it) => it.group === g).map((it) => (
+                {catalog.filter((it) => it.group === g).map((it) => (
                   <option key={it.code} value={it.code}>
                     {rt819Label(it)} — HK${it.unit_price}
                   </option>

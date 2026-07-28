@@ -3,10 +3,10 @@ import { pageAlternates } from "@/lib/seo";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { packages } from "@/lib/content/tours";
-import { site } from "@/lib/site";
+import { site, whatsappLink } from "@/lib/site";
 import PageHero from "@/components/PageHero";
 import CTABand from "@/components/CTABand";
-import { CheckIcon, ArrowRight } from "@/components/icons";
+import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
@@ -80,13 +80,17 @@ export default function PackagesPage({ params }: { params: { locale: string } })
                   </p>
                 </div>
                 <a
-                  href={site.adventureUrl}
+                  href={whatsappLink(
+                    isEn
+                      ? `Hi, I'd like to ask about the ${p.title} self-drive package.`
+                      : `你好，我想查詢自駕套票：${p.title}`,
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-outline"
                 >
-                  {isEn ? "Book on 26 Adventure" : "到 26 Adventure 報名"}
-                  <ArrowRight className="h-4 w-4" />
+                  <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
+                  {isEn ? "Ask on WhatsApp" : "WhatsApp 查詢"}
                 </a>
               </div>
             </article>
@@ -98,13 +102,17 @@ export default function PackagesPage({ params }: { params: { locale: string } })
         <CTABand
           locale={locale}
           dict={dict}
-          primaryHref={site.adventureUrl}
-          primaryLabel={isEn ? "Book on 26 Adventure" : "到 26 Adventure 報名"}
+          primaryHref={whatsappLink(
+            isEn
+              ? "Hi, I'd like to ask about a self-drive package."
+              : "你好，我想查詢自駕套票。",
+          )}
+          primaryLabel={isEn ? "Ask on WhatsApp" : "WhatsApp 查詢"}
           title={isEn ? "Book a package" : "預約自駕套票"}
           subtitle={
             isEn
-              ? "Self-drive packages are booked on 26adventure.com."
-              : "自駕套票現於 26adventure.com 報名預約。"
+              ? "Message us on WhatsApp to plan and book your self-drive package."
+              : "WhatsApp 我們，即可查詢及預約自駕套票。"
           }
         />
         <p className="container-x mt-6 text-center text-xs text-ink-muted">

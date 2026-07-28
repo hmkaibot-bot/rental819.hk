@@ -6,6 +6,7 @@ import type { Reservation, ReservationStatus } from "./types";
 const TABLE = "reservations";
 
 export interface NewReservation {
+  booking_ref?: string | null;
   name_zh?: string | null;
   name_en?: string | null;
   gender?: string | null;

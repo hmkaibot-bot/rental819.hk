@@ -1,13 +1,12 @@
+// Status set mirrors the master Excel 狀態 dropdown (data-validation list) exactly.
 export type ReservationStatus =
-  | "new"
-  | "sent_to_jp"
-  | "confirmed"
-  | "invoiced"
-  | "paid"
-  | "customer_confirmed"
-  | "settled"
-  | "cancelled"
-  | "no_response";
+  | "new" // 未處理
+  | "notified_jp" // 已通知日本
+  | "awaiting_si" // 待SI
+  | "awaiting_payment" // 待付款
+  | "confirmed" // 已確認預定
+  | "change_pending" // 變更溝通中
+  | "cancelled"; // 顧客無反應/已取消
 
 export interface ReservationAddons {
   cardo?: boolean; // CARDO 對講機
@@ -68,6 +67,8 @@ export interface Reservation {
   paid_to_supplier: boolean;
   supplier_paid_date: string | null;
   cost_jpy: number | null;
+  revenue_hkd?: number | null; // 單價（港幣） customer price (imported)
+  cost_hkd?: number | null; // 單價成本（港元） real HK$ cost (imported)
   settlement: Record<string, unknown>;
 
   notes: string | null;
@@ -83,13 +84,11 @@ export const STATUS_FLOW: {
   en: string;
   tone: string;
 }[] = [
-  { key: "new", zh: "新預約", en: "New", tone: "bg-accent-100 text-accent-800" },
-  { key: "sent_to_jp", zh: "已向日本確認", en: "Sent to JP", tone: "bg-amber-100 text-amber-800" },
-  { key: "confirmed", zh: "日本已確認", en: "Confirmed", tone: "bg-sky-100 text-sky-800" },
-  { key: "invoiced", zh: "已開單", en: "Invoiced", tone: "bg-indigo-100 text-indigo-800" },
-  { key: "paid", zh: "客人已付款", en: "Paid", tone: "bg-emerald-100 text-emerald-800" },
-  { key: "customer_confirmed", zh: "已發確認信", en: "Customer confirmed", tone: "bg-teal-100 text-teal-800" },
-  { key: "settled", zh: "月結已對帳", en: "Settled", tone: "bg-slate-200 text-slate-700" },
+  { key: "new", zh: "未處理", en: "New", tone: "bg-slate-100 text-slate-700" },
+  { key: "notified_jp", zh: "已通知日本", en: "Notified Japan", tone: "bg-amber-100 text-amber-800" },
+  { key: "awaiting_si", zh: "待SI", en: "Awaiting SI", tone: "bg-indigo-100 text-indigo-800" },
+  { key: "awaiting_payment", zh: "待付款", en: "Awaiting payment", tone: "bg-orange-100 text-orange-800" },
+  { key: "confirmed", zh: "已確認預定", en: "Confirmed", tone: "bg-emerald-100 text-emerald-800" },
 ];
 
 export const TERMINAL_STATUS: {
@@ -98,8 +97,8 @@ export const TERMINAL_STATUS: {
   en: string;
   tone: string;
 }[] = [
-  { key: "cancelled", zh: "已取消", en: "Cancelled", tone: "bg-rose-100 text-rose-700" },
-  { key: "no_response", zh: "客人無反應", en: "No response", tone: "bg-slate-200 text-slate-600" },
+  { key: "change_pending", zh: "變更溝通中", en: "Change pending", tone: "bg-violet-100 text-violet-800" },
+  { key: "cancelled", zh: "顧客無反應/已取消", en: "No response / cancelled", tone: "bg-rose-100 text-rose-700" },
 ];
 
 const ALL = [...STATUS_FLOW, ...TERMINAL_STATUS];
@@ -122,16 +121,147 @@ export const ADDON_LABELS: { key: keyof ReservationAddons; zh: string }[] = [
   { key: "luggage_storage", zh: "行李寄存" },
 ];
 
-/** Rental819 pick-up branches seen in operations (extend as needed). */
-export const SHOPS = [
-  "大阪伊丹空港店",
-  "お台場店 (東京)",
-  "福岡空港店",
-  "那覇空港店",
-  "新千歳空港店 (北海道)",
-  "仙台店",
-  "名古屋店",
-  "京都店",
-  "廣島店",
-  "松山店 (四國)",
+/**
+ * Rental819 pick-up branches — the full network of 99 stores across Japan,
+ * grouped by region. Source: https://rental819.com/store/ (official store list).
+ */
+export const SHOP_AREAS: { area: string; shops: string[] }[] = [
+  {
+    area: "北海道",
+    shops: [
+      "千歳パーク店",
+      "函館店",
+      "札幌清田店",
+      "新千歳空港店",
+      "札幌白石店",
+      "札幌店",
+      "北見店",
+    ],
+  },
+  {
+    area: "東北",
+    shops: [
+      "岩手紫波店",
+      "仙台泉店",
+      "仙台店",
+      "H-D宮城店",
+      "秋田店",
+      "山形店",
+      "いわき店",
+    ],
+  },
+  {
+    area: "関東",
+    shops: [
+      "イオンつくば店",
+      "竜ヶ崎店",
+      "H-D塚原店",
+      "宇都宮竹林店",
+      "伊勢崎店",
+      "北軽井沢店(2026年4月移転)",
+      "BMW Motorrad 越谷店",
+      "鳩ケ谷店",
+      "Ducati埼玉南店",
+      "H-D埼玉花園店",
+      "和光店",
+      "H-Dメガ松戸店",
+      "茂原店",
+      "柏店",
+      "柏沼南店",
+      "市川店",
+      "池袋店",
+      "三鷹店",
+      "東村山店",
+      "東府中店",
+      "羽田店",
+      "落合南長崎駅前店",
+      "高円寺店",
+      "八王子長沼店",
+      "吉祥寺店",
+      "八王子大塚店",
+      "八王子駅前店",
+      "阿佐ヶ谷店",
+      "葛飾店",
+      "お台場店",
+      "大田中央店",
+      "駒沢店",
+      "大田店",
+      "上野店",
+      "世田谷代田店",
+      "板橋店",
+      "東名横浜店",
+      "新山下店",
+      "横浜店",
+      "高津店",
+    ],
+  },
+  {
+    area: "甲信越",
+    shops: ["新潟店", "長野店", "長野駅前店", "飯田店", "上田店"],
+  },
+  {
+    area: "北陸",
+    shops: ["福井店"],
+  },
+  {
+    area: "東海",
+    shops: [
+      "南箱根店",
+      "知立店",
+      "イオンモール豊川店",
+      "豊田店",
+      "豊橋店",
+      "中川店",
+      "桑名店",
+      "伊勢店",
+    ],
+  },
+  {
+    area: "近畿",
+    shops: [
+      "大津店",
+      "京都十条店",
+      "京都宝ヶ池店",
+      "京都中央店",
+      "京都伏見店",
+      "京都山科店",
+      "大阪国際空港店(伊丹空港)",
+      "門真店",
+      "関西国際空港店(関西空港)",
+      "茨木彩都店",
+      "東大阪店",
+      "H-D須磨店",
+      "西宮店",
+    ],
+  },
+  {
+    area: "四国",
+    shops: ["松山店"],
+  },
+  {
+    area: "九州",
+    shops: [
+      "福岡空港店",
+      "福岡空港国内ターミナル店",
+      "博多店",
+      "小倉南店",
+      "福岡城南店",
+      "福岡南店",
+      "佐世保店",
+      "長崎道ノ尾店",
+      "諫早店",
+      "熊本空港店",
+      "熊本店",
+      "大分店",
+      "鹿児島空港店",
+      "鹿児島東谷山店",
+    ],
+  },
+  {
+    area: "沖縄",
+    shops: ["H-D沖縄店", "沖縄とよみ店", "那覇空港店"],
+  },
 ];
+
+/** Flat list of every branch name (for validation / lookups). */
+export const SHOPS = SHOP_AREAS.flatMap((a) => a.shops);

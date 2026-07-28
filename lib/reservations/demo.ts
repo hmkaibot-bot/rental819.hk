@@ -45,7 +45,7 @@ const rawDemo: Omit<Reservation, "invoice_date" | "invoice_items">[] = [
   {
     id: "demo-2",
     booking_ref: "2026-047",
-    status: "sent_to_jp",
+    status: "notified_jp",
     request_date: "2026-07-18",
     name_zh: "陳大文",
     name_en: "Chan Tai Man",
@@ -85,7 +85,7 @@ const rawDemo: Omit<Reservation, "invoice_date" | "invoice_items">[] = [
   {
     id: "demo-3",
     booking_ref: "2026-041",
-    status: "invoiced",
+    status: "awaiting_payment",
     request_date: "2026-06-30",
     name_zh: "譚經綸",
     name_en: "Tam King Lun",
@@ -125,7 +125,7 @@ const rawDemo: Omit<Reservation, "invoice_date" | "invoice_items">[] = [
   {
     id: "demo-4",
     booking_ref: "2026-035",
-    status: "paid",
+    status: "confirmed",
     request_date: "2026-06-05",
     name_zh: "方庭峯",
     name_en: "Fong Ting Fung",
@@ -165,7 +165,7 @@ const rawDemo: Omit<Reservation, "invoice_date" | "invoice_items">[] = [
   {
     id: "demo-5",
     booking_ref: "2026-028",
-    status: "settled",
+    status: "confirmed",
     request_date: "2026-05-10",
     name_zh: "林光耀",
     name_en: "Lam Kuong Io",
