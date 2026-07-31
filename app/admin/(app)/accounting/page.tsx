@@ -17,11 +17,28 @@ function revenue(r: Reservation) {
   const inv = invoiceTotal(r.invoice_items ?? []);
   return inv > 0 ? inv : Number(r.revenue_hkd) || 0;
 }
-// Cost (HK$) = the imported 單價成本 when present, otherwise the JPY cost
+// Gross cost (HK$) = the imported 單價成本 when present, otherwise the JPY cost
 // converted at the reference rate (for in-app bookings priced in yen).
-function costHkd(r: Reservation) {
+function grossCostHkd(r: Reservation) {
   if (r.cost_hkd != null) return Number(r.cost_hkd) || 0;
   return (Number(r.cost_jpy) || 0) * RT819_EXCHANGE_RATE;
+}
+
+/**
+ * Japan rebates 10% of the base bike rental to us, so what we actually pay is
+ * the gross cost less that rebate. Both imported cost columns are gross, so the
+ * rebate is subtracted here: in yen directly, and in HK$ pro-rata so each
+ * booking keeps the exchange rate it was actually settled at.
+ */
+function rebateJpy(r: Reservation) {
+  return Number(r.rebate_jpy) || 0;
+}
+function netCostHkd(r: Reservation) {
+  const gross = grossCostHkd(r);
+  const rebate = rebateJpy(r);
+  const grossJpy = Number(r.cost_jpy) || 0;
+  if (!rebate || !grossJpy) return gross;
+  return gross * ((grossJpy - rebate) / grossJpy);
 }
 
 export default async function AccountingPage() {
@@ -49,8 +66,9 @@ export default async function AccountingPage() {
         pickup_date: r.pickup_date,
         return_date: r.return_date,
         revenue: revenue(r),
-        cost_jpy: r.cost_jpy ?? null,
-        cost_hkd: costHkd(r),
+        cost_jpy: r.cost_jpy == null ? null : Number(r.cost_jpy) - rebateJpy(r),
+        rebate_jpy: rebateJpy(r),
+        cost_hkd: netCostHkd(r),
         paid_to_supplier: r.paid_to_supplier,
         supplier_paid_date: r.supplier_paid_date,
       };

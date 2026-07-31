@@ -14,7 +14,11 @@ export type AcctRow = {
   pickup_date: string | null;
   return_date: string | null;
   revenue: number;
+  /** Net of the Japan rebate (gross ¥ minus rebate_jpy). */
   cost_jpy: number | null;
+  /** Japan's 10% base-rental rebate, in yen. */
+  rebate_jpy: number;
+  /** Net of the rebate, pro-rata at the booking's own exchange rate. */
   cost_hkd: number;
   paid_to_supplier: boolean;
   supplier_paid_date: string | null;
@@ -30,6 +34,7 @@ type ColKey =
   | "pickup"
   | "return"
   | "revenue"
+  | "rebate_jpy"
   | "cost_jpy"
   | "cost_hkd"
   | "profit"
@@ -52,6 +57,7 @@ const COLS: Col[] = [
   { key: "pickup", label: "取車日期", filter: "text", sortVal: (r) => r.pickup_date ?? "", text: (r) => r.pickup_date ?? "" },
   { key: "return", label: "還車日期", filter: "text", sortVal: (r) => r.return_date ?? "", text: (r) => r.return_date ?? "" },
   { key: "revenue", label: "收入", align: "right", numeric: true, filter: "text", sortVal: (r) => r.revenue, text: (r) => fmt(r.revenue) },
+  { key: "rebate_jpy", label: "回贈 (¥)", align: "right", numeric: true, filter: "text", sortVal: (r) => r.rebate_jpy, text: (r) => (r.rebate_jpy ? Number(r.rebate_jpy).toLocaleString("en-US") : "") },
   { key: "cost_jpy", label: "成本 (¥)", align: "right", numeric: true, filter: "text", sortVal: (r) => r.cost_jpy ?? 0, text: (r) => (r.cost_jpy ? Number(r.cost_jpy).toLocaleString("en-US") : "") },
   { key: "cost_hkd", label: "成本 (HK$)", align: "right", numeric: true, filter: "text", sortVal: (r) => r.cost_hkd, text: (r) => fmt(r.cost_hkd) },
   { key: "profit", label: "利潤", align: "right", numeric: true, filter: "text", sortVal: (r) => profitOf(r), text: (r) => fmt(profitOf(r)) },
@@ -104,13 +110,14 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
       filtered.reduce(
         (acc, r) => {
           acc.rev += r.revenue;
+          acc.rebate += Number(r.rebate_jpy ?? 0);
           acc.jpy += Number(r.cost_jpy ?? 0);
           acc.cost += r.cost_hkd;
           acc.profit += profitOf(r);
           if (!r.paid_to_supplier) acc.outstanding += r.cost_hkd;
           return acc;
         },
-        { rev: 0, jpy: 0, cost: 0, profit: 0, outstanding: 0 },
+        { rev: 0, rebate: 0, jpy: 0, cost: 0, profit: 0, outstanding: 0 },
       ),
     [filtered],
   );
@@ -261,6 +268,9 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
                   <td className={td}>{r.pickup_date ?? "—"}</td>
                   <td className={td}>{r.return_date ?? "—"}</td>
                   <td className={`${td} text-right`}>{fmt(r.revenue)}</td>
+                  <td className={`${td} text-right ${r.rebate_jpy ? "text-emerald-700" : "text-ink-muted"}`}>
+                    {r.rebate_jpy ? `−${Number(r.rebate_jpy).toLocaleString("en-US")}` : "—"}
+                  </td>
                   <td className={`${td} text-right`}>{r.cost_jpy ? Number(r.cost_jpy).toLocaleString("en-US") : "—"}</td>
                   <td className={`${td} text-right`}>{fmt(r.cost_hkd)}</td>
                   <td className={`${td} text-right font-medium ${profit >= 0 ? "text-emerald-700" : "text-rose-600"}`}>{fmt(profit)}</td>
@@ -290,6 +300,9 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
                   總計（{filtered.length} 張）
                 </td>
                 <td className={`${td} text-right`}>{fmt(totals.rev)}</td>
+                <td className={`${td} text-right text-emerald-700`}>
+                  {totals.rebate ? `−${totals.rebate.toLocaleString("en-US")}` : "—"}
+                </td>
                 <td className={`${td} text-right`}>
                   {totals.jpy ? totals.jpy.toLocaleString("en-US") : "—"}
                 </td>
