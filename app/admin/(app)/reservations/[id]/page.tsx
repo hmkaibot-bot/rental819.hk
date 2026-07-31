@@ -279,7 +279,11 @@ export default async function ReservationDetail({
               <input type="hidden" name="id" value={r.id} />
               <div className="col-span-2 text-xs font-medium text-ink-soft">開單</div>
               <input name="si_number" defaultValue={autoSiNumber(r)} className={input} placeholder="SI-26-xxxxx" />
-              <input name="cost_jpy" type="number" defaultValue={r.cost_jpy ?? ""} className={input} placeholder="成本 ¥" />
+              <input name="cost_jpy" type="number" defaultValue={r.cost_jpy ?? ""} className={input} placeholder="成本 ¥（未扣回贈）" />
+              <input name="rebate_jpy" type="number" defaultValue={r.rebate_jpy ?? ""} className={input} placeholder="日本回贈 ¥" />
+              <p className="col-span-2 -mt-1 text-[11px] leading-4 text-ink-muted">
+                回贈為基本車租的 10%（例：車租 ¥55,440 → 回贈 ¥5,544）。會計以「成本 − 回贈」計算實付。
+              </p>
               <input type="hidden" name="status" value="awaiting_payment" />
               <button className="btn-brand col-span-2 text-xs">儲存單號並標記「待付款」</button>
             </form>
@@ -308,6 +312,15 @@ export default async function ReservationDetail({
             <dl className="grid grid-cols-2 gap-x-6">
               <Field label="單號 (SI)" value={r.si_number} />
               <Field label="成本 (¥)" value={r.cost_jpy?.toLocaleString("en-US")} />
+              <Field label="日本回贈 (¥)" value={r.rebate_jpy ? `−${r.rebate_jpy.toLocaleString("en-US")}` : undefined} />
+              <Field
+                label="實付成本 (¥)"
+                value={
+                  r.cost_jpy != null
+                    ? (Number(r.cost_jpy) - (Number(r.rebate_jpy) || 0)).toLocaleString("en-US")
+                    : undefined
+                }
+              />
               <Field label="客人付款日" value={r.customer_paid_date} />
               <Field label="供應商付款日" value={r.supplier_paid_date} />
               <Field label="已向供應商付款" value={r.paid_to_supplier ? "是" : "否"} />

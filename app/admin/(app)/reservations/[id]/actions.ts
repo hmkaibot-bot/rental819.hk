@@ -29,6 +29,10 @@ export async function patchReservation(formData: FormData) {
     const v = formData.get("cost_jpy");
     patch.cost_jpy = v === "" || v == null ? null : Number(v);
   }
+  if (formData.has("rebate_jpy")) {
+    const v = formData.get("rebate_jpy");
+    patch.rebate_jpy = v === "" || v == null ? null : Number(v);
+  }
   if (formData.has("paid_to_supplier")) {
     patch.paid_to_supplier = formData.get("paid_to_supplier") === "on";
   }

@@ -66,9 +66,15 @@ export interface Reservation {
   customer_paid_date: string | null;
   paid_to_supplier: boolean;
   supplier_paid_date: string | null;
-  cost_jpy: number | null;
+  cost_jpy: number | null; // gross supplier cost (¥), before the Japan rebate
+  /**
+   * Japan rebates 10% of the base bike rental back to us, so the net supplier
+   * cost is cost_jpy − rebate_jpy. Stored as a positive figure (the master
+   * Excel carries it as its own negative column, e.g. 基本車租 ¥55,440 → −¥5,544).
+   */
+  rebate_jpy?: number | null;
   revenue_hkd?: number | null; // 單價（港幣） customer price (imported)
-  cost_hkd?: number | null; // 單價成本（港元） real HK$ cost (imported)
+  cost_hkd?: number | null; // 單價成本（港元） gross HK$ cost (imported, pre-rebate)
   settlement: Record<string, unknown>;
 
   notes: string | null;

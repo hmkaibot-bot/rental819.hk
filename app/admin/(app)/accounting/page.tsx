@@ -17,11 +17,27 @@ function revenue(r: Reservation) {
   const inv = invoiceTotal(r.invoice_items ?? []);
   return inv > 0 ? inv : Number(r.revenue_hkd) || 0;
 }
-// Cost (HK$) = the imported 單價成本 when present, otherwise the JPY cost
-// converted at the reference rate (for in-app bookings priced in yen).
-function costHkd(r: Reservation) {
+/** Japan's 10% base-rental rebate, in yen (stored positive). */
+function rebateJpy(r: Reservation) {
+  return Number(r.rebate_jpy) || 0;
+}
+
+/**
+ * Net supplier cost in HK$ — what we actually pay after Japan's rebate.
+ *
+ * The imported 單價成本（港元） is ALREADY net: the master Excel computes it as
+ * (單價（日元） + 回贈) × rate with 回贈 held as a negative, so the rebate is
+ * baked in. Deducting again would double-count it. (Confirmed against the sheet
+ * formulas and across 136 imported bookings: net ¥ ÷ cost_hkd is a flat 20.882
+ * with a 0.001 spread, whereas gross ¥ ÷ cost_hkd scatters by 0.074.)
+ *
+ * Only the fallback path needs the deduction: in-app bookings priced in yen have
+ * no imported HK$ figure, and their cost_jpy is the gross total.
+ */
+function netCostHkd(r: Reservation) {
   if (r.cost_hkd != null) return Number(r.cost_hkd) || 0;
-  return (Number(r.cost_jpy) || 0) * RT819_EXCHANGE_RATE;
+  const netJpy = (Number(r.cost_jpy) || 0) - rebateJpy(r);
+  return netJpy * RT819_EXCHANGE_RATE;
 }
 
 export default async function AccountingPage() {
@@ -49,8 +65,9 @@ export default async function AccountingPage() {
         pickup_date: r.pickup_date,
         return_date: r.return_date,
         revenue: revenue(r),
-        cost_jpy: r.cost_jpy ?? null,
-        cost_hkd: costHkd(r),
+        cost_jpy: r.cost_jpy == null ? null : Number(r.cost_jpy) - rebateJpy(r),
+        rebate_jpy: rebateJpy(r),
+        cost_hkd: netCostHkd(r),
         paid_to_supplier: r.paid_to_supplier,
         supplier_paid_date: r.supplier_paid_date,
       };
