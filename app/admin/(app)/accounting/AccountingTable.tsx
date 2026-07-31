@@ -104,12 +104,13 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
       filtered.reduce(
         (acc, r) => {
           acc.rev += r.revenue;
+          acc.jpy += Number(r.cost_jpy ?? 0);
           acc.cost += r.cost_hkd;
           acc.profit += profitOf(r);
           if (!r.paid_to_supplier) acc.outstanding += r.cost_hkd;
           return acc;
         },
-        { rev: 0, cost: 0, profit: 0, outstanding: 0 },
+        { rev: 0, jpy: 0, cost: 0, profit: 0, outstanding: 0 },
       ),
     [filtered],
   );
@@ -281,6 +282,27 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
               </tr>
             )}
           </tbody>
+          {/* Totals for whatever the current filter shows */}
+          {filtered.length > 0 && (
+            <tfoot className="border-t-2 border-slate-300 bg-slate-50 font-bold">
+              <tr>
+                <td className={`${td} text-xs uppercase tracking-wide text-ink-muted`} colSpan={6}>
+                  總計（{filtered.length} 張）
+                </td>
+                <td className={`${td} text-right`}>{fmt(totals.rev)}</td>
+                <td className={`${td} text-right`}>
+                  {totals.jpy ? totals.jpy.toLocaleString("en-US") : "—"}
+                </td>
+                <td className={`${td} text-right`}>{fmt(totals.cost)}</td>
+                <td className={`${td} text-right ${totals.profit >= 0 ? "text-emerald-700" : "text-rose-600"}`}>
+                  {fmt(totals.profit)}
+                </td>
+                <td className={`${td} text-xs font-medium text-accent-700`}>
+                  未付 {fmt(totals.outstanding)}
+                </td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
 
