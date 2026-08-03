@@ -49,16 +49,16 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
         <ol className="relative mt-12 space-y-12">
           {/* vertical connector line */}
           <div
-            className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-slate-200"
+            className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-brand-100"
             aria-hidden
           />
           {c.brands.map((b) => (
             <li key={b.name} className="relative pl-10 sm:pl-12">
               <span
-                className="absolute left-0 top-1 h-5 w-5 rounded-full bg-accent-600 ring-4 ring-white"
+                className="absolute left-0 top-1 h-5 w-5 rounded-full bg-brand-600 ring-4 ring-white"
                 aria-hidden
               />
-              <p className="text-sm font-bold text-accent-600">{b.year}</p>
+              <p className="text-sm font-bold text-brand-700">{b.year}</p>
               <h3 className="mt-1 text-2xl font-black text-ink sm:text-3xl">{b.name}</h3>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-ink-muted">{b.body}</p>
             </li>
