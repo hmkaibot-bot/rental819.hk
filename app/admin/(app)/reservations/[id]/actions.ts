@@ -2,15 +2,52 @@
 
 import { revalidatePath } from "next/cache";
 import { getReservation, updateReservation } from "@/lib/reservations/store";
-import type { Reservation, ReservationAddons } from "@/lib/reservations/types";
+import {
+  costItemsTotal,
+  rebateFromCostItems,
+  COST_ITEM_LABELS,
+  ADDON_LABELS,
+  type CostItems,
+  type Reservation,
+  type ReservationAddons,
+} from "@/lib/reservations/types";
 
+/**
+ * Every field staff may correct from the reservation page. Customers mistype
+ * their own details often enough that the whole submission has to be editable,
+ * not just the operational fields.
+ */
 const NULLABLE_TEXT = [
   "status",
+  // customer details
+  "name_zh",
+  "name_en",
+  "gender",
+  "dob",
+  "email",
+  "hk_phone",
+  "hk_address",
+  "jp_address",
+  "jp_phone",
+  "japanese_ability",
+  "english_ability",
+  "emergency_contact",
+  "emergency_phone",
+  // rental details
+  "shop",
+  "bike_pref_1",
+  "bike_pref_2",
+  "bike_pref_3",
   "confirmed_bike",
+  "pickup_date",
+  "pickup_time",
+  "return_date",
+  "return_time",
+  "promo",
+  // billing / ops
   "si_number",
   "customer_paid_date",
   "supplier_paid_date",
-  "shop",
   "notes",
 ] as const;
 
@@ -40,6 +77,64 @@ export async function patchReservation(formData: FormData) {
   await updateReservation(id, patch);
   revalidatePath(`/admin/reservations/${id}`);
   revalidatePath("/admin");
+}
+
+/**
+ * Save the add-ons block on the reservation page (Task: staff can correct what
+ * the customer submitted). Unchecked boxes do not post, so every key is read
+ * explicitly rather than merged over the existing object.
+ */
+export async function saveAddons(formData: FormData) {
+  const id = String(formData.get("id"));
+  const addons: ReservationAddons = {};
+  for (const a of ADDON_LABELS) {
+    if (a.key === "full_face" || a.key === "open_face") {
+      const n = Number(formData.get(`addon_${a.key}`));
+      if (Number.isFinite(n) && n > 0) addons[a.key] = n;
+    } else {
+      const on = formData.get(`addon_${a.key}`) === "on";
+      if (on) (addons as Record<string, unknown>)[a.key] = true;
+    }
+  }
+  await updateReservation(id, { addons });
+  revalidatePath(`/admin/reservations/${id}`);
+  revalidatePath("/admin");
+}
+
+/**
+ * Save the per-item supplier cost (¥). The total and the rebate are derived,
+ * never typed: cost_jpy is the sum of the lines and the rebate is always 10% of
+ * the base bike rental, so the two can never drift out of step.
+ */
+export async function saveCostItems(formData: FormData) {
+  const id = String(formData.get("id"));
+  const items: CostItems = {};
+  for (const l of COST_ITEM_LABELS) {
+    const raw = formData.get(`cost_${l.key}`);
+    const n = Number(raw);
+    if (raw !== "" && raw != null && Number.isFinite(n) && n !== 0) {
+      items[l.key] = n;
+    }
+  }
+  const total = costItemsTotal(items);
+  const si = formData.get("si_number");
+  const anyEntered = Object.keys(items).length > 0;
+
+  await updateReservation(id, {
+    // Submitting an all-blank cost form (e.g. just saving the SI number on a
+    // booking whose cost lives elsewhere) must not wipe a recorded total.
+    ...(anyEntered
+      ? {
+          cost_items: items,
+          cost_jpy: total,
+          rebate_jpy: rebateFromCostItems(items) || null,
+        }
+      : {}),
+    ...(si != null ? { si_number: si === "" ? null : String(si) } : {}),
+  });
+  revalidatePath(`/admin/reservations/${id}`);
+  revalidatePath("/admin");
+  revalidatePath("/admin/accounting");
 }
 
 /**
@@ -88,7 +183,7 @@ export async function confirmReservation(formData: FormData) {
     return_time: text("return_time"),
     addons,
     settlement,
-    status: "awaiting_si", // Japan confirmed availability → next step is to issue the SI
+    // Status is never advanced automatically — staff set it in the 狀態 dropdown.
   });
   revalidatePath(`/admin/reservations/${id}`);
   revalidatePath("/admin");

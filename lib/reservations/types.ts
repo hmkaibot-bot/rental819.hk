@@ -21,6 +21,46 @@ export interface ReservationAddons {
   luggage_storage?: boolean; // 行李寄存
 }
 
+/**
+ * Supplier cost broken down per line item (JPY), mirroring the master Excel's
+ * cost columns. cost_jpy is the gross total of these; the rebate is always 10%
+ * of base_rental and is tracked separately in rebate_jpy.
+ */
+export interface CostItems {
+  base_rental?: number; // 基本車租
+  insurance?: number; // 保險
+  mamoride?: number; // MAMO RIDE 保險
+  helmet?: number; // 頭盔
+  topcase?: number; // 尾箱
+  sidebag?: number; // 側袋
+  pannier?: number; // 側箱
+  etc?: number; // ETC
+}
+
+/** Ordered cost lines for the 開單 form, in the master Excel's column order. */
+export const COST_ITEM_LABELS: { key: keyof CostItems; zh: string }[] = [
+  { key: "base_rental", zh: "基本車租" },
+  { key: "insurance", zh: "保險" },
+  { key: "mamoride", zh: "MAMO RIDE 保險" },
+  { key: "helmet", zh: "頭盔" },
+  { key: "topcase", zh: "尾箱" },
+  { key: "sidebag", zh: "側袋" },
+  { key: "pannier", zh: "側箱" },
+  { key: "etc", zh: "ETC" },
+];
+
+/** Japan rebates 10% of the base bike rental. */
+export const REBATE_RATE = 0.1;
+
+export function costItemsTotal(c: CostItems | null | undefined): number {
+  if (!c) return 0;
+  return COST_ITEM_LABELS.reduce((sum, l) => sum + (Number(c[l.key]) || 0), 0);
+}
+
+export function rebateFromCostItems(c: CostItems | null | undefined): number {
+  return Math.round((Number(c?.base_rental) || 0) * REBATE_RATE);
+}
+
 export interface InvoiceItem {
   description: string;
   qty: number;
@@ -73,6 +113,8 @@ export interface Reservation {
    * Excel carries it as its own negative column, e.g. 基本車租 ¥55,440 → −¥5,544).
    */
   rebate_jpy?: number | null;
+  /** Per-item supplier cost (¥). cost_jpy is the gross total of these lines. */
+  cost_items?: CostItems | null;
   revenue_hkd?: number | null; // 單價（港幣） customer price (imported)
   cost_hkd?: number | null; // 單價成本（港元） gross HK$ cost (imported, pre-rebate)
   settlement: Record<string, unknown>;
