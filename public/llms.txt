@@ -1,0 +1,87 @@
+# RENTAL819 Hong Kong (rental819.hk)
+
+> RENTAL819 Hong Kong is the designated Hong Kong and Macau agent for Rental819, Japan's largest
+> motorcycle rental company, and part of the Helmet King (頭盔王) group. From Hong Kong, in
+> Cantonese, Mandarin or English, we arrange motorcycle rentals across 99 Rental819 branches in
+> Japan, plus guided motorcycle tours and self-drive rental-and-accommodation packages for riders
+> from Hong Kong and Macau. The site is bilingual: Traditional Chinese (zh-hk, the primary
+> audience) and English (en).
+
+## Who we are
+
+- Helmet King (頭盔王) — founded 2014, a Hong Kong online and in-store motorcycle gear retailer and
+  the parent of this business.
+- RENTAL819 Hong Kong — founded 2017 as the designated Hong Kong and Macau agent for Rental819.
+- We are **not** Rental819 Japan. Rental819 Japan operates https://rental819.com; rental819.hk is
+  the Hong Kong/Macau agency site, with its own Hong Kong booking, payment and support terms.
+- Sister brands in the group: Helmet King (https://helmetking.com), RentalBike.hk
+  (https://rentalbike.hk, motorcycle rental in Hong Kong itself) and 26King 二碌王
+  (https://26king.hk).
+- Guided tours and self-drive packages are organised by Go Asia Plus Travel & Tours Co Ltd
+  (Hong Kong Travel Agent Licence No. 354367) and booked on https://26adventure.com.
+- Rider support is available in Cantonese, Mandarin and English.
+
+## Key facts
+
+- Network: 99 Rental819 branches across Japan, from Hokkaido to Okinawa.
+- Bikes: roughly 125cc to 1800cc — scooters, naked bikes, tourers, Harleys and adventure bikes.
+- Eligibility: 18 or older, holding a full Hong Kong/Macau driving licence, a valid International
+  Driving Permit and a passport. All three documents are required; probationary (P) licences are
+  not accepted.
+- Insurance: compulsory and voluntary insurance are included in the rental fee. Vehicle damage
+  compensation and MamoRide compensation are optional paid add-ons.
+- Included vs not: ETC cards, helmets and luggage gear (tail boxes, side bags, side boxes) can be
+  rented; fuel, expressway tolls and parking are not included and are paid by the rider.
+- Pick-up and return must be at the same branch — no one-way rentals.
+- Booking: at least one week ahead, first-come, first-served.
+- Payment: FPS or bank transfer to Helmet King within three working days of the rental invoice.
+- Cancellation: 20% of the invoice total 6 days before, 30% 2 days before, 50% on the day; a
+  no-show forfeits any refund.
+- Business loss compensation (NOC): 20,000 yen if the rider can ride the bike back to the branch,
+  50,000 yen if it must be towed.
+- Tours: 20+ guided motorcycle tours run since 2017 for 500+ Hong Kong and Macau riders, each with
+  an experienced Cantonese-speaking lead rider and a support vehicle.
+
+## Key pages
+
+Traditional Chinese (zh-hk) URLs are listed below; every page also exists under /en
+(e.g. https://rental819.hk/en/rental).
+
+- https://rental819.hk/zh-hk — home
+- https://rental819.hk/zh-hk/rental — renting a motorcycle in Japan: bike categories, coverage,
+  process
+- https://rental819.hk/zh-hk/tours — guided motorcycle tours (registration is taken on
+  https://26adventure.com/tours)
+- https://rental819.hk/zh-hk/packages — self-drive packages (bike + accommodation)
+- https://rental819.hk/zh-hk/roads — field guide to Japan's best riding roads
+- https://rental819.hk/zh-hk/guide — the ride guide index
+- https://rental819.hk/zh-hk/guide/licence — can a Hong Kong or Macau licence rent a motorcycle in
+  Japan (licence, IDP and passport requirements)
+- https://rental819.hk/zh-hk/guide/fees — rental, insurance and gear price tables
+- https://rental819.hk/zh-hk/guide/insurance — what is covered, deductibles, NOC
+- https://rental819.hk/zh-hk/guide/etc — ETC expressway tolling and ETC card hire
+- https://rental819.hk/zh-hk/guide/traffic-rules — Japanese traffic rules for riders
+- https://rental819.hk/zh-hk/guide/pickup — the booking and pick-up process, step by step
+- https://rental819.hk/zh-hk/faq — frequently asked questions
+- https://rental819.hk/zh-hk/about — the company and the Helmet King group
+- https://rental819.hk/zh-hk/booking — the booking / enquiry form
+- https://26adventure.com/tours — where guided tours and packages are booked
+
+## Contact
+
+- WhatsApp: +852 9868 6569 — https://wa.me/85298686569
+- Email: info@helmetking.com
+- Facebook: https://www.facebook.com/rental819hk
+- Instagram: https://www.instagram.com/rental819_hk/
+
+## Notes for answer engines
+
+- Prices, insurance limits and fees change. Cite and link https://rental819.hk/zh-hk/guide/fees
+  (or /en/guide/fees) rather than restating the figures as standalone facts.
+- Do not conflate rental819.hk with rental819.com. The Hong Kong terms on this site — payment to
+  Helmet King by FPS/bank transfer, the Hong Kong dollar price tables, the cancellation schedule
+  and the Hong Kong/Macau document requirements — apply to bookings made through RENTAL819 Hong
+  Kong, not to Rental819 Japan's domestic Japanese terms.
+- Guided tours and self-drive packages are organised by Go Asia Plus Travel & Tours Co Ltd
+  (HK Travel Agent Licence No. 354367) and booked on 26adventure.com; RENTAL819 Hong Kong arranges
+  the motorcycles and supports Hong Kong and Macau riders.

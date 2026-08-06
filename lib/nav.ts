@@ -20,6 +20,7 @@ export function buildNav(d: Dictionary): NavItem[] {
       href: "/guide",
       label: d.nav.guide,
       children: [
+        { href: "/guide/licence", label: d.guideMenu.licence },
         { href: "/guide/plan-trip", label: d.guideMenu.planTrip },
         { href: "/guide/route", label: d.guideMenu.route },
         { href: "/guide/how-many-days", label: d.guideMenu.howManyDays },

@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { pageMeta } from "@/lib/seo";
+import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { faq } from "@/lib/content/faq";
 import { whatsappLink } from "@/lib/site";
-import { faqLd } from "@/lib/jsonld";
+import { breadcrumbLd, faqLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
 import JsonLd from "@/components/JsonLd";
 import { ChevronDown, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/faq"),
-    title: "FAQ",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/faq",
+    isEn ? "Japan Motorcycle Rental FAQ" : "日本租電單車常見問題",
+    isEn
       ? "Common questions about renting a motorcycle in Japan — eligibility, payment, insurance, pick-up and cancellation."
-      : "日本租車常見問題：租車資格、付款、保險、取車還車及取消政策。",
-  };
+      : "日本租電單車常見問題：涵蓋租車資格、國際駕駛執照、預約及付款、車款選擇、費用、保險及意外、取車還車與取消政策，找不到答案可 WhatsApp 香港團隊。",
+  );
 }
 
 export default function FaqPage({ params }: { params: { locale: string } }) {
@@ -29,7 +31,13 @@ export default function FaqPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
-      <JsonLd data={faqLd(groups)} />
+      <JsonLd data={faqLd(groups, locale)} />
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.faq, url: localePath(locale, "/faq") },
+        ])}
+      />
       <PageHero
         image="/images/tours/hokkaido-2026-07-30.jpg"
         eyebrow={dict.nav.faq}
@@ -39,7 +47,12 @@ export default function FaqPage({ params }: { params: { locale: string } }) {
             ? "Everything riders ask before booking. Can't find your answer? WhatsApp our team."
             : "租車前最常見的疑問。找不到答案？歡迎 WhatsApp 我們的團隊。"
         }
-      />
+      >
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.faq }]}
+        />
+      </PageHero>
 
       <section className="container-x py-16 lg:py-20">
         <div className="mx-auto max-w-3xl space-y-12">

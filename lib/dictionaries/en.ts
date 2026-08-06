@@ -19,6 +19,7 @@ const dict: Dictionary = {
     book: "Book Now",
   },
   guideMenu: {
+    licence: "Can I rent with a HK licence?",
     planTrip: "How to plan your trip",
     route: "Planning your route",
     howManyDays: "How many days to ride?",

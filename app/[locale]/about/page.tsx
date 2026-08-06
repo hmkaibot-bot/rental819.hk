@@ -1,22 +1,26 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { pageMeta } from "@/lib/seo";
+import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { aboutContent } from "@/lib/content/about";
 import { site } from "@/lib/site";
+import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
+import JsonLd from "@/components/JsonLd";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/about"),
-    title: isEn ? "About Us" : "關於我們",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/about",
+    isEn ? "About RENTAL819 Hong Kong" : "關於 RENTAL819 香港｜日本電單車租賃港澳代理",
+    isEn
       ? "RENTAL819 Hong Kong — the official HK & Macau agent for Rental819 Japan, part of the Helmet King group."
       : "RENTAL819 香港 — 日本 Rental819 指定港澳代理，隸屬頭盔王集團。",
-  };
+  );
 }
 
 export default function AboutPage({ params }: { params: { locale: string } }) {
@@ -26,7 +30,18 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
-      <PageHero image="/images/about/shop.jpg" eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro} />
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.about, url: localePath(locale, "/about") },
+        ])}
+      />
+      <PageHero image="/images/about/shop.jpg" eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro}>
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.about }]}
+        />
+      </PageHero>
 
       {/* Stats */}
       <section className="border-b border-slate-100 bg-white">

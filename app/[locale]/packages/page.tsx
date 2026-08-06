@@ -1,22 +1,26 @@
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { pageMeta } from "@/lib/seo";
+import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { packages } from "@/lib/content/tours";
 import { site, whatsappLink } from "@/lib/site";
+import { breadcrumbLd, packagesLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
+import JsonLd from "@/components/JsonLd";
 import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/packages"),
-    title: isEn ? "Self-Drive Packages" : "自駕套票",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/packages",
+    isEn ? "Japan Self-Drive Motorcycle Packages" : "日本電單車自駕套票｜租車連住宿",
+    isEn
       ? "Motorcycle rental + accommodation bundles for popular Japan routes, in 3/4/5-day tiers."
-      : "熱門日本路線的租車＋住宿自駕套票，設 3／4／5 日選擇。",
-  };
+      : "日本電單車自駕套票：租車連住宿一次過搞掂，設 3／4／5 日選擇，另附建議路線行程、保險及 ETC 指引，全程有香港團隊跟進，WhatsApp 即可查詢預約。",
+  );
 }
 
 export default function PackagesPage({ params }: { params: { locale: string } }) {
@@ -31,6 +35,13 @@ export default function PackagesPage({ params }: { params: { locale: string } })
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.packages, url: localePath(locale, "/packages") },
+        ])}
+      />
+      <JsonLd data={packagesLd(locale, list)} />
       <PageHero
         image="/images/tours/kyushu-aso-2026-04-30.jpg"
         eyebrow={dict.nav.packages}
@@ -40,7 +51,12 @@ export default function PackagesPage({ params }: { params: { locale: string } })
             ? "Bike and accommodation bundled for popular routes — the easy-value way to go independent, at your own pace."
             : "熱門路線的租車＋住宿套票，最抵、最方便的自由行組合，行程自己話事。"
         }
-      />
+      >
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.packages }]}
+        />
+      </PageHero>
 
       {/* What's included */}
       <section className="container-x py-14">

@@ -18,6 +18,7 @@ export interface Dictionary {
     book: string;
   };
   guideMenu: {
+    licence: string;
     planTrip: string;
     route: string;
     howManyDays: string;

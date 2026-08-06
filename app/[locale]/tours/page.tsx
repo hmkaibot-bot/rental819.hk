@@ -1,24 +1,28 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
-import { tours, type Tour } from "@/lib/content/tours";
+import { tours, providerNote, type Tour } from "@/lib/content/tours";
 import { whatsappLink, site } from "@/lib/site";
+import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
+import JsonLd from "@/components/JsonLd";
 import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/tours"),
-    title: isEn ? "Guided Motorcycle Tours" : "電單車旅行團",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/tours",
+    isEn ? "Guided Japan Motorcycle Tours" : "日本電單車自駕遊旅行團",
+    isEn
       ? "Led group self-drive motorcycle tours across Japan, with Cantonese-speaking guides and full support."
-      : "資深廣東話領隊帶隊、後勤車全程支援的日本電單車自駕遊旅行團。",
-  };
+      : "日本電單車自駕遊旅行團：自 2017 年起已舉辦逾 20 次、逾 500 位港澳團友參與，每團均設資深廣東話領隊及後勤車全程隨團支援，行程輕鬆無憂。",
+  );
 }
 
 function priceLabel(t: Tour, isEn: boolean) {
@@ -91,6 +95,12 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.tours, url: localePath(locale, "/tours") },
+        ])}
+      />
       <PageHero
         image="/images/tours/tohoku-2026-09-20.jpg"
         eyebrow={dict.nav.tours}
@@ -101,15 +111,26 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
             : "自 2017 年起已舉辦逾 20 次旅行團、逾 500 位港澳團友參與。每團均設資深廣東話領隊及後勤車全程隨團支援，讓你無憂享受騎旅。"
         }
       >
-        <a
-          href={whatsappLink()}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn bg-white text-brand-800 hover:bg-brand-50"
-        >
-          <WhatsAppIcon className="h-5 w-5 text-[#25D366]" />
-          {dict.common.whatsapp}
-        </a>
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.tours }]}
+        />
+        {/* Who actually organises and sells these tours — stated up front, in
+            the same view as the prices on the cards below. */}
+        <p className="mt-6 max-w-2xl text-sm leading-6 text-brand-100">
+          {providerNote[locale]}
+        </p>
+        <div className="mt-6">
+          <a
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn bg-white text-brand-800 hover:bg-brand-50"
+          >
+            <WhatsAppIcon className="h-5 w-5 text-[#25D366]" />
+            {dict.common.whatsapp}
+          </a>
+        </div>
       </PageHero>
 
       <section className="container-x py-16 lg:py-20">
