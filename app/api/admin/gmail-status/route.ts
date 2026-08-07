@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/admin/auth";
-import { isGmailConfigured, gmailAccount } from "@/lib/gmail";
+import { isGmailConfigured, gmailAccount, senderHeader } from "@/lib/gmail";
+import { isEmailAddress } from "@/lib/email-address";
+import { JP_PARTNER_EMAIL, INTERNAL_COPY } from "@/lib/reservations/recipients";
 
 export const runtime = "nodejs";
 
@@ -32,9 +34,8 @@ export async function GET() {
     const account = info.account.trim().toLowerCase();
     const match = info.sendAs.find((s) => s.address.toLowerCase() === wanted);
 
-    // A value that is not an address at all is worth calling out on its own —
-    // it lands in the From: header verbatim and breaks the send.
-    const looksLikeAddress = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(wanted);
+    // A value that is not an address at all is worth calling out on its own.
+    const looksLikeAddress = isEmailAddress(configured);
 
     let senderUsable: boolean | null;
     let note: string | null = null;
@@ -43,8 +44,12 @@ export async function GET() {
       senderUsable = true;
       note = `GMAIL_SENDER is unset — mail goes out as ${info.account}.`;
     } else if (!looksLikeAddress) {
-      senderUsable = false;
-      note = "GMAIL_SENDER is not an email address. Set it to \"Name <addr>\" or unset it.";
+      // Sending still works: senderHeader() drops the bad value, so the mail
+      // goes out as the authorised account. Worth fixing for the display name.
+      senderUsable = true;
+      note =
+        `GMAIL_SENDER is not an email address, so it is ignored and mail goes out as ${info.account}. ` +
+        'Set it to "Name <addr>" to control the display name, or remove it.';
     } else if (wanted === account) {
       // The account's own address never needs a send-as alias.
       senderUsable = true;
@@ -63,10 +68,14 @@ export async function GET() {
       sendAsReadable: info.sendAsReadable,
       // Never echo the raw value — a misconfigured GMAIL_SENDER has held a
       // credential before now, and this response gets pasted around.
-      configuredSender: wanted && looksLikeAddress ? configured : wanted ? "(set, but not an email address)" : null,
-      effectiveSender: senderUsable && wanted && looksLikeAddress ? wanted : info.account,
+      configuredSender: looksLikeAddress ? configured : wanted ? "(set, but not an email address)" : null,
+      // What the From: header will really say — senderHeader() applies exactly
+      // this rule, so the two can never disagree.
+      effectiveSender: senderHeader() ?? info.account,
       senderUsable,
       note,
+      jpPartnerEmail: JP_PARTNER_EMAIL,
+      internalCopy: INTERNAL_COPY,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "status_failed";
