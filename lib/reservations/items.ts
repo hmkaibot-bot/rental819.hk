@@ -97,6 +97,21 @@ export const RT819_GROUP_LABELS: Record<Rt819Item["group"], string> = {
   other: "其他 Other",
 };
 
+/** The same groups for the admin's Japanese mode. */
+export const RT819_GROUP_LABELS_JA: Record<Rt819Item["group"], string> = {
+  bike: "車両レンタル Bike rent",
+  insurance: "車両保険 Insurance",
+  mamoride: "MamoRide 補償",
+  helmet: "ヘルメット Helmet",
+  case: "ケース・バッグ Case & bag",
+  hk: "香港側サービス HK add-on",
+  other: "その他 Other",
+};
+
+export function rt819GroupLabels(lang: "zh" | "ja"): Record<Rt819Item["group"], string> {
+  return lang === "ja" ? RT819_GROUP_LABELS_JA : RT819_GROUP_LABELS;
+}
+
 /** Full invoice-line label as shown on the SI template: "<EN> <ZH>". */
 export function rt819Label(item: Rt819Item): string {
   return item.desc_zh ? `${item.desc_en} ${item.desc_zh}` : item.desc_en;

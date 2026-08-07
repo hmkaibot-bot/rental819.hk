@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getReservation } from "@/lib/reservations/store";
+import { getAdminDict } from "@/lib/admin/lang";
 import PrintButton from "@/components/admin/PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,9 @@ const CLAUSES: { n: string; title: string; body: string }[] = [
 export default async function CardoTerms({ params }: { params: { id: string } }) {
   const r = await getReservation(params.id);
   if (!r) notFound();
+  // Only the chrome follows the admin language — the terms themselves are the
+  // Chinese contract the Hong Kong customer signs, so they are never translated.
+  const t = getAdminDict();
 
   const from = r.pickup_date ?? "____年____月____日";
   const to = r.return_date ?? "____年____月____日";
@@ -34,9 +38,9 @@ export default async function CardoTerms({ params }: { params: { id: string } })
     <div>
       <div className="no-print mb-4 flex items-center justify-between">
         <Link href={`/admin/reservations/${r.id}`} className="text-sm text-brand-700 hover:underline">
-          ← 返回預約 {r.booking_ref}
+          {t.cardo.backTo} {r.booking_ref}
         </Link>
-        <PrintButton />
+        <PrintButton label={t.common.print} />
       </div>
 
       <div className="print-area mx-auto max-w-[820px] bg-white p-8 text-ink shadow-card print:max-w-none print:p-0 print:shadow-none">

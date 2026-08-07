@@ -38,15 +38,15 @@ export interface CostItems {
 }
 
 /** Ordered cost lines for the 開單 form, in the master Excel's column order. */
-export const COST_ITEM_LABELS: { key: keyof CostItems; zh: string }[] = [
-  { key: "base_rental", zh: "基本車租" },
-  { key: "insurance", zh: "保險" },
-  { key: "mamoride", zh: "MAMO RIDE 保險" },
-  { key: "helmet", zh: "頭盔" },
-  { key: "topcase", zh: "尾箱" },
-  { key: "sidebag", zh: "側袋" },
-  { key: "pannier", zh: "側箱" },
-  { key: "etc", zh: "ETC" },
+export const COST_ITEM_LABELS: { key: keyof CostItems; zh: string; ja: string }[] = [
+  { key: "base_rental", zh: "基本車租", ja: "基本車両料金" },
+  { key: "insurance", zh: "保險", ja: "保険" },
+  { key: "mamoride", zh: "MAMO RIDE 保險", ja: "MAMO RIDE 保険" },
+  { key: "helmet", zh: "頭盔", ja: "ヘルメット" },
+  { key: "topcase", zh: "尾箱", ja: "トップケース" },
+  { key: "sidebag", zh: "側袋", ja: "サイドバッグ" },
+  { key: "pannier", zh: "側箱", ja: "サイドケース" },
+  { key: "etc", zh: "ETC", ja: "ETC" },
 ];
 
 /** Japan rebates 10% of the base bike rental. */
@@ -130,23 +130,25 @@ export const STATUS_FLOW: {
   key: ReservationStatus;
   zh: string;
   en: string;
+  ja: string;
   tone: string;
 }[] = [
-  { key: "new", zh: "未處理", en: "New", tone: "bg-slate-100 text-slate-700" },
-  { key: "notified_jp", zh: "已通知日本", en: "Notified Japan", tone: "bg-amber-100 text-amber-800" },
-  { key: "awaiting_si", zh: "待SI", en: "Awaiting SI", tone: "bg-indigo-100 text-indigo-800" },
-  { key: "awaiting_payment", zh: "待付款", en: "Awaiting payment", tone: "bg-orange-100 text-orange-800" },
-  { key: "confirmed", zh: "已確認預定", en: "Confirmed", tone: "bg-emerald-100 text-emerald-800" },
+  { key: "new", zh: "未處理", en: "New", ja: "未対応", tone: "bg-slate-100 text-slate-700" },
+  { key: "notified_jp", zh: "已通知日本", en: "Notified Japan", ja: "日本へ連絡済", tone: "bg-amber-100 text-amber-800" },
+  { key: "awaiting_si", zh: "待SI", en: "Awaiting SI", ja: "SI 待ち", tone: "bg-indigo-100 text-indigo-800" },
+  { key: "awaiting_payment", zh: "待付款", en: "Awaiting payment", ja: "入金待ち", tone: "bg-orange-100 text-orange-800" },
+  { key: "confirmed", zh: "已確認預定", en: "Confirmed", ja: "予約確定", tone: "bg-emerald-100 text-emerald-800" },
 ];
 
 export const TERMINAL_STATUS: {
   key: ReservationStatus;
   zh: string;
   en: string;
+  ja: string;
   tone: string;
 }[] = [
-  { key: "change_pending", zh: "變更溝通中", en: "Change pending", tone: "bg-violet-100 text-violet-800" },
-  { key: "cancelled", zh: "顧客無反應/已取消", en: "No response / cancelled", tone: "bg-rose-100 text-rose-700" },
+  { key: "change_pending", zh: "變更溝通中", en: "Change pending", ja: "変更調整中", tone: "bg-violet-100 text-violet-800" },
+  { key: "cancelled", zh: "顧客無反應/已取消", en: "No response / cancelled", ja: "連絡なし／キャンセル", tone: "bg-rose-100 text-rose-700" },
 ];
 
 const ALL = [...STATUS_FLOW, ...TERMINAL_STATUS];
@@ -155,18 +157,25 @@ export function statusMeta(status: ReservationStatus) {
   return ALL.find((s) => s.key === status) ?? STATUS_FLOW[0];
 }
 
-/** Addon labels for display. */
-export const ADDON_LABELS: { key: keyof ReservationAddons; zh: string }[] = [
-  { key: "cardo", zh: "CARDO 對講機" },
-  { key: "topcase", zh: "尾箱" },
-  { key: "sidebag", zh: "側袋" },
-  { key: "pannier", zh: "側箱" },
-  { key: "full_face", zh: "全盔" },
-  { key: "open_face", zh: "開面盔" },
-  { key: "mamoride", zh: "MamoRide 保險" },
-  { key: "etc", zh: "ETC" },
-  { key: "shuttle_bus", zh: "穿梭巴士" },
-  { key: "luggage_storage", zh: "行李寄存" },
+/** Addon labels for display. `ja` is used by the admin's Japanese mode. */
+export const ADDON_LABELS: {
+  key: keyof ReservationAddons;
+  zh: string;
+  en: string;
+  ja: string;
+}[] = [
+  { key: "cardo", zh: "CARDO 對講機", en: "CARDO intercom", ja: "CARDO インカム" },
+  { key: "topcase", zh: "尾箱", en: "Top case", ja: "トップケース" },
+  { key: "sidebag", zh: "側袋", en: "Side bag", ja: "サイドバッグ" },
+  { key: "pannier", zh: "側箱", en: "Pannier", ja: "パニアケース" },
+  // Short forms matching the master Excel's own column headers, so the label is
+  // the same here and in the reservation table.
+  { key: "full_face", zh: "全盔", en: "Full-face helmet", ja: "フルフェイス" },
+  { key: "open_face", zh: "開面盔", en: "Open-face helmet", ja: "オープンフェイス" },
+  { key: "mamoride", zh: "MamoRide 保險", en: "MamoRide insurance", ja: "MamoRide 保険" },
+  { key: "etc", zh: "ETC", en: "ETC card", ja: "ETC カード" },
+  { key: "shuttle_bus", zh: "穿梭巴士", en: "Shuttle bus", ja: "送迎バス" },
+  { key: "luggage_storage", zh: "行李寄存", en: "Luggage storage", ja: "荷物預かり" },
 ];
 
 /**

@@ -11,15 +11,17 @@ export function StatusFilter({
   value,
   options,
   keep,
+  ariaLabel,
 }: {
   value: string;
   options: { key: string; label: string; count: number }[];
   keep: { tab?: string; sort?: string; dir?: string; q?: string };
+  ariaLabel: string;
 }) {
   const router = useRouter();
   return (
     <select
-      aria-label="篩選狀態"
+      aria-label={ariaLabel}
       value={value}
       onChange={(e) => {
         const sp = new URLSearchParams();

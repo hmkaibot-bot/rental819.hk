@@ -2,14 +2,18 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
+import type { AdminDict } from "@/lib/admin/i18n";
 import { recordSupplierPayment } from "./actions";
+
+type AcctDict = AdminDict["accounting"];
 
 export type AcctRow = {
   id: string;
   booking_ref: string | null;
   name: string;
   si_number: string | null;
-  status_zh: string;
+  /** Status name already resolved to the operator's language. */
+  status_label: string;
   status_tone: string;
   pickup_date: string | null;
   return_date: string | null;
@@ -42,29 +46,29 @@ type ColKey =
 
 type Col = {
   key: ColKey;
-  label: string;
+  label: (t: AcctDict) => string;
   align?: "right";
   numeric?: boolean;
   filter: "text" | "select" | "none";
   sortVal: (r: AcctRow) => string | number;
-  text: (r: AcctRow) => string; // used for text filtering
+  text: (r: AcctRow, t: AcctDict) => string; // used for text filtering
 };
 
 const COLS: Col[] = [
-  { key: "booking_ref", label: "預約", filter: "text", sortVal: (r) => r.booking_ref ?? "", text: (r) => r.booking_ref ?? "" },
-  { key: "name", label: "客人", filter: "text", sortVal: (r) => r.name, text: (r) => r.name },
-  { key: "si", label: "單號 SI", filter: "text", sortVal: (r) => r.si_number ?? "", text: (r) => r.si_number ?? "" },
-  { key: "pickup", label: "取車日期", filter: "text", sortVal: (r) => r.pickup_date ?? "", text: (r) => r.pickup_date ?? "" },
-  { key: "return", label: "還車日期", filter: "text", sortVal: (r) => r.return_date ?? "", text: (r) => r.return_date ?? "" },
-  { key: "revenue", label: "收入", align: "right", numeric: true, filter: "text", sortVal: (r) => r.revenue, text: (r) => fmt(r.revenue) },
-  { key: "rebate_jpy", label: "回贈 (¥)", align: "right", numeric: true, filter: "text", sortVal: (r) => r.rebate_jpy, text: (r) => (r.rebate_jpy ? Number(r.rebate_jpy).toLocaleString("en-US") : "") },
-  { key: "cost_jpy", label: "成本 (¥)", align: "right", numeric: true, filter: "text", sortVal: (r) => r.cost_jpy ?? 0, text: (r) => (r.cost_jpy ? Number(r.cost_jpy).toLocaleString("en-US") : "") },
-  { key: "cost_hkd", label: "成本 (HK$)", align: "right", numeric: true, filter: "text", sortVal: (r) => r.cost_hkd, text: (r) => fmt(r.cost_hkd) },
-  { key: "profit", label: "利潤", align: "right", numeric: true, filter: "text", sortVal: (r) => profitOf(r), text: (r) => fmt(profitOf(r)) },
-  { key: "supplier", label: "供應商付款", filter: "select", sortVal: (r) => (r.paid_to_supplier ? 1 : 0), text: (r) => (r.paid_to_supplier ? `已付 ${r.supplier_paid_date ?? ""}` : "未付") },
+  { key: "booking_ref", label: (t) => t.cols.booking, filter: "text", sortVal: (r) => r.booking_ref ?? "", text: (r) => r.booking_ref ?? "" },
+  { key: "name", label: (t) => t.cols.customer, filter: "text", sortVal: (r) => r.name, text: (r) => r.name },
+  { key: "si", label: (t) => t.cols.si, filter: "text", sortVal: (r) => r.si_number ?? "", text: (r) => r.si_number ?? "" },
+  { key: "pickup", label: (t) => t.cols.pickup, filter: "text", sortVal: (r) => r.pickup_date ?? "", text: (r) => r.pickup_date ?? "" },
+  { key: "return", label: (t) => t.cols.return, filter: "text", sortVal: (r) => r.return_date ?? "", text: (r) => r.return_date ?? "" },
+  { key: "revenue", label: (t) => t.cols.revenue, align: "right", numeric: true, filter: "text", sortVal: (r) => r.revenue, text: (r) => fmt(r.revenue) },
+  { key: "rebate_jpy", label: (t) => t.cols.rebate, align: "right", numeric: true, filter: "text", sortVal: (r) => r.rebate_jpy, text: (r) => (r.rebate_jpy ? Number(r.rebate_jpy).toLocaleString("en-US") : "") },
+  { key: "cost_jpy", label: (t) => t.cols.costJpy, align: "right", numeric: true, filter: "text", sortVal: (r) => r.cost_jpy ?? 0, text: (r) => (r.cost_jpy ? Number(r.cost_jpy).toLocaleString("en-US") : "") },
+  { key: "cost_hkd", label: (t) => t.cols.costHkd, align: "right", numeric: true, filter: "text", sortVal: (r) => r.cost_hkd, text: (r) => fmt(r.cost_hkd) },
+  { key: "profit", label: (t) => t.cols.profit, align: "right", numeric: true, filter: "text", sortVal: (r) => profitOf(r), text: (r) => fmt(profitOf(r)) },
+  { key: "supplier", label: (t) => t.cols.supplier, filter: "select", sortVal: (r) => (r.paid_to_supplier ? 1 : 0), text: (r, t) => (r.paid_to_supplier ? `${t.paid} ${r.supplier_paid_date ?? ""}` : t.unpaid) },
 ];
 
-export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
+export default function AccountingTable({ rows, t }: { rows: AcctRow[]; t: AcctDict }) {
   const [year, setYear] = useState("all");
   const [month, setMonth] = useState("all");
   const [colFilter, setColFilter] = useState<Record<string, string>>({});
@@ -90,7 +94,7 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
     for (const c of COLS) {
       if (c.filter !== "text") continue;
       const q = (colFilter[c.key] ?? "").trim().toLowerCase();
-      if (q) out = out.filter((r) => c.text(r).toLowerCase().includes(q));
+      if (q) out = out.filter((r) => c.text(r, t).toLowerCase().includes(q));
     }
     if (sortKey) {
       const col = COLS.find((c) => c.key === sortKey)!;
@@ -103,7 +107,7 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
       });
     }
     return out;
-  }, [rows, year, month, supplierFilter, colFilter, sortKey, sortDir]);
+  }, [rows, year, month, supplierFilter, colFilter, sortKey, sortDir, t]);
 
   const totals = useMemo(
     () =>
@@ -172,10 +176,10 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
       {/* Summary cards (reflect the current filter) */}
       <div className="mb-5 grid gap-4 sm:grid-cols-4">
         {[
-          ["總收入 Revenue", totals.rev, "text-ink"],
-          ["總成本 Cost", totals.cost, "text-ink"],
-          ["總利潤 Profit", totals.profit, "text-emerald-700"],
-          ["未付供應商 Outstanding", totals.outstanding, "text-accent-700"],
+          [t.cardRevenue, totals.rev, "text-ink"],
+          [t.cardCost, totals.cost, "text-ink"],
+          [t.cardProfit, totals.profit, "text-emerald-700"],
+          [t.cardOutstanding, totals.outstanding, "text-accent-700"],
         ].map(([label, val, tone]) => (
           <div key={label as string} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
             <div className="text-xs text-ink-muted">{label as string}</div>
@@ -186,22 +190,22 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
 
       {/* Period statistics toolbar */}
       <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-card">
-        <span className="text-sm font-medium text-ink-soft">統計期間（依取車日期）</span>
+        <span className="text-sm font-medium text-ink-soft">{t.period}</span>
         <select value={year} onChange={(e) => setYear(e.target.value)} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm">
-          <option value="all">全部年份</option>
+          <option value="all">{t.allYears}</option>
           {years.map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}
         </select>
         <select value={month} onChange={(e) => setMonth(e.target.value)} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm">
-          <option value="all">全部月份</option>
+          <option value="all">{t.allMonths}</option>
           {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((m) => (
-            <option key={m} value={m}>{Number(m)} 月</option>
+            <option key={m} value={m}>{Number(m)}{t.monthSuffix}</option>
           ))}
         </select>
-        <span className="text-sm text-ink-muted">顯示 {filtered.length} 張</span>
+        <span className="text-sm text-ink-muted">{t.showing.pre}{filtered.length}{t.showing.post}</span>
         <button type="button" onClick={resetFilters} className="ml-auto text-sm text-brand-700 hover:underline">
-          重設篩選
+          {t.resetFilters}
         </button>
       </div>
 
@@ -210,12 +214,12 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
           <thead className="border-b border-slate-200 bg-slate-50">
             <tr>
               <th className={th}>
-                <input type="checkbox" checked={allSelected} onChange={toggleAll} className="h-4 w-4 rounded border-slate-300" aria-label="全選" />
+                <input type="checkbox" checked={allSelected} onChange={toggleAll} className="h-4 w-4 rounded border-slate-300" aria-label={t.selectAllAria} />
               </th>
               {COLS.map((c) => (
                 <th key={c.key} className={`${th} ${c.align === "right" ? "text-right" : ""}`}>
                   <button type="button" onClick={() => clickSort(c.key)} className={`inline-flex items-center gap-1 hover:text-ink ${active(c.key) ? "text-ink" : ""}`}>
-                    {c.label}
+                    {c.label(t)}
                     <span className="text-[10px] leading-none">{active(c.key) ? (sortDir === "asc" ? "▲" : "▼") : "↕"}</span>
                   </button>
                 </th>
@@ -230,7 +234,7 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
                     <input
                       value={colFilter[c.key] ?? ""}
                       onChange={(e) => setColFilter((p) => ({ ...p, [c.key]: e.target.value }))}
-                      placeholder="篩選…"
+                      placeholder={t.filterPlaceholder}
                       className={filterInput}
                     />
                   )}
@@ -240,9 +244,9 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
                       onChange={(e) => setSupplierFilter(e.target.value as "all" | "paid" | "unpaid")}
                       className={filterInput}
                     >
-                      <option value="all">全部</option>
-                      <option value="paid">已付</option>
-                      <option value="unpaid">未付</option>
+                      <option value="all">{t.filterAll}</option>
+                      <option value="paid">{t.paid}</option>
+                      <option value="unpaid">{t.unpaid}</option>
                     </select>
                   )}
                 </th>
@@ -261,7 +265,7 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
                     <Link href={`/admin/reservations/${r.id}`} className="font-medium text-brand-700 hover:underline">
                       {r.booking_ref ?? "—"}
                     </Link>
-                    <div className={`text-xs ${r.status_tone.split(" ").find((c) => c.startsWith("text-")) ?? "text-ink-muted"}`}>{r.status_zh}</div>
+                    <div className={`text-xs ${r.status_tone.split(" ").find((c) => c.startsWith("text-")) ?? "text-ink-muted"}`}>{r.status_label}</div>
                   </td>
                   <td className={td}>{r.name}</td>
                   <td className={td}>{r.si_number ?? "—"}</td>
@@ -276,9 +280,9 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
                   <td className={`${td} text-right font-medium ${profit >= 0 ? "text-emerald-700" : "text-rose-600"}`}>{fmt(profit)}</td>
                   <td className={td}>
                     {r.paid_to_supplier ? (
-                      <span className="text-xs text-emerald-700">已付 {r.supplier_paid_date ?? ""}</span>
+                      <span className="text-xs text-emerald-700">{t.paid} {r.supplier_paid_date ?? ""}</span>
                     ) : (
-                      <span className="text-xs text-ink-muted">未付</span>
+                      <span className="text-xs text-ink-muted">{t.unpaid}</span>
                     )}
                   </td>
                 </tr>
@@ -287,7 +291,7 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={COLS.length + 1} className="px-4 py-8 text-center text-sm text-ink-muted">
-                  未有符合的預約。
+                  {t.empty}
                 </td>
               </tr>
             )}
@@ -297,7 +301,7 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
             <tfoot className="border-t-2 border-slate-300 bg-slate-50 font-bold">
               <tr>
                 <td className={`${td} text-xs uppercase tracking-wide text-ink-muted`} colSpan={6}>
-                  總計（{filtered.length} 張）
+                  {t.totalRow.pre}{filtered.length}{t.totalRow.post}
                 </td>
                 <td className={`${td} text-right`}>{fmt(totals.rev)}</td>
                 <td className={`${td} text-right text-emerald-700`}>
@@ -311,7 +315,7 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
                   {fmt(totals.profit)}
                 </td>
                 <td className={`${td} text-xs font-medium text-accent-700`}>
-                  未付 {fmt(totals.outstanding)}
+                  {t.unpaid} {fmt(totals.outstanding)}
                 </td>
               </tr>
             </tfoot>
@@ -322,17 +326,17 @@ export default function AccountingTable({ rows }: { rows: AcctRow[] }) {
       {/* Batch supplier-payment bar */}
       <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
         <span className="text-sm font-medium text-ink-soft">
-          月結：已選 <span className="font-bold text-brand-700">{selected.size}</span> 張
+          {t.batch.pre} <span className="font-bold text-brand-700">{selected.size}</span> {t.batch.post}
         </span>
-        <label className="text-sm text-ink-soft">向供應商付款日期</label>
+        <label className="text-sm text-ink-soft">{t.supplierPayDate}</label>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm" />
         <button type="button" disabled={selected.size === 0 || pending} onClick={() => submit(true)} className="btn-primary text-sm disabled:opacity-50">
-          標記已付款
+          {t.markPaid}
         </button>
         <button type="button" disabled={selected.size === 0 || pending} onClick={() => submit(false)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-ink-soft hover:bg-slate-50 disabled:opacity-50">
-          標記未付款
+          {t.markUnpaid}
         </button>
-        {pending && <span className="text-xs text-ink-muted">更新中…</span>}
+        {pending && <span className="text-xs text-ink-muted">{t.updating}</span>}
       </div>
     </div>
   );

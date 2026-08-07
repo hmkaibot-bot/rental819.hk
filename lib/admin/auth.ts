@@ -40,9 +40,26 @@ export function sessionCookie() {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
-    path: "/admin",
+    // Site-wide, not "/admin": the admin's own API routes live under
+    // /api/admin, which is not under /admin, so a cookie scoped to /admin is
+    // never sent to them and every isAuthed() check there fails with 401.
+    path: "/",
     maxAge: 60 * 60 * 12, // 12h
   };
 }
 
-export const CLEAR_COOKIE = { name: COOKIE, value: "", path: "/admin", maxAge: 0 };
+/**
+ * Logout has to clear both paths: sessions issued before the cookie moved to
+ * "/" still carry the old /admin-scoped one, and a cookie left at /admin would
+ * keep authenticating the admin pages after logging out.
+ *
+ * These are raw Set-Cookie strings rather than two `res.cookies.set()` calls,
+ * because ResponseCookies keys by name — setting the same name twice replaces
+ * the first entry instead of emitting both headers.
+ */
+export function clearCookieHeaders(): string[] {
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return ["/", "/admin"].map(
+    (path) => `${COOKIE}=; Path=${path}; Max-Age=0; HttpOnly; SameSite=Lax${secure}`,
+  );
+}

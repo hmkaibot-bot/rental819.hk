@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { RT819_GROUP_LABELS, type Rt819Item } from "@/lib/reservations/items";
+import type { AdminDict } from "@/lib/admin/i18n";
 import { saveFeeItems } from "@/app/admin/(app)/items/actions";
 
 export interface FeeItemRow {
@@ -29,7 +30,15 @@ type Draft = Record<
   { unit_price: number; cost_hkd: number; yen_cost: number }
 >;
 
-export default function FeeItemsEditor({ items }: { items: FeeItemRow[] }) {
+export default function FeeItemsEditor({
+  items,
+  t,
+  groupLabels = RT819_GROUP_LABELS,
+}: {
+  items: FeeItemRow[];
+  t: AdminDict["items"];
+  groupLabels?: Record<Rt819Item["group"], string>;
+}) {
   const [draft, setDraft] = useState<Draft>(() =>
     Object.fromEntries(
       items.map((it) => [
@@ -88,16 +97,16 @@ export default function FeeItemsEditor({ items }: { items: FeeItemRow[] }) {
             className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card"
           >
             <div className="border-b border-slate-100 bg-slate-50 px-4 py-2 text-sm font-semibold text-ink-soft">
-              {RT819_GROUP_LABELS[g]}
+              {groupLabels[g]}
             </div>
             <table className="w-full min-w-[720px] border-collapse">
               <thead>
                 <tr className="border-b border-slate-100">
-                  <th className={th}>項目 Item</th>
-                  <th className={`${th} text-right`}>售價 HK$</th>
-                  <th className={`${th} text-right`}>成本 HK$</th>
-                  <th className={`${th} text-right`}>成本 ¥</th>
-                  <th className={`${th} text-right`}>毛利 Margin</th>
+                  <th className={th}>{t.colItem}</th>
+                  <th className={`${th} text-right`}>{t.colPrice}</th>
+                  <th className={`${th} text-right`}>{t.colCost}</th>
+                  <th className={`${th} text-right`}>{t.colYen}</th>
+                  <th className={`${th} text-right`}>{t.colMargin}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -171,16 +180,14 @@ export default function FeeItemsEditor({ items }: { items: FeeItemRow[] }) {
       {/* Sticky save bar */}
       <div className="sticky bottom-4 mt-6 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-card backdrop-blur">
         <span className="text-sm text-ink-muted">
-          {dirty.length
-            ? `${dirty.length} 個項目已修改`
-            : "改動售價 / 成本後儲存，會即時套用到之後的發票"}
+          {dirty.length ? `${t.dirty.pre}${dirty.length}${t.dirty.post}` : t.hint}
         </span>
         <button
           onClick={save}
           disabled={pending || !dirty.length}
           className="btn-primary text-sm disabled:opacity-50"
         >
-          {pending ? "儲存中…" : saved ? "已儲存 ✓" : "儲存變更"}
+          {pending ? t.saving : saved ? t.savedOk : t.saveChanges}
         </button>
       </div>
     </div>

@@ -1,12 +1,12 @@
 import "server-only";
 
 /**
- * Minimal Gmail API integration (no SDK) to create a DRAFT in the user's
- * mailbox — the user then reviews and sends it themselves ("用家控制發送").
+ * Minimal Gmail API integration (no SDK) for sending from the company mailbox.
  *
  * Requires a one-time OAuth setup (see README / .env.example):
  *   GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_SENDER
- * Scope needed: https://www.googleapis.com/auth/gmail.compose
+ * Scope needed: https://www.googleapis.com/auth/gmail.compose (which also
+ * grants send).
  */
 export function isGmailConfigured(): boolean {
   return Boolean(
@@ -46,73 +46,54 @@ function encodeHeader(value: string): string {
   return `=?UTF-8?B?${Buffer.from(value, "utf8").toString("base64")}?=`;
 }
 
-function buildMime(
-  to: string,
-  subject: string,
-  body: string,
-  from?: string,
-  html?: string,
-): string {
-  const contentType = html ? 'text/html; charset="UTF-8"' : 'text/plain; charset="UTF-8"';
+export interface GmailMessage {
+  to: string;
+  subject: string;
+  body: string;
+  html?: string;
+  cc?: string[];
+  /** Blind copies — never revealed to the recipient in `to`. */
+  bcc?: string[];
+}
+
+function addressList(values?: string[]): string | null {
+  const list = (values ?? []).map((v) => v.trim()).filter(Boolean);
+  return list.length ? list.join(", ") : null;
+}
+
+function buildMime(msg: GmailMessage, from?: string): string {
+  const contentType = msg.html
+    ? 'text/html; charset="UTF-8"'
+    : 'text/plain; charset="UTF-8"';
+  const cc = addressList(msg.cc);
+  const bcc = addressList(msg.bcc);
   const headers = [
     from ? `From: ${from}` : null,
-    to ? `To: ${to}` : null,
-    `Subject: ${encodeHeader(subject)}`,
+    msg.to ? `To: ${msg.to}` : null,
+    cc ? `Cc: ${cc}` : null,
+    // Gmail strips Bcc from the delivered copy but still delivers to it, so the
+    // recipients stay hidden from everyone in To/Cc.
+    bcc ? `Bcc: ${bcc}` : null,
+    `Subject: ${encodeHeader(msg.subject)}`,
     "MIME-Version: 1.0",
     `Content-Type: ${contentType}`,
     "Content-Transfer-Encoding: base64",
   ]
     .filter(Boolean)
     .join("\r\n");
-  const encodedBody = Buffer.from(html ?? body, "utf8").toString("base64");
+  const encodedBody = Buffer.from(msg.html ?? msg.body, "utf8").toString("base64");
   return `${headers}\r\n\r\n${encodedBody}`;
 }
 
-/** Create a Gmail draft; returns the draft id. Pass `html` for an HTML email. */
-export async function createGmailDraft(opts: {
-  to: string;
-  subject: string;
-  body: string;
-  html?: string;
-}): Promise<{ draftId: string }> {
-  const token = await accessToken();
-  const raw = base64url(
-    buildMime(opts.to, opts.subject, opts.body, process.env.GMAIL_SENDER, opts.html),
-  );
-  const res = await fetch(
-    "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message: { raw } }),
-    },
-  );
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`Gmail draft error: ${res.status} ${t.slice(0, 200)}`);
-  }
-  const json = (await res.json()) as { id?: string };
-  return { draftId: json.id ?? "" };
-}
-
 /**
- * Send an email directly (not a draft). The gmail.compose scope also grants
- * send, so this reuses the same OAuth credentials. Used for internal
- * notifications (e.g. a new-booking alert to the Slack channel address).
+ * Send an email. The gmail.compose scope also grants send, so this reuses the
+ * same OAuth credentials. Used for the JP reservation and customer confirmation
+ * mails, and for internal notifications (e.g. the new-booking alert to the
+ * Slack channel address).
  */
-export async function sendGmailMessage(opts: {
-  to: string;
-  subject: string;
-  body: string;
-  html?: string;
-}): Promise<{ id: string }> {
+export async function sendGmailMessage(opts: GmailMessage): Promise<{ id: string }> {
   const token = await accessToken();
-  const raw = base64url(
-    buildMime(opts.to, opts.subject, opts.body, process.env.GMAIL_SENDER, opts.html),
-  );
+  const raw = base64url(buildMime(opts, process.env.GMAIL_SENDER));
   const res = await fetch(
     "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
     {
@@ -130,4 +111,60 @@ export async function sendGmailMessage(opts: {
   }
   const json = (await res.json()) as { id?: string };
   return { id: json.id ?? "" };
+}
+
+export interface GmailAccountInfo {
+  /** The mailbox the refresh token belongs to. */
+  account: string;
+  /** Addresses this account may put in From:, and whether each is verified. */
+  sendAs: { address: string; verified: boolean; isDefault: boolean }[];
+}
+
+/**
+ * Which mailbox are we actually connected to, and what may it send as? Used by
+ * the /api/admin/gmail-status check — `gmail.compose` covers both endpoints, so
+ * no extra scope is needed.
+ */
+export async function gmailAccount(): Promise<GmailAccountInfo> {
+  const token = await accessToken();
+  const auth = { Authorization: `Bearer ${token}` };
+
+  const profileRes = await fetch(
+    "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+    { headers: auth },
+  );
+  if (!profileRes.ok) {
+    const t = await profileRes.text();
+    throw new Error(`Gmail profile error: ${profileRes.status} ${t.slice(0, 200)}`);
+  }
+  const profile = (await profileRes.json()) as { emailAddress?: string };
+
+  const sendAsRes = await fetch(
+    "https://gmail.googleapis.com/gmail/v1/users/me/settings/sendAs",
+    { headers: auth },
+  );
+  // The alias list needs gmail.settings.basic; without it we still report the
+  // account rather than failing the whole check.
+  const sendAs = sendAsRes.ok
+    ? (
+        (await sendAsRes.json()) as {
+          sendAs?: {
+            sendAsEmail?: string;
+            verificationStatus?: string;
+            isPrimary?: boolean;
+            isDefault?: boolean;
+          }[];
+        }
+      ).sendAs ?? []
+    : [];
+
+  return {
+    account: profile.emailAddress ?? "",
+    sendAs: sendAs.map((s) => ({
+      address: s.sendAsEmail ?? "",
+      // The primary address needs no verification; aliases must be "accepted".
+      verified: Boolean(s.isPrimary) || s.verificationStatus === "accepted",
+      isDefault: Boolean(s.isDefault),
+    })),
+  };
 }

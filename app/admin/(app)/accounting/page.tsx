@@ -2,6 +2,8 @@ import Link from "next/link";
 import { listReservations } from "@/lib/reservations/store";
 import { invoiceTotal } from "@/lib/reservations/invoice";
 import { RT819_EXCHANGE_RATE } from "@/lib/reservations/items";
+import { getAdminLang } from "@/lib/admin/lang";
+import { adminDict } from "@/lib/admin/i18n";
 import { statusMeta, type Reservation } from "@/lib/reservations/types";
 import AccountingTable, { type AcctRow } from "./AccountingTable";
 
@@ -42,6 +44,8 @@ function netCostHkd(r: Reservation) {
 
 export default async function AccountingPage() {
   const all = await listReservations();
+  const lang = getAdminLang();
+  const t = adminDict(lang);
   // A booking counts toward accounting once it is billed — an in-app pipeline
   // status, an SI number (imported historical bookings), or an in-app invoice —
   // and is never cancelled / no-response.
@@ -60,7 +64,7 @@ export default async function AccountingPage() {
         booking_ref: r.booking_ref,
         name: r.name_en ?? r.name_zh ?? "—",
         si_number: r.si_number,
-        status_zh: m.zh,
+        status_label: lang === "ja" ? m.ja : m.zh,
         status_tone: m.tone,
         pickup_date: r.pickup_date,
         return_date: r.return_date,
@@ -76,10 +80,12 @@ export default async function AccountingPage() {
   return (
     <div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold">會計 / 月結</h1>
-        <Link href="/admin" className="text-sm text-brand-700 hover:underline">預約列表 →</Link>
+        <h1 className="text-xl font-bold">{t.accounting.title}</h1>
+        <Link href="/admin" className="text-sm text-brand-700 hover:underline">
+          {t.accounting.toReservations}
+        </Link>
       </div>
-      <AccountingTable rows={rows} />
+      <AccountingTable rows={rows} t={t.accounting} />
     </div>
   );
 }

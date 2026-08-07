@@ -1,12 +1,13 @@
 import { ADDON_LABELS, type Reservation } from "./types";
 import { site } from "@/lib/site";
 
-function addonList(r: Reservation): string {
+function addonList(r: Reservation, lang: "zh" | "en" = "zh"): string {
   const on: string[] = [];
   for (const a of ADDON_LABELS) {
+    const label = lang === "en" ? a.en : a.zh;
     const v = r.addons?.[a.key];
-    if (typeof v === "number" && v > 0) on.push(`${a.zh} x${v}`);
-    else if (v === true) on.push(a.zh);
+    if (typeof v === "number" && v > 0) on.push(`${label} x${v}`);
+    else if (v === true) on.push(label);
   }
   return on.length ? on.join(", ") : "—";
 }
@@ -36,35 +37,36 @@ function paymentStatus(r: Reservation, lang: EmailLang = "en"): string {
 /** Email to Japan Rental819 to request/confirm the booking (step 4). Plain text. */
 export function jpReservationEmail(r: Reservation) {
   const subject = `RENTAL819 RESERVATION #${r.booking_ref ?? ""}`;
-  const body = `Rental819 御中
+  const dash = (v: string | null | undefined) => (v && String(v).trim()) || "—";
+  const body = `Dear Rental819 team,
 
-いつもお世話になっております。Helmet King (香港・マカオ代理) です。
-下記のお客様のレンタル予約をお願いいたします。
+This is Helmet King, your agent in Hong Kong and Macau.
+We would like to request the following motorcycle rental reservation.
 
-■ 予約番号 (Booking Ref): ${r.booking_ref ?? ""}
-■ 店舗 (Shop): ${r.shop ?? ""}
-■ レンタル期間 (Rental): ${period(r)}
+■ Booking ref: ${dash(r.booking_ref)}
+■ Shop: ${dash(r.shop)}
+■ Rental period: ${period(r)}
 
-【お客様 / Customer】
-・お名前 (Name): ${r.name_en ?? ""} / ${r.name_zh ?? ""}
-・性別 (Gender): ${r.gender ?? ""}
-・生年月日 (DOB): ${r.dob ?? ""}
-・メール (Email): ${r.email ?? ""}
-・日本語 (JP): ${r.japanese_ability ?? ""}
-・英語 (EN): ${r.english_ability ?? ""}
-・日本の宿泊先 (JP address): ${r.jp_address ?? ""}
-・日本の電話 (JP phone): ${r.jp_phone ?? ""}
+[Customer]
+- Name: ${dash(r.name_en)} / ${dash(r.name_zh)}
+- Gender: ${dash(r.gender)}
+- Date of birth: ${dash(r.dob)}
+- Email: ${dash(r.email)}
+- Japanese level: ${dash(r.japanese_ability)}
+- English level: ${dash(r.english_ability)}
+- Address in Japan: ${dash(r.jp_address)}
+- Phone in Japan: ${dash(r.jp_phone)}
 
-【ご希望のバイク / Bike preference】
-1. ${r.bike_pref_1 ?? ""}
-2. ${r.bike_pref_2 ?? ""}
-3. ${r.bike_pref_3 ?? ""}
+[Preferred motorcycle]
+1. ${dash(r.bike_pref_1)}
+2. ${dash(r.bike_pref_2)}
+3. ${dash(r.bike_pref_3)}
 
-【オプション / Add-ons】
-${addonList(r)}
+[Add-ons]
+${addonList(r, "en")}
 
-空車状況とご確認をお願いいたします。
-どうぞよろしくお願いいたします。
+Please confirm availability and the reservation.
+Thank you very much for your support.
 
 Helmet King × RENTAL819.HK`;
   return { subject, body };
