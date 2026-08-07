@@ -4,7 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { localePath, type Locale } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/site";
-import { SHOP_AREAS } from "@/lib/reservations/types";
+import {
+  SHOP_AREAS,
+  JP_ABILITY_OPTIONS,
+  EN_ABILITY_OPTIONS,
+} from "@/lib/reservations/types";
 import { WhatsAppIcon, CheckIcon, ArrowRight } from "./icons";
 
 type Status = "idle" | "submitting" | "done" | "error";
@@ -51,7 +55,7 @@ const t = {
     hkAddress: "居住地址（原居地）",
     jpAbility: "日語能力",
     enAbility: "英語能力",
-    abilities: ["", "不懂", "略懂", "流利"],
+    abilityPlaceholder: "請選擇",
     // japan
     jpAddress: "在日住宿地址",
     jpAddressHint: "供緊急聯絡用，請填實際住宿地址而非酒店名稱。",
@@ -140,7 +144,7 @@ const t = {
     hkAddress: "Home address (country of residence)",
     jpAbility: "Japanese ability",
     enAbility: "English ability",
-    abilities: ["", "None", "Some", "Fluent"],
+    abilityPlaceholder: "Please choose",
     jpAddress: "Accommodation address in Japan",
     jpAddressHint: "For emergency contact — the actual address, not the hotel name.",
     jpPhone: "Contact number in Japan",
@@ -263,6 +267,7 @@ function ageFrom(dob: string): number | null {
 
 export default function BookingForm({ locale }: { locale: Locale }) {
   const c = t[locale];
+  const isEn = locale === "en";
   const [status, setStatus] = useState<Status>("idle");
   const [errKey, setErrKey] = useState<keyof typeof c | null>(null);
   const [form, setForm] = useState<Form>(emptyForm);
@@ -472,19 +477,24 @@ export default function BookingForm({ locale }: { locale: Locale }) {
             <label className={labelCls}>{c.hkAddress}</label>
             <input className={field} value={form.hk_address} onChange={setText("hk_address")} />
           </div>
+          {/* Japanese and English are asked separately and answered from their
+              own fixed lists — the shop reads these to decide how to brief the
+              rider, so the wording has to be one they recognise. */}
           <div>
             <label className={labelCls}>{c.jpAbility}</label>
             <select className={field} value={form.japanese_ability} onChange={setText("japanese_ability")}>
-              {c.abilities.map((a, i) => (
-                <option key={i} value={a}>{a || "—"}</option>
+              <option value="">{c.abilityPlaceholder}</option>
+              {JP_ABILITY_OPTIONS.map((a) => (
+                <option key={a.value} value={a.value}>{isEn ? a.en : a.zh}</option>
               ))}
             </select>
           </div>
           <div>
             <label className={labelCls}>{c.enAbility}</label>
             <select className={field} value={form.english_ability} onChange={setText("english_ability")}>
-              {c.abilities.map((a, i) => (
-                <option key={i} value={a}>{a || "—"}</option>
+              <option value="">{c.abilityPlaceholder}</option>
+              {EN_ABILITY_OPTIONS.map((a) => (
+                <option key={a.value} value={a.value}>{isEn ? a.en : a.zh}</option>
               ))}
             </select>
           </div>

@@ -157,6 +157,67 @@ export function statusMeta(status: ReservationStatus) {
   return ALL.find((s) => s.key === status) ?? STATUS_FLOW[0];
 }
 
+/**
+ * Language-ability answers. These are a fixed list, not free text: the value is
+ * passed on to Rental819 Japan verbatim, and it is the shop's cue for whether
+ * staff can brief the rider at hand-over — so it has to be one of the phrases
+ * they already read, not whatever the customer types.
+ *
+ * `value` is the master Excel's own wording and is what gets stored, whichever
+ * language the form was filled in. (Bookings taken on /en used to store English
+ * variants like "Able to communicate in English (Fluent)", which meant the same
+ * answer arrived in Japan two different ways.) `zh` / `en` / `ja` are labels
+ * only.
+ */
+export interface AbilityOption {
+  value: string;
+  zh: string;
+  en: string;
+  ja: string;
+}
+
+export const JP_ABILITY_OPTIONS: AbilityOption[] = [
+  {
+    value: "無（日本語話せない）",
+    zh: "不懂日語",
+    en: "None",
+    ja: "日本語は話せない",
+  },
+  {
+    value: "可簡易日語溝通（簡単な日本語会話が出来る）",
+    zh: "可簡單日語溝通",
+    en: "Basic — simple conversation",
+    ja: "簡単な日本語会話が出来る",
+  },
+  {
+    value: "可日語溝通（日本語会話が出来る）",
+    zh: "可日語溝通",
+    en: "Conversational",
+    ja: "日本語会話が出来る",
+  },
+];
+
+export const EN_ABILITY_OPTIONS: AbilityOption[] = [
+  {
+    value: "無（Low/None）",
+    zh: "不懂英語",
+    en: "None",
+    ja: "英語は話せない",
+  },
+  {
+    value: "可簡易英語溝通（Daily Conversation）",
+    zh: "可簡單英語溝通",
+    en: "Daily conversation",
+    ja: "簡単な英会話が出来る",
+  },
+  {
+    value: "可英語溝通（Fluent）",
+    zh: "可流利英語溝通",
+    en: "Fluent",
+    ja: "英語で会話が出来る",
+  },
+];
+
 /** Addon labels for display. `ja` is used by the admin's Japanese mode. */
 export const ADDON_LABELS: {
   key: keyof ReservationAddons;

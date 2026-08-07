@@ -11,9 +11,12 @@ import {
   COST_ITEM_LABELS,
   SHOP_AREAS,
   SHOPS,
+  JP_ABILITY_OPTIONS,
+  EN_ABILITY_OPTIONS,
   costItemsTotal,
   rebateFromCostItems,
 } from "@/lib/reservations/types";
+import AbilitySelect from "@/components/admin/AbilitySelect";
 import { autoSiNumber } from "@/lib/reservations/invoice";
 import {
   patchReservation,
@@ -141,8 +144,26 @@ export default async function ReservationDetail({
               <Edit label={f.dob} name="dob" value={r.dob} type="date" />
               <Edit label={f.email} name="email" value={r.email} type="email" />
               <Edit label={f.hkPhone} name="hk_phone" value={r.hk_phone} />
-              <Edit label={f.japaneseAbility} name="japanese_ability" value={r.japanese_ability} />
-              <Edit label={f.englishAbility} name="english_ability" value={r.english_ability} />
+              <AbilitySelect
+                name="japanese_ability"
+                label={f.japaneseAbility}
+                options={JP_ABILITY_OPTIONS}
+                lang={lang}
+                value={r.japanese_ability}
+                existingSuffix={t.detail.existingSuffix}
+                labelClassName={fieldLabel}
+                wrapperClassName="py-2"
+              />
+              <AbilitySelect
+                name="english_ability"
+                label={f.englishAbility}
+                options={EN_ABILITY_OPTIONS}
+                lang={lang}
+                value={r.english_ability}
+                existingSuffix={t.detail.existingSuffix}
+                labelClassName={fieldLabel}
+                wrapperClassName="py-2"
+              />
               <Edit label={f.hkAddress} name="hk_address" value={r.hk_address} wide />
               <Edit label={f.jpAddress} name="jp_address" value={r.jp_address} wide />
               <Edit label={f.jpPhone} name="jp_phone" value={r.jp_phone} />
