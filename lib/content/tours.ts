@@ -26,6 +26,23 @@ export interface Package {
 }
 
 /**
+ * The printed leaflet for each package — day-by-day itinerary, the full P3–P7
+ * bike and price table (both with and without the travel component) and the
+ * booking terms. Keyed by package id so both locales share one set of files.
+ *
+ * Served from /public rather than linked to Drive, so the download keeps
+ * working if the Drive sharing changes and is never gated behind a Google
+ * sign-in. The size is part of the data because it is shown before the tap:
+ * these are 4–8 MB files and that matters on mobile data.
+ */
+export const packageLeaflets: Record<string, { file: string; mb: number }> = {
+  "osaka-shoryudo": { file: "/packages/osaka-shoryudo.pdf", mb: 4.5 },
+  "kyushu-aso": { file: "/packages/kyushu-aso.pdf", mb: 5.9 },
+  "okinawa-island": { file: "/packages/okinawa-island.pdf", mb: 5.1 },
+  "tokyo-initiald": { file: "/packages/tokyo-initiald.pdf", mb: 7.7 },
+};
+
+/**
  * Who actually organises and sells the tour products. Required disclosure under
  * the HK Travel Agents Ordinance; the licensee and licence number come from
  * site.travelAgent so there is a single source of truth.
