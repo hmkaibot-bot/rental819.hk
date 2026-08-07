@@ -112,3 +112,59 @@ export async function sendGmailMessage(opts: GmailMessage): Promise<{ id: string
   const json = (await res.json()) as { id?: string };
   return { id: json.id ?? "" };
 }
+
+export interface GmailAccountInfo {
+  /** The mailbox the refresh token belongs to. */
+  account: string;
+  /** Addresses this account may put in From:, and whether each is verified. */
+  sendAs: { address: string; verified: boolean; isDefault: boolean }[];
+}
+
+/**
+ * Which mailbox are we actually connected to, and what may it send as? Used by
+ * the /api/admin/gmail-status check — `gmail.compose` covers both endpoints, so
+ * no extra scope is needed.
+ */
+export async function gmailAccount(): Promise<GmailAccountInfo> {
+  const token = await accessToken();
+  const auth = { Authorization: `Bearer ${token}` };
+
+  const profileRes = await fetch(
+    "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+    { headers: auth },
+  );
+  if (!profileRes.ok) {
+    const t = await profileRes.text();
+    throw new Error(`Gmail profile error: ${profileRes.status} ${t.slice(0, 200)}`);
+  }
+  const profile = (await profileRes.json()) as { emailAddress?: string };
+
+  const sendAsRes = await fetch(
+    "https://gmail.googleapis.com/gmail/v1/users/me/settings/sendAs",
+    { headers: auth },
+  );
+  // The alias list needs gmail.settings.basic; without it we still report the
+  // account rather than failing the whole check.
+  const sendAs = sendAsRes.ok
+    ? (
+        (await sendAsRes.json()) as {
+          sendAs?: {
+            sendAsEmail?: string;
+            verificationStatus?: string;
+            isPrimary?: boolean;
+            isDefault?: boolean;
+          }[];
+        }
+      ).sendAs ?? []
+    : [];
+
+  return {
+    account: profile.emailAddress ?? "",
+    sendAs: sendAs.map((s) => ({
+      address: s.sendAsEmail ?? "",
+      // The primary address needs no verification; aliases must be "accepted".
+      verified: Boolean(s.isPrimary) || s.verificationStatus === "accepted",
+      isDefault: Boolean(s.isDefault),
+    })),
+  };
+}
