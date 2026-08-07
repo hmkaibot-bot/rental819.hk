@@ -70,10 +70,10 @@ const t = {
       sidebag: "側袋",
       pannier: "側箱",
       cardo: "CARDO 對講機",
-      etc: "ETC 卡",
       shuttle_bus: "穿梭巴士",
       luggage_storage: "行李寄存",
     },
+    etcNote: "ETC 卡因供應有限，請到店取車時向職員查詢。",
     mamoride: "加購 MamoRide 補償（只限 15 日內預約）",
     promo: "優惠碼（如有）",
     promoPh: "例如 CARDO88",
@@ -156,10 +156,10 @@ const t = {
       sidebag: "Side bag",
       pannier: "Side box",
       cardo: "CARDO intercom",
-      etc: "ETC card",
       shuttle_bus: "Shuttle bus",
       luggage_storage: "Luggage storage",
     },
+    etcNote: "ETC cards are limited in supply — please ask staff at the branch when you collect the bike.",
     mamoride: "Add MamoRide compensation (reservations of 15 days or less)",
     promo: "Promo code (if any)",
     promoPh: "e.g. CARDO88",
@@ -552,7 +552,6 @@ export default function BookingForm({ locale }: { locale: Locale }) {
               ["addon_sidebag", c.addons.sidebag],
               ["addon_pannier", c.addons.pannier],
               ["addon_cardo", c.addons.cardo],
-              ["addon_etc", c.addons.etc],
               ["addon_shuttle_bus", c.addons.shuttle_bus],
               ["addon_luggage_storage", c.addons.luggage_storage],
             ] as const).map(([key, label]) => (
@@ -567,6 +566,11 @@ export default function BookingForm({ locale }: { locale: Locale }) {
               </label>
             ))}
           </div>
+          {/* ETC is not a customer-selectable add-on: stock is limited and it is
+              arranged at the branch on collection. */}
+          <p className="mt-2.5 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-5 text-ink-muted">
+            {c.etcNote}
+          </p>
         </div>
         <label className="flex items-center gap-2.5 text-sm text-ink-soft">
           <input
