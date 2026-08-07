@@ -54,6 +54,11 @@ const legacyRedirects = [
   // --- Legacy tour / package detail pages (booking now on 26adventure) ---
   { source: "/st_activity/:slug*", destination: "/zh-hk/tours", permanent: true },
   { source: "/st_tour/:slug*", destination: "/zh-hk/tours", permanent: true },
+
+  // --- Apex → default locale ---
+  // app/page.tsx also redirects, but doing it here means the edge answers with a
+  // real 308 + Location before any RSC render is involved.
+  { source: "/", destination: "/zh-hk", permanent: true },
 ];
 
 const nextConfig = {
@@ -71,10 +76,13 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Keep the Vercel preview domain out of the search index so it never
-        // competes with the production site for duplicate content.
+        // Keep every Vercel preview host out of the search index so none of them
+        // competes with the production site for duplicate content. `has.value`
+        // is compiled to an anchored regex, so a literal hostname would miss the
+        // per-branch and per-commit preview URLs. Production rental819.hk is
+        // never matched.
         source: "/:path*",
-        has: [{ type: "host", value: "rental819-hk.vercel.app" }],
+        has: [{ type: "host", value: ".*\\.vercel\\.app" }],
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
     ];

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { homeContent } from "@/lib/content/home";
@@ -14,15 +14,16 @@ import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, ""),
-    title: isEn
+  return pageMeta(
+    params.locale,
+    "",
+    isEn
       ? "Japan Motorcycle Rental & Self-Drive Tours"
       : "日本電單車租賃・自駕遊團",
-    description: isEn
+    isEn
       ? "Rent a motorcycle in Japan and ride self-drive tours, booked from Hong Kong. 99 branches, full insurance, ETC and gear included."
       : "由香港預約日本電單車租賃及自駕遊，全日本 99 間分店，包保險、ETC 及裝備。",
-  };
+  );
 }
 
 export default function HomePage({ params }: { params: { locale: string } }) {

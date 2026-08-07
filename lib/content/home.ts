@@ -51,7 +51,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       highlight: "電單車自駕遊",
       tagline: "體驗日本道路之美，感受日本二輪文化",
       subtitle:
-        "由香港直接以中文預約，於全日本 99 間分店取車。由 125cc 到大型旅行電單車、Harley、越野車一應俱全，連保險、ETC、頭盔裝備一次過安排妥當。",
+        "喺日本租電單車自駕遊，由香港直接以中文預約，於全日本 99 間分店取車。由 125cc 到大型旅行電單車、Harley、越野車一應俱全，連保險、ETC、頭盔裝備一次過安排妥當。",
       primaryCta: "立即預約租車",
       secondaryCta: "WhatsApp 免費查詢",
       stats: [
@@ -171,7 +171,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       highlight: "self-drive motorcycle tour",
       tagline: "Experience the beauty of Japan's roads and the spirit of its riding culture",
       subtitle:
-        "Book from Hong Kong in your own language and pick up at any of 99 branches across Japan. From 125cc to big tourers, Harleys and off-road machines — with insurance, ETC and gear all sorted for you.",
+        "Rent a motorcycle in Japan and ride it yourself — book from Hong Kong in your own language and pick up at any of 99 branches across Japan. From 125cc to big tourers, Harleys and off-road machines — with insurance, ETC and gear all sorted for you.",
       primaryCta: "Book a rental",
       secondaryCta: "Free WhatsApp enquiry",
       stats: [

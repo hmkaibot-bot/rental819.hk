@@ -35,6 +35,7 @@ export default function Footer({
             alt="RENTAL819 レンタルバイク"
             width={768}
             height={488}
+            sizes="76px"
             className="h-12 w-auto rounded-md"
           />
           <p className="mt-4 max-w-xs text-sm leading-6 text-brand-200">

@@ -44,6 +44,9 @@ export default function Header({
             width={768}
             height={488}
             priority
+            // Renders ~58px wide (70px from lg:) — without `sizes` Next preloads
+            // the 828w candidate at high priority on every page.
+            sizes="(min-width: 1024px) 70px, 58px"
             className="h-9 w-auto lg:h-11"
           />
         </Link>
@@ -155,7 +158,14 @@ export default function Header({
                 className="flex items-center"
                 aria-label={site.name}
               >
-                <Image src="/logo-lg.png" alt="RENTAL819" width={768} height={488} className="h-8 w-auto" />
+                <Image
+                  src="/logo-lg.png"
+                  alt="RENTAL819"
+                  width={768}
+                  height={488}
+                  sizes="50px"
+                  className="h-8 w-auto"
+                />
               </Link>
               <button
                 type="button"

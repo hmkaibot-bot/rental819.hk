@@ -1,23 +1,27 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { rentalContent } from "@/lib/content/rental";
+import { breadcrumbLd, serviceLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
 import CoverageMap from "@/components/CoverageMap";
+import JsonLd from "@/components/JsonLd";
 import { ArrowRight } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/rental"),
-    title: isEn ? "Rent a Motorcycle in Japan" : "日本電單車租賃",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/rental",
+    isEn ? "Rent a Motorcycle in Japan" : "日本電單車租賃",
+    isEn
       ? "Rent a motorcycle in Japan — 125cc to big tourers and Harleys, 99 branches nationwide, booked from Hong Kong."
       : "日本電單車租賃：125cc 至大型旅行車、Harley，全日本 99 間分店，香港預約。",
-  };
+  );
 }
 
 export default function RentalPage({ params }: { params: { locale: string } }) {
@@ -28,11 +32,32 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.rental, url: localePath(locale, "/rental") },
+        ])}
+      />
+      {/* The bike categories rendered below are the offer catalog — no price is
+          shown on this page, so the Service node carries none. */}
+      <JsonLd
+        data={serviceLd(locale, {
+          name: c.hero.title,
+          description: c.hero.intro,
+          categories: c.categories.map((cat) => ({ title: cat.name })),
+        })}
+      />
       <PageHero image="/images/tours/shikoku-2026-07-01.jpg" eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro}>
-        <Link href={localePath(locale, "/booking")} className="btn-primary">
-          {dict.common.bookNow}
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.rental }]}
+        />
+        <div className="mt-6">
+          <Link href={localePath(locale, "/booking")} className="btn-primary">
+            {dict.common.bookNow}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </PageHero>
 
       {/* Bike categories */}

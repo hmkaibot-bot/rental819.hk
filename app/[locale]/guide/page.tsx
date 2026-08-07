@@ -1,22 +1,26 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { guideDocs } from "@/lib/content/guide";
+import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
+import JsonLd from "@/components/JsonLd";
 import { ArrowRight } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/guide"),
-    title: isEn ? "Ride Guide" : "自駕攻略",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/guide",
+    isEn ? "Japan Motorcycle Ride Guide" : "日本電單車自駕攻略",
+    isEn
       ? "Everything you need to plan and ride a motorcycle self-drive trip in Japan."
       : "由證件、交通規則、保險到行程規劃，日本電單車自駕遊你需要知道的一切。",
-  };
+  );
 }
 
 export default function GuideIndex({ params }: { params: { locale: string } }) {
@@ -27,6 +31,12 @@ export default function GuideIndex({ params }: { params: { locale: string } }) {
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.guide, url: localePath(locale, "/guide") },
+        ])}
+      />
       <PageHero
         image="/images/tours/kansai-sakura-2026-04-08.jpg"
         eyebrow={dict.nav.guide}
@@ -36,7 +46,12 @@ export default function GuideIndex({ params }: { params: { locale: string } }) {
             ? "From licences and traffic rules to insurance, ETC and itinerary planning — read up before you ride."
             : "由所需證件、交通規則、保險、ETC，到行程與預算規劃，出發前先了解清楚。"
         }
-      />
+      >
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.guide }]}
+        />
+      </PageHero>
       <section className="container-x py-16 lg:py-20">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {docs.map((doc, i) => (

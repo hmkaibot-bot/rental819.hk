@@ -19,6 +19,7 @@ const dict: Dictionary = {
     book: "立即預約",
   },
   guideMenu: {
+    licence: "香港車牌可以租車嗎？",
     planTrip: "如何規劃行程",
     route: "路線如何規劃",
     howManyDays: "打算開幾天車？",

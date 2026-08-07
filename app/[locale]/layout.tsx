@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { locales, isLocale, htmlLang, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { buildNav } from "@/lib/nav";
-import { organizationLd } from "@/lib/jsonld";
+import { organizationLd, websiteLd } from "@/lib/jsonld";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -27,7 +27,8 @@ export default function LocaleLayout({
   return (
     <html lang={htmlLang[locale]}>
       <body className="flex min-h-screen flex-col font-sans">
-        <JsonLd data={organizationLd()} />
+        <JsonLd data={organizationLd(locale)} />
+        <JsonLd data={websiteLd(locale)} />
         <Header locale={locale} dict={dict} nav={nav} />
         <main className="flex-1">{children}</main>
         <Footer locale={locale} dict={dict} />

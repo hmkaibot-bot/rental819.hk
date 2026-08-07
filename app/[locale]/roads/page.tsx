@@ -1,21 +1,25 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { roadsContent, TOURS_URL } from "@/lib/content/roads";
+import { breadcrumbLd, roadsLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
+import JsonLd from "@/components/JsonLd";
 import { ArrowRight } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/roads"),
-    title: isEn ? "Japan's Legendary Roads" : "日本名道圖鑑",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/roads",
+    isEn ? "Japan's Legendary Roads" : "日本名道圖鑑",
+    isEn
       ? "A field guide to Japan's greatest riding roads — by region, from Hokkaido to Okinawa. Rent a bike and ride them, or join a guided tour."
       : "日本名道圖鑑：由北海道到沖繩，按地區精選全日本最值得騎的名道與絕景公路。租車自駕或參加電單車旅行團。",
-  };
+  );
 }
 
 export default function RoadsPage({ params }: { params: { locale: string } }) {
@@ -25,11 +29,24 @@ export default function RoadsPage({ params }: { params: { locale: string } }) {
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.roads, url: localePath(locale, "/roads") },
+        ])}
+      />
+      <JsonLd data={roadsLd(locale, c.regions)} />
       <PageHero image="/images/tours/hokkaido-2026-07-30.jpg" eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro}>
-        <a href={TOURS_URL} target="_blank" rel="noopener noreferrer" className="btn-primary">
-          {c.ctaTours}
-          <ArrowRight className="h-4 w-4" />
-        </a>
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.roads }]}
+        />
+        <div className="mt-6">
+          <a href={TOURS_URL} target="_blank" rel="noopener noreferrer" className="btn-primary">
+            {c.ctaTours}
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
       </PageHero>
 
       <div className="container-x py-14 lg:py-20">
@@ -72,6 +89,11 @@ export default function RoadsPage({ params }: { params: { locale: string } }) {
               </a>
               <Link href={localePath(locale, "/booking")} className="inline-flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">
                 {c.ctaBook}
+              </Link>
+              {/* The self-drive alternative to the tour link above — /rental is
+                  otherwise barely linked to from anywhere on the site. */}
+              <Link href={localePath(locale, "/rental")} className="inline-flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">
+                {locale === "en" ? "Rent a bike and ride it yourself" : "租電單車自駕走一趟"}
               </Link>
             </div>
           </div>

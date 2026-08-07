@@ -5,10 +5,6 @@ export interface BikeCategory {
   cc: string;
   note: string;
 }
-export interface Region {
-  name: string;
-  prefectures: string;
-}
 export interface RentalContent {
   hero: { eyebrow: string; title: string; intro: string };
   categoriesHead: string;
@@ -16,7 +12,8 @@ export interface RentalContent {
   categories: BikeCategory[];
   coverageHead: string;
   coverageIntro: string;
-  regions: Region[];
+  // The region/prefecture list itself lives in lib/content/coverage.ts, which is
+  // what <CoverageMap> renders on /rental.
   howHead: string;
   howIntro: string;
   ctaTitle: string;
@@ -43,19 +40,6 @@ export const rentalContent: Record<Locale, RentalContent> = {
     ],
     coverageHead: "全日本取車網絡",
     coverageIntro: "分店遍佈全國主要地區及機場，租還車須於同一分店辦理。",
-    regions: [
-      { name: "北海道", prefectures: "北海道全域" },
-      { name: "東北", prefectures: "秋田・岩手・福島・宮城・山形" },
-      { name: "關東", prefectures: "東京・神奈川・千葉・茨城・栃木・埼玉・群馬" },
-      { name: "甲信越", prefectures: "長野・新潟" },
-      { name: "北陸", prefectures: "福井・石川" },
-      { name: "東海", prefectures: "静岡・愛知・三重" },
-      { name: "近畿", prefectures: "滋賀・大阪・京都" },
-      { name: "中国", prefectures: "岡山・広島・山口" },
-      { name: "四国", prefectures: "愛媛" },
-      { name: "九州", prefectures: "福岡・長崎・熊本・大分・鹿児島" },
-      { name: "沖繩", prefectures: "沖繩本島・機場" },
-    ],
     howHead: "租車流程",
     howIntro: "由確認證件到取車，共 7 個簡單步驟。",
     ctaTitle: "揀好車款，即刻預約",
@@ -82,19 +66,6 @@ export const rentalContent: Record<Locale, RentalContent> = {
     coverageHead: "Nationwide pick-up network",
     coverageIntro:
       "Branches across every major region and airport. Pick-up and return must be at the same branch.",
-    regions: [
-      { name: "Hokkaido", prefectures: "All of Hokkaido" },
-      { name: "Tohoku", prefectures: "Akita · Iwate · Fukushima · Miyagi · Yamagata" },
-      { name: "Kanto", prefectures: "Tokyo · Kanagawa · Chiba · Ibaraki · Tochigi · Saitama · Gunma" },
-      { name: "Koshinetsu", prefectures: "Nagano · Niigata" },
-      { name: "Hokuriku", prefectures: "Fukui · Ishikawa" },
-      { name: "Tokai", prefectures: "Shizuoka · Aichi · Mie" },
-      { name: "Kinki", prefectures: "Shiga · Osaka · Kyoto" },
-      { name: "Chugoku", prefectures: "Okayama · Hiroshima · Yamaguchi" },
-      { name: "Shikoku", prefectures: "Ehime" },
-      { name: "Kyushu", prefectures: "Fukuoka · Nagasaki · Kumamoto · Oita · Kagoshima" },
-      { name: "Okinawa", prefectures: "Okinawa main island · airport" },
-    ],
     howHead: "The rental process",
     howIntro: "Seven simple steps from checking your documents to riding away.",
     ctaTitle: "Picked your bike? Book it",

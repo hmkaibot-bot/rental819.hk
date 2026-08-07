@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Block } from "@/lib/content/blocks";
 
 function renderBlock(block: Block, i: number) {
@@ -21,6 +22,19 @@ function renderBlock(block: Block, i: number) {
         <ol key={i}>
           {block.items.map((it, j) => (
             <li key={j}>{it}</li>
+          ))}
+        </ol>
+      );
+    // Hrefs are stored locale-prefixed in the content, so the article stays
+    // locale-agnostic and needs no extra prop from the page.
+    case "link":
+      return (
+        <ol key={i}>
+          {block.items.map((it, j) => (
+            <li key={j}>
+              <Link href={it.href}>{it.label}</Link>
+              {it.text ? ` — ${it.text}` : null}
+            </li>
           ))}
         </ol>
       );

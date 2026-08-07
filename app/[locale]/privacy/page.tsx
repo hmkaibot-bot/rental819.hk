@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { pageMeta } from "@/lib/seo";
+import { isLocale, localePath, type Locale } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 import { site } from "@/lib/site";
+import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
 import GuideArticle from "@/components/GuideArticle";
+import JsonLd from "@/components/JsonLd";
 import type { Block } from "@/lib/content/blocks";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/privacy"),
-    title: isEn ? "Privacy Policy" : "私隱政策",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/privacy",
+    isEn ? "Privacy Policy" : "私隱政策",
+    isEn
       ? "How RENTAL819 Hong Kong collects and uses your personal data."
-      : "RENTAL819 香港如何收集及使用你的個人資料。",
-  };
+      : "RENTAL819 香港（頭盔王集團）私隱政策：說明我們透過預約及查詢表格收集哪些個人資料、如何使用及與日本 Rental819 等夥伴分享，以及你查閱和更正資料的權利。",
+  );
 }
 
 const content: Record<Locale, { title: string; blocks: Block[] }> = {
@@ -64,10 +69,22 @@ const content: Record<Locale, { title: string; blocks: Block[] }> = {
 
 export default function PrivacyPage({ params }: { params: { locale: string } }) {
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
+  const dict = getDictionary(locale);
   const c = content[locale];
   return (
     <>
-      <PageHero image="/images/tours/kansai-sakura-2026-04-08.jpg" title={c.title} />
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.footer.privacy, url: localePath(locale, "/privacy") },
+        ])}
+      />
+      <PageHero image="/images/tours/kansai-sakura-2026-04-08.jpg" title={c.title}>
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.footer.privacy }]}
+        />
+      </PageHero>
       <section className="container-x py-14 lg:py-16">
         <GuideArticle blocks={c.blocks} />
       </section>

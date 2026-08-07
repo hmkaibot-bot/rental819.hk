@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/i18n";
+import { site } from "@/lib/site";
 
 export interface Tour {
   id: string;
@@ -20,7 +21,19 @@ export interface Package {
   tiers: string;
   priceFrom: number;
   blurb: string;
+  /** Roads and places on this route, all named elsewhere in the repo (roads.ts / tours). */
+  highlights: string[];
 }
+
+/**
+ * Who actually organises and sells the tour products. Required disclosure under
+ * the HK Travel Agents Ordinance; the licensee and licence number come from
+ * site.travelAgent so there is a single source of truth.
+ */
+export const providerNote: Record<Locale, string> = {
+  "zh-hk": `以下電單車旅行團由 ${site.travelAgent.name}（旅行代理商牌照號碼 ${site.travelAgent.licence}）主辦，並於 26adventure.com 接受報名；RENTAL819 香港負責租車安排及港澳團友支援。`,
+  en: `These tours are organised by ${site.travelAgent.name} (HK Travel Agent Licence No. ${site.travelAgent.licence}) and booked on 26adventure.com. RENTAL819 Hong Kong arranges the motorcycles and supports Hong Kong and Macau riders.`,
+};
 
 // Departure dates relative to the site's reference date (2026-07-19).
 export const tours: Record<Locale, Tour[]> = {
@@ -251,6 +264,7 @@ export const packages: Record<Locale, Package[]> = {
       tiers: "3日 / 4日 / 5日",
       priceFrom: 5680,
       blurb: "由大阪出發走昇龍道，租車連住宿一次過搞掂，自由編排行程。",
+      highlights: ["大阪", "白川鄉", "千里濱沙灘公路", "兼六園"],
     },
     {
       id: "kyushu-aso",
@@ -259,6 +273,7 @@ export const packages: Record<Locale, Package[]> = {
       tiers: "3日 / 4日 / 5日",
       priceFrom: 4480,
       blurb: "阿蘇火山與牛奶之路的經典九州路線，租車＋住宿套票最抵玩。",
+      highlights: ["阿蘇牛奶之路", "阿蘇 Panorama Line", "山並 Highway", "福岡"],
     },
     {
       id: "okinawa-island",
@@ -267,6 +282,7 @@ export const packages: Record<Locale, Package[]> = {
       tiers: "3日 / 4日",
       priceFrom: 4880,
       blurb: "環繞碧海藍天的沖繩海島騎旅，輕鬆寫意的入門自駕之選。",
+      highlights: ["沖繩本島", "沖繩海中道路"],
     },
     {
       id: "tokyo-initiald",
@@ -275,6 +291,7 @@ export const packages: Record<Locale, Package[]> = {
       tiers: "3日 / 4日 / 5日",
       priceFrom: 5480,
       blurb: "朝聖《頭文字D》經典山路，暢遊關東名所的租車住宿組合。",
+      highlights: ["榛名山（秋名山）", "赤城山", "碓冰峠", "伊呂波坂"],
     },
   ],
   en: [
@@ -285,6 +302,7 @@ export const packages: Record<Locale, Package[]> = {
       tiers: "3 / 4 / 5 days",
       priceFrom: 5680,
       blurb: "Ride the Shoryudo route from Osaka — bike and accommodation bundled, itinerary your call.",
+      highlights: ["Osaka", "Shirakawa-go", "Chirihama Nagisa Driveway", "Kenroku-en"],
     },
     {
       id: "kyushu-aso",
@@ -293,6 +311,7 @@ export const packages: Record<Locale, Package[]> = {
       tiers: "3 / 4 / 5 days",
       priceFrom: 4480,
       blurb: "The classic Kyushu loop past Aso's volcano and Milk Road — the best-value bike + stay bundle.",
+      highlights: ["Aso Milk Road", "Aso Panorama Line", "Yamanami Highway", "Fukuoka"],
     },
     {
       id: "okinawa-island",
@@ -301,6 +320,7 @@ export const packages: Record<Locale, Package[]> = {
       tiers: "3 / 4 days",
       priceFrom: 4880,
       blurb: "An easy-going island ride under Okinawa's blue skies — a great first self-drive.",
+      highlights: ["Okinawa main island", "Okinawa Kaichu Road"],
     },
     {
       id: "tokyo-initiald",
@@ -309,6 +329,7 @@ export const packages: Record<Locale, Package[]> = {
       tiers: "3 / 4 / 5 days",
       priceFrom: 5480,
       blurb: "Chase the Initial D mountain passes and Kanto highlights with a bike + stay combo.",
+      highlights: ["Mt. Haruna (Akina)", "Mt. Akagi", "Usui Pass", "Irohazaka"],
     },
   ],
 };

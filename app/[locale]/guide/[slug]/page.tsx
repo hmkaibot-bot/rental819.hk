@@ -1,11 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { pageAlternates } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { guideDocs } from "@/lib/content/guide";
-import { breadcrumbLd } from "@/lib/jsonld";
+import { articleLd, breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import GuideArticle from "@/components/GuideArticle";
@@ -24,12 +24,21 @@ export function generateMetadata({
 }): Metadata {
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
   const doc = guideDocs[locale].find((d) => d.slug === params.slug);
-  if (!doc) return {};
-  return {
-    alternates: pageAlternates(params.locale, `/guide/${params.slug}`),
-    title: doc.title,
-    description: doc.intro,
-  };
+  // Unknown slug: the route 404s, so say so instead of silently inheriting the
+  // home page's title with no canonical of its own.
+  if (!doc)
+    return {
+      title: params.locale === "en" ? "Page not found" : "頁面不存在",
+      robots: { index: false, follow: false },
+    };
+  // The h1 stays doc.title; the search-result title and snippet come from the
+  // doc's own SEO fields, falling back to the visible copy when it has none.
+  return pageMeta(
+    params.locale,
+    `/guide/${params.slug}`,
+    doc.seoTitle ?? doc.title,
+    doc.seoDescription ?? doc.intro ?? "",
+  );
 }
 
 export default function GuideDocPage({
@@ -56,6 +65,7 @@ export default function GuideDocPage({
           { name: doc.title, url: localePath(locale, `/guide/${doc.slug}`) },
         ])}
       />
+      <JsonLd data={articleLd(doc, locale)} />
       <PageHero image="/images/tours/kansai-sakura-2026-04-08.jpg" eyebrow={dict.nav.guide} title={doc.title} intro={doc.intro}>
         <Breadcrumb
           locale={locale}

@@ -1,21 +1,25 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { pageAlternates } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { site, whatsappLink } from "@/lib/site";
+import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
+import Breadcrumb from "@/components/Breadcrumb";
+import JsonLd from "@/components/JsonLd";
 import { WhatsAppIcon, FacebookIcon, InstagramIcon, ArrowRight } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return {
-    alternates: pageAlternates(params.locale, "/contact"),
-    title: isEn ? "Contact" : "聯絡我們",
-    description: isEn
+  return pageMeta(
+    params.locale,
+    "/contact",
+    isEn ? "Contact" : "聯絡我們",
+    isEn
       ? "Reach the RENTAL819 Hong Kong team by WhatsApp, email or social media."
       : "透過 WhatsApp、電郵或社交媒體聯絡 RENTAL819 香港團隊。",
-  };
+  );
 }
 
 export default function ContactPage({ params }: { params: { locale: string } }) {
@@ -56,6 +60,12 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: dict.nav.home, url: localePath(locale, "/") },
+          { name: dict.nav.contact, url: localePath(locale, "/contact") },
+        ])}
+      />
       <PageHero
         image="/images/about/shop.jpg"
         eyebrow={dict.nav.contact}
@@ -65,7 +75,12 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
             ? "Questions, quotes or route advice — the Hong Kong team is here to help, in Cantonese, Mandarin or English."
             : "查詢、報價或路線建議 — 香港團隊隨時以廣東話、普通話或英語為你解答。"
         }
-      />
+      >
+        <Breadcrumb
+          locale={locale}
+          items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.contact }]}
+        />
+      </PageHero>
 
       <section className="container-x py-16 lg:py-20">
         <div className="grid gap-6 sm:grid-cols-2">
