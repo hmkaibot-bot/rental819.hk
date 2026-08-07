@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { ADDON_LABELS, SHOP_AREAS } from "@/lib/reservations/types";
+import {
+  ADDON_LABELS,
+  SHOP_AREAS,
+  JP_ABILITY_OPTIONS,
+  EN_ABILITY_OPTIONS,
+} from "@/lib/reservations/types";
 import { getAdminLang } from "@/lib/admin/lang";
 import { adminDict } from "@/lib/admin/i18n";
+import AbilitySelect from "@/components/admin/AbilitySelect";
 import { createReservationAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -73,8 +79,20 @@ export default function NewReservationPage() {
             <Field name="dob" label={f.dob} type="date" />
             <Field name="email" label={f.email} type="email" />
             <Field name="hk_phone" label={f.hkPhone} />
-            <Field name="japanese_ability" label={f.japaneseAbility} />
-            <Field name="english_ability" label={f.englishAbility} />
+            <AbilitySelect
+              name="japanese_ability"
+              label={f.japaneseAbility}
+              options={JP_ABILITY_OPTIONS}
+              lang={lang}
+              existingSuffix={t.detail.existingSuffix}
+            />
+            <AbilitySelect
+              name="english_ability"
+              label={f.englishAbility}
+              options={EN_ABILITY_OPTIONS}
+              lang={lang}
+              existingSuffix={t.detail.existingSuffix}
+            />
             <Field name="hk_address" label={f.hkAddress} colSpan />
             <Field name="jp_address" label={f.jpAddress} colSpan />
             <Field name="jp_phone" label={f.jpPhone} />
