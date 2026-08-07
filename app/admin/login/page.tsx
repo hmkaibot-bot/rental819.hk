@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { isAuthed } from "@/lib/admin/auth";
+import { getAdminDict } from "@/lib/admin/lang";
 
 export default function AdminLogin({
   searchParams,
@@ -8,6 +9,7 @@ export default function AdminLogin({
   searchParams: { error?: string; next?: string };
 }) {
   if (isAuthed()) redirect("/admin");
+  const t = getAdminDict();
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-card">
@@ -20,18 +22,18 @@ export default function AdminLogin({
             priority
             className="mx-auto h-12 w-auto rounded-md"
           />
-          <p className="mt-2 text-sm text-ink-muted">租車管理後台</p>
+          <p className="mt-2 text-sm text-ink-muted">{t.login.subtitle}</p>
         </div>
         {searchParams.error && (
           <p className="mt-5 rounded-lg bg-accent-50 px-3 py-2 text-sm text-accent-700">
-            密碼錯誤，請再試。
+            {t.login.error}
           </p>
         )}
         <form action="/api/admin/login" method="post" className="mt-6 space-y-4">
           <input type="hidden" name="next" value={searchParams.next || "/admin"} />
           <div>
             <label className="mb-1.5 block text-sm font-medium text-ink-soft">
-              管理密碼
+              {t.login.password}
             </label>
             <input
               type="password"
@@ -43,7 +45,7 @@ export default function AdminLogin({
             />
           </div>
           <button type="submit" className="btn-primary w-full">
-            登入
+            {t.login.submit}
           </button>
         </form>
       </div>

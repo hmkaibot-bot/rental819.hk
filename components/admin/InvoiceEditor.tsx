@@ -17,6 +17,7 @@ import {
   rt819Label,
   type Rt819Item,
 } from "@/lib/reservations/items";
+import type { AdminDict } from "@/lib/admin/i18n";
 import { saveInvoice } from "@/app/admin/(app)/reservations/[id]/invoice/actions";
 
 const GROUP_ORDER: Rt819Item["group"][] = [
@@ -33,10 +34,14 @@ export default function InvoiceEditor({
   reservation,
   seed,
   catalog = RT819_ITEMS,
+  t,
+  groupLabels = RT819_GROUP_LABELS,
 }: {
   reservation: Reservation;
   seed: InvoiceItem[];
   catalog?: Rt819Item[];
+  t: AdminDict["invoice"];
+  groupLabels?: Record<Rt819Item["group"], string>;
 }) {
   const r = reservation;
   const settlement = (r.settlement ?? {}) as Record<string, unknown>;
@@ -112,19 +117,19 @@ export default function InvoiceEditor({
       <div className="no-print mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <div className="grid gap-3 sm:grid-cols-4">
           <label className="text-sm">
-            <span className="mb-1 block font-medium text-ink-soft">單號 (SI No.)</span>
+            <span className="mb-1 block font-medium text-ink-soft">{t.siNo}</span>
             <input value={si} onChange={(e) => setSi(e.target.value)} placeholder="SI-26-xxxxx" className={`${cell} w-full`} />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block font-medium text-ink-soft">單據日期 Date</span>
+            <span className="mb-1 block font-medium text-ink-soft">{t.date}</span>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={`${cell} w-full`} />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block font-medium text-ink-soft">付款日期 Payment date</span>
+            <span className="mb-1 block font-medium text-ink-soft">{t.paymentDate}</span>
             <input type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} className={`${cell} w-full`} />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block font-medium text-ink-soft">訂金 Deposit (HK$)</span>
+            <span className="mb-1 block font-medium text-ink-soft">{t.deposit}</span>
             <input type="number" value={deposit} onChange={(e) => setDeposit(Number(e.target.value))} className={`${cell} w-full`} />
           </label>
         </div>
@@ -132,7 +137,7 @@ export default function InvoiceEditor({
         {/* Item picker from the RT819 catalog */}
         <div className="mt-4">
           <label className="mb-1 block text-sm font-medium text-ink-soft">
-            由 RT819 項目表加入
+            {t.fromCatalog}
           </label>
           <select
             className={`${cell} w-full sm:max-w-md`}
@@ -142,9 +147,9 @@ export default function InvoiceEditor({
               e.target.value = "";
             }}
           >
-            <option value="">＋ 選擇項目加入單據…</option>
+            <option value="">{t.pickItem}</option>
             {GROUP_ORDER.map((g) => (
-              <optgroup key={g} label={RT819_GROUP_LABELS[g]}>
+              <optgroup key={g} label={groupLabels[g]}>
                 {catalog.filter((it) => it.group === g).map((it) => (
                   <option key={it.code} value={it.code}>
                     {rt819Label(it)} — HK${it.unit_price}
@@ -159,10 +164,10 @@ export default function InvoiceEditor({
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-ink-muted">
-                <th className="py-1 pr-2">項目說明 Description</th>
-                <th className="w-28 py-1 px-2">單價 (HK$)</th>
-                <th className="w-16 py-1 px-2">數量</th>
-                <th className="w-28 py-1 px-2 text-right">金額</th>
+                <th className="py-1 pr-2">{t.colDesc}</th>
+                <th className="w-28 py-1 px-2">{t.colUnitPrice}</th>
+                <th className="w-16 py-1 px-2">{t.colQty}</th>
+                <th className="w-28 py-1 px-2 text-right">{t.colAmount}</th>
                 <th className="w-8"></th>
               </tr>
             </thead>
@@ -180,7 +185,7 @@ export default function InvoiceEditor({
                   </td>
                   <td className="py-1 px-2 text-right font-medium">{fmtAmount(it.amount)}</td>
                   <td className="py-1 text-center">
-                    <button onClick={() => removeRow(i)} className="text-slate-400 hover:text-rose-600" aria-label="刪除">×</button>
+                    <button onClick={() => removeRow(i)} className="text-slate-400 hover:text-rose-600" aria-label={t.deleteAria}>×</button>
                   </td>
                 </tr>
               ))}
@@ -189,22 +194,22 @@ export default function InvoiceEditor({
         </div>
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">+ 自訂一行</button>
+          <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">{t.addRow}</button>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-ink-muted">總額</span>
+            <span className="text-sm text-ink-muted">{t.total}</span>
             <span className="text-lg font-black text-ink">HK${fmtAmount(remaintance)}</span>
           </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           <button onClick={() => save(true)} disabled={pending} className="btn-primary text-sm disabled:opacity-60">
-            {pending ? "儲存中…" : saved ? "已儲存 ✓" : "儲存並標記已開單"}
+            {pending ? t.saving : saved ? t.savedOk : t.saveAndInvoice}
           </button>
           <button onClick={() => save(false)} disabled={pending} className="btn-outline text-sm">
-            只儲存
+            {t.saveOnly}
           </button>
           <button onClick={() => window.print()} className="btn-brand text-sm">
-            列印 / 儲存為 PDF
+            {t.print}
           </button>
         </div>
       </div>

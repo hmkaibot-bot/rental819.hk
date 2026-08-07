@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { listReservations } from "@/lib/reservations/store";
+import { getAdminLang } from "@/lib/admin/lang";
+import { adminDict, type AdminLang } from "@/lib/admin/i18n";
 import {
   STATUS_FLOW,
   TERMINAL_STATUS,
@@ -9,6 +11,10 @@ import {
   type ReservationStatus,
 } from "@/lib/reservations/types";
 import { StatusFilter } from "./status-filter";
+
+/** Status label in the operator's language. */
+const statusName = (s: { zh: string; ja: string }, lang: AdminLang) =>
+  lang === "ja" ? s.ja : s.zh;
 
 export const dynamic = "force-dynamic";
 
@@ -76,13 +82,19 @@ const tick = (v?: boolean): ReactNode =>
 const num = (v?: number): ReactNode => (v && v > 0 ? `×${v}` : dash);
 
 type Column = {
-  label: string;
+  label: string; // 中文 header
   ja?: string; // Japanese header (中日對照, from the master Excel)
   sort?: SortKey;
   filter?: boolean;
   cls?: string;
-  cell: (r: Reservation) => ReactNode;
+  cell: (r: Reservation, lang: AdminLang) => ReactNode;
 };
+
+/** Header text in the chosen language, with the other language underneath. */
+function heads(c: Column, lang: AdminLang): { main: string; sub?: string } {
+  if (lang === "ja" && c.ja) return { main: c.ja, sub: c.label };
+  return { main: c.label, sub: c.ja };
+}
 
 const COLUMNS: Column[] = [
   {
@@ -105,11 +117,11 @@ const COLUMNS: Column[] = [
     sort: "status",
     filter: true,
     cls: "whitespace-nowrap",
-    cell: (r) => {
+    cell: (r, lang) => {
       const m = statusMeta(r.status);
       return (
         <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
-          {m.zh}
+          {statusName(m, lang)}
         </span>
       );
     },
@@ -166,6 +178,8 @@ export default async function AdminDashboard({
   searchParams: { tab?: string; status?: string; sort?: string; dir?: string; q?: string };
 }) {
   const all = await listReservations();
+  const lang = getAdminLang();
+  const t = adminDict(lang);
 
   const tab: TabKey = TABS.some((t) => t.key === searchParams.tab)
     ? (searchParams.tab as TabKey)
@@ -195,11 +209,15 @@ export default async function AdminDashboard({
     <div>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold">租車預約</h1>
+          <h1 className="text-xl font-bold">{t.dashboard.title}</h1>
           <p className="text-sm text-ink-muted">
-            共 {tabRows.length} 張預約
-            {q ? ` · 搜尋「${q}」（${list.length}）` : ""}
-            {activeStatus ? ` · 篩選：${statusMeta(activeStatus).zh}（${list.length}）` : ""}
+            {`${t.dashboard.total.pre}${tabRows.length}${t.dashboard.total.post}`}
+            {q
+              ? `${t.dashboard.searched.pre}${q}${t.dashboard.searched.mid}${list.length}${t.dashboard.searched.post}`
+              : ""}
+            {activeStatus
+              ? `${t.dashboard.filtered.pre}${statusName(statusMeta(activeStatus), lang)}${t.dashboard.filtered.mid}${list.length}${t.dashboard.filtered.post}`
+              : ""}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -212,11 +230,11 @@ export default async function AdminDashboard({
               type="search"
               name="q"
               defaultValue={q}
-              placeholder="搜尋 編號／姓名／電郵／電話…"
+              placeholder={t.dashboard.searchPlaceholder}
               className="w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm outline-none focus:border-brand-500"
             />
             <button className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-ink-soft hover:bg-slate-200">
-              搜尋
+              {t.dashboard.search}
             </button>
           </form>
           {(activeStatus || q) && (
@@ -224,11 +242,11 @@ export default async function AdminDashboard({
               href={`/admin${qs({ tab, sort: sortKey, dir: sortKey ? dir : undefined })}`}
               className="text-sm text-brand-700 hover:underline"
             >
-              清除 ✕
+              {t.dashboard.clear}
             </Link>
           )}
           <Link href="/admin/reservations/new" className="btn-brand text-sm">
-            ＋ 新增預約
+            {t.dashboard.newBooking}
           </Link>
         </div>
       </div>
@@ -269,6 +287,7 @@ export default async function AdminDashboard({
               {COLUMNS.map((c) => {
                 const active = !!c.sort && sortKey === c.sort;
                 const nextDir = active && dir === "asc" ? "desc" : "asc";
+                const h = heads(c, lang);
                 return (
                   <th key={c.label} className={th}>
                     <div className="flex items-center gap-1.5">
@@ -277,33 +296,34 @@ export default async function AdminDashboard({
                           href={`/admin${qs({ tab, status: activeStatus, sort: c.sort, dir: nextDir, q: q || undefined })}`}
                           className={`inline-flex items-center gap-1 hover:text-ink ${active ? "text-ink" : ""}`}
                         >
-                          {c.label}
+                          {h.main}
                           <span className="text-[10px] leading-none">
                             {active ? (dir === "asc" ? "▲" : "▼") : "↕"}
                           </span>
                         </Link>
                       ) : (
-                        <span>{c.label}</span>
+                        <span>{h.main}</span>
                       )}
 
                       {c.filter && (
                         <StatusFilter
                           value={activeStatus ?? ""}
+                          ariaLabel={t.dashboard.statusFilterAria}
                           keep={{ tab, sort: sortKey, dir: sortKey ? dir : undefined, q: q || undefined }}
                           options={[
-                            { key: "", label: "全部", count: tabRows.length },
+                            { key: "", label: t.common.all, count: tabRows.length },
                             ...STATUS_ORDER.map((s) => ({
                               key: s.key,
-                              label: s.zh,
+                              label: statusName(s, lang),
                               count: counts.get(s.key) ?? 0,
                             })),
                           ]}
                         />
                       )}
                     </div>
-                    {c.ja && (
+                    {h.sub && (
                       <div className="mt-0.5 text-[10px] font-normal normal-case tracking-normal text-ink-muted/70">
-                        {c.ja}
+                        {h.sub}
                       </div>
                     )}
                   </th>
@@ -316,7 +336,7 @@ export default async function AdminDashboard({
               <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50/60">
                 {COLUMNS.map((c) => (
                   <td key={c.label} className={`px-3 py-3 align-top ${c.cls ?? ""}`}>
-                    {c.cell(r)}
+                    {c.cell(r, lang)}
                   </td>
                 ))}
               </tr>
@@ -324,7 +344,7 @@ export default async function AdminDashboard({
             {list.length === 0 && (
               <tr>
                 <td colSpan={COLUMNS.length} className="px-4 py-10 text-center text-ink-muted">
-                  沒有符合的預約。
+                  {t.dashboard.empty}
                 </td>
               </tr>
             )}
