@@ -1,4 +1,5 @@
 import "server-only";
+import { addressFromEnv } from "./email-address";
 
 /**
  * Minimal Gmail API integration (no SDK) for sending from the company mailbox.
@@ -44,6 +45,16 @@ function base64url(input: Buffer | string): string {
 /** RFC 2047 encode a header value (for CJK subjects). */
 function encodeHeader(value: string): string {
   return `=?UTF-8?B?${Buffer.from(value, "utf8").toString("base64")}?=`;
+}
+
+/**
+ * The From: header, or undefined to let Gmail use the authorised account's own
+ * address. A GMAIL_SENDER that is not an address is dropped rather than written
+ * into the header — production held an OAuth access token there, and sending
+ * with `From: ya29.…` fails in a way nothing surfaces.
+ */
+export function senderHeader(): string | undefined {
+  return addressFromEnv("GMAIL_SENDER", null) ?? undefined;
 }
 
 export interface GmailMessage {
@@ -93,7 +104,7 @@ function buildMime(msg: GmailMessage, from?: string): string {
  */
 export async function sendGmailMessage(opts: GmailMessage): Promise<{ id: string }> {
   const token = await accessToken();
-  const raw = base64url(buildMime(opts, process.env.GMAIL_SENDER));
+  const raw = base64url(buildMime(opts, senderHeader()));
   const res = await fetch(
     "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
     {
