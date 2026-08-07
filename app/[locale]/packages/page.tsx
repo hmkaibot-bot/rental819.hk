@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
-import { packages } from "@/lib/content/tours";
+import { packages, packageLeaflets } from "@/lib/content/tours";
 import { site, whatsappLink } from "@/lib/site";
 import { breadcrumbLd, packagesLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
 import JsonLd from "@/components/JsonLd";
-import { CheckIcon, WhatsAppIcon } from "@/components/icons";
+import { CheckIcon, WhatsAppIcon, PdfIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
@@ -78,13 +78,40 @@ export default function PackagesPage({ params }: { params: { locale: string } })
       {/* Package cards */}
       <section className="container-x pb-16">
         <div className="grid gap-6 md:grid-cols-2">
-          {list.map((p) => (
+          {list.map((p) => {
+            const leaflet = packageLeaflets[p.id];
+            return (
             <article key={p.id} className="card-hover flex flex-col p-7">
               <span className="text-xs font-semibold uppercase tracking-wide text-brand-600">
                 {p.region}
               </span>
               <h3 className="mt-2 text-xl font-bold">{p.title}</h3>
               <p className="mt-2 flex-1 text-sm leading-6 text-ink-muted">{p.blurb}</p>
+
+              {/* Full leaflet: day-by-day itinerary, the P3–P7 bike/price table
+                  and the booking terms. Opens in a new tab so the reader keeps
+                  their place on the page. */}
+              {leaflet && (
+                <a
+                  href={leaflet.file}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 flex items-center gap-3 rounded-xl border border-brand-100 bg-brand-50/60 px-4 py-3 transition hover:border-brand-300 hover:bg-brand-50"
+                >
+                  <PdfIcon className="h-6 w-6 shrink-0 text-brand-600" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold text-brand-800">
+                      {isEn ? "Full package leaflet" : "套票詳情單張"}
+                    </span>
+                    <span className="block text-xs text-ink-muted">
+                      {isEn
+                        ? `Day-by-day itinerary, bike tiers & prices · PDF ${leaflet.mb} MB · Chinese`
+                        : `逐日行程、車款級別及價目表 · PDF ${leaflet.mb} MB`}
+                    </span>
+                  </span>
+                </a>
+              )}
+
               <div className="mt-5 flex items-end justify-between border-t border-slate-100 pt-5">
                 <div>
                   <p className="text-xs text-ink-muted">{p.tiers}</p>
@@ -110,7 +137,8 @@ export default function PackagesPage({ params }: { params: { locale: string } })
                 </a>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
 
