@@ -118,6 +118,12 @@ export interface GmailAccountInfo {
   account: string;
   /** Addresses this account may put in From:, and whether each is verified. */
   sendAs: { address: string; verified: boolean; isDefault: boolean }[];
+  /**
+   * False when the alias list could not be read at all — the original
+   * authorisation only asked for gmail.compose, which does not cover
+   * settings.sendAs. An empty list then means "unknown", not "no aliases".
+   */
+  sendAsReadable: boolean;
 }
 
 /**
@@ -160,6 +166,7 @@ export async function gmailAccount(): Promise<GmailAccountInfo> {
 
   return {
     account: profile.emailAddress ?? "",
+    sendAsReadable: sendAsRes.ok,
     sendAs: sendAs.map((s) => ({
       address: s.sendAsEmail ?? "",
       // The primary address needs no verification; aliases must be "accepted".
