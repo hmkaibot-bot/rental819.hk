@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAuthed } from "@/lib/admin/auth";
+import { isAuthed, canWrite } from "@/lib/admin/auth";
 import { getReservation } from "@/lib/reservations/store";
 import { jpReservationEmail, customerConfirmEmail } from "@/lib/reservations/emails";
 import { JP_PARTNER_EMAIL, INTERNAL_COPY } from "@/lib/reservations/recipients";
@@ -20,6 +20,11 @@ export async function POST(request: Request) {
   if (!isAuthed()) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
+  // Sending is irreversible and reaches a customer or the Japan partner, so it
+  // is a write even though it changes no row.
+  if (!canWrite()) {
+    return NextResponse.json({ ok: false, error: "read_only" }, { status: 403 });
+  }
   if (!isGmailConfigured()) {
     return NextResponse.json({ ok: false, error: "gmail_not_configured" }, { status: 400 });
   }
@@ -37,7 +42,10 @@ export async function POST(request: Request) {
     ? jpReservationEmail(r)
     : customerConfirmEmail(r, lang === "zh" ? "zh" : "en");
   const to = isJp ? JP_PARTNER_EMAIL : (r.email ?? "").trim();
-  const html = isJp ? undefined : (mail as { html?: string }).html;
+  // Both mails are HTML now. This used to force the JP one to plain text, which
+  // meant the table only ever existed in the admin preview — the copy that
+  // reached Japan was still the old text body.
+  const html = (mail as { html?: string }).html;
 
   if (!to) {
     // Only reachable for the customer mail — the JP address is a constant.

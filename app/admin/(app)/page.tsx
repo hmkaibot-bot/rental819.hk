@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { listReservations } from "@/lib/reservations/store";
+import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
 import { adminDict, type AdminLang } from "@/lib/admin/i18n";
 import {
@@ -178,6 +179,7 @@ export default async function AdminDashboard({
   searchParams: { tab?: string; status?: string; sort?: string; dir?: string; q?: string };
 }) {
   const all = await listReservations();
+  const readOnly = !canWrite();
   const lang = getAdminLang();
   const t = adminDict(lang);
 
@@ -245,9 +247,11 @@ export default async function AdminDashboard({
               {t.dashboard.clear}
             </Link>
           )}
-          <Link href="/admin/reservations/new" className="btn-brand text-sm">
-            {t.dashboard.newBooking}
-          </Link>
+          {!readOnly && (
+            <Link href="/admin/reservations/new" className="btn-brand text-sm">
+              {t.dashboard.newBooking}
+            </Link>
+          )}
         </div>
       </div>
 

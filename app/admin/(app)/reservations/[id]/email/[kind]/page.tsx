@@ -4,6 +4,7 @@ import { getReservation } from "@/lib/reservations/store";
 import { jpReservationEmail, customerConfirmEmail } from "@/lib/reservations/emails";
 import { JP_PARTNER_EMAIL, INTERNAL_COPY } from "@/lib/reservations/recipients";
 import { isGmailConfigured } from "@/lib/gmail";
+import { canWrite } from "@/lib/admin/auth";
 import { getAdminDict } from "@/lib/admin/lang";
 import EmailPreview from "@/components/admin/EmailPreview";
 import SendEmailButton from "@/components/admin/SendEmailButton";
@@ -22,6 +23,7 @@ export default async function EmailDraft({
   if (params.kind !== "jp" && params.kind !== "customer") notFound();
 
   const t = getAdminDict();
+  const readOnly = !canWrite();
   const isJp = params.kind === "jp";
   const lang: "en" | "zh" = searchParams.lang === "zh" ? "zh" : "en";
   const mail = isJp ? jpReservationEmail(r) : customerConfirmEmail(r, lang);
@@ -84,6 +86,7 @@ export default async function EmailDraft({
             lang={lang}
             enabled={isGmailConfigured()}
             hasRecipient={!!to}
+            readOnly={readOnly}
             t={t.email}
           />
         </div>

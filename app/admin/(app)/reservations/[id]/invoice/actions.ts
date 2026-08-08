@@ -1,5 +1,7 @@
 "use server";
 
+import { assertCanWrite } from "@/lib/admin/auth";
+
 import { revalidatePath } from "next/cache";
 import { updateReservation } from "@/lib/reservations/store";
 import type { InvoiceItem, Reservation } from "@/lib/reservations/types";
@@ -12,6 +14,7 @@ export async function saveInvoice(input: {
   settlement?: Reservation["settlement"];
   markInvoiced?: boolean;
 }) {
+  assertCanWrite();
   await updateReservation(input.id, {
     si_number: input.si_number || null,
     invoice_date: input.invoice_date || null,

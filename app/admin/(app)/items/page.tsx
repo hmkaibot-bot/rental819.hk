@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listFeeItems } from "@/lib/reservations/items-store";
+import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
 import { adminDict } from "@/lib/admin/i18n";
 import { rt819GroupLabels } from "@/lib/reservations/items";
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function FeeItemsPage() {
   const items = await listFeeItems();
+  const readOnly = !canWrite();
   const lang = getAdminLang();
   const t = adminDict(lang);
 
@@ -24,7 +26,7 @@ export default async function FeeItemsPage() {
         </Link>
       </div>
 
-      <FeeItemsEditor items={items} t={t.items} groupLabels={rt819GroupLabels(lang)} />
+      <FeeItemsEditor items={items} t={t.items} groupLabels={rt819GroupLabels(lang)} readOnly={readOnly} />
     </div>
   );
 }
