@@ -36,12 +36,14 @@ export default function InvoiceEditor({
   catalog = RT819_ITEMS,
   t,
   groupLabels = RT819_GROUP_LABELS,
+  readOnly = false,
 }: {
   reservation: Reservation;
   seed: InvoiceItem[];
   catalog?: Rt819Item[];
   t: AdminDict["invoice"];
   groupLabels?: Record<Rt819Item["group"], string>;
+  readOnly?: boolean;
 }) {
   const r = reservation;
   const settlement = (r.settlement ?? {}) as Record<string, unknown>;
@@ -115,6 +117,10 @@ export default function InvoiceEditor({
     <div>
       {/* ---- Editor (hidden when printing) ---- */}
       <div className="no-print mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+        {/* A read-only session can still read and print the invoice, but every
+            field is inert — leaving them live would let someone type a whole
+            invoice that vanishes with no error. */}
+        <fieldset disabled={readOnly} className="contents">
         <div className="grid gap-3 sm:grid-cols-4">
           <label className="text-sm">
             <span className="mb-1 block font-medium text-ink-soft">{t.siNo}</span>
@@ -201,13 +207,20 @@ export default function InvoiceEditor({
           </div>
         </div>
 
+        </fieldset>
+
         <div className="mt-4 flex flex-wrap gap-2">
-          <button onClick={() => save(true)} disabled={pending} className="btn-primary text-sm disabled:opacity-60">
-            {pending ? t.saving : saved ? t.savedOk : t.saveAndInvoice}
-          </button>
-          <button onClick={() => save(false)} disabled={pending} className="btn-outline text-sm">
-            {t.saveOnly}
-          </button>
+          {!readOnly && (
+            <>
+              <button onClick={() => save(true)} disabled={pending} className="btn-primary text-sm disabled:opacity-60">
+                {pending ? t.saving : saved ? t.savedOk : t.saveAndInvoice}
+              </button>
+              <button onClick={() => save(false)} disabled={pending} className="btn-outline text-sm">
+                {t.saveOnly}
+              </button>
+            </>
+          )}
+          {/* Printing is read-only and stays available to everyone. */}
           <button onClick={() => window.print()} className="btn-brand text-sm">
             {t.print}
           </button>

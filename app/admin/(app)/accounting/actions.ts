@@ -1,5 +1,7 @@
 "use server";
 
+import { assertCanWrite } from "@/lib/admin/auth";
+
 import { revalidatePath } from "next/cache";
 import { updateReservation } from "@/lib/reservations/store";
 
@@ -10,6 +12,7 @@ import { updateReservation } from "@/lib/reservations/store";
  * supplier_paid_date, not the booking status (which follows the Excel pipeline).
  */
 export async function recordSupplierPayment(formData: FormData) {
+  assertCanWrite();
   const ids = formData.getAll("ids").map(String).filter(Boolean);
   if (ids.length === 0) return;
   const paid = formData.get("paid") !== "0";

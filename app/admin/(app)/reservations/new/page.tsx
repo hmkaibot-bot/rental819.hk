@@ -5,6 +5,8 @@ import {
   JP_ABILITY_OPTIONS,
   EN_ABILITY_OPTIONS,
 } from "@/lib/reservations/types";
+import { redirect } from "next/navigation";
+import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
 import { adminDict } from "@/lib/admin/i18n";
 import AbilitySelect from "@/components/admin/AbilitySelect";
@@ -45,6 +47,9 @@ const ADDON_CHECKS = ADDON_LABELS.filter(
 );
 
 export default function NewReservationPage() {
+  // This page exists only to create a record — send a read-only session back to
+  // the list rather than showing a form whose submit can never succeed.
+  if (!canWrite()) redirect("/admin");
   const lang = getAdminLang();
   const t = adminDict(lang);
   const f = t.fields;

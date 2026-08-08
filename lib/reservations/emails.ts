@@ -1,21 +1,15 @@
 import { ADDON_LABELS, type Reservation } from "./types";
 import { site } from "@/lib/site";
 
-function addonList(r: Reservation, lang: "zh" | "en" = "zh"): string {
+/** Add-ons as a one-line summary, for the customer's confirmation email. */
+function addonList(r: Reservation): string {
   const on: string[] = [];
   for (const a of ADDON_LABELS) {
-    const label = lang === "en" ? a.en : a.zh;
     const v = r.addons?.[a.key];
-    if (typeof v === "number" && v > 0) on.push(`${label} x${v}`);
-    else if (v === true) on.push(label);
+    if (typeof v === "number" && v > 0) on.push(`${a.zh} x${v}`);
+    else if (v === true) on.push(a.zh);
   }
   return on.length ? on.join(", ") : "—";
-}
-
-function period(r: Reservation): string {
-  const a = [r.pickup_date, r.pickup_time].filter(Boolean).join(" ");
-  const b = [r.return_date, r.return_time].filter(Boolean).join(" ");
-  return `${a || "?"}  →  ${b || "?"}`;
 }
 
 function rentalDays(r: Reservation): number {
@@ -34,42 +28,152 @@ function paymentStatus(r: Reservation, lang: EmailLang = "en"): string {
   return paid ? "Paid" : "Pending";
 }
 
-/** Email to Japan Rental819 to request/confirm the booking (step 4). Plain text. */
+/** `2026-08-09` → `2026/08/09`, the form the Japan office reads. */
+function slashDate(v: string | null | undefined): string {
+  const s = (v ?? "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s.replace(/-/g, "/") : s;
+}
+
+/**
+ * `14:00:00` → `14:00`. Postgres `time` columns come back with seconds, which
+ * the demo fixtures (hand-written as `14:00`) do not reproduce — so this only
+ * shows up against real data.
+ */
+function hhmm(v: string | null | undefined): string {
+  const s = (v ?? "").trim();
+  return /^\d{2}:\d{2}(:\d{2})?$/.test(s) ? s.slice(0, 5) : s;
+}
+
+/**
+ * The OPTION(S) REQUEST rows, in the order the Japan office's own sheet lists
+ * them. Helmets get one row per unit rather than a quantity, matching that
+ * sheet — two of each are offered, which is the most a booking has ever asked
+ * for. ETC is absent by design: it is arranged at the branch on collection, not
+ * reserved ahead. CARDO is absent too — that is a Hong Kong-side rental and
+ * never involves Japan.
+ */
+function optionRows(r: Reservation): { label: string; on: boolean }[] {
+  const a = r.addons ?? {};
+  const full = Number(a.full_face) || 0;
+  const open = Number(a.open_face) || 0;
+  // Two rows each is what the sheet shows, but the booking form accepts any
+  // number — so grow the block rather than silently under-ordering helmets.
+  const helmets = (label: string, qty: number) =>
+    Array.from({ length: Math.max(2, qty) }, (_, i) => ({ label, on: i < qty }));
+  return [
+    ...helmets("FULL FACE", full),
+    ...helmets("OPEN FACE", open),
+    { label: "TOP CASE", on: a.topcase === true },
+    { label: "SIDE CASE", on: a.pannier === true },
+    { label: "SIDE BAG", on: a.sidebag === true },
+    { label: "SHUTTLE BUS", on: a.shuttle_bus === true },
+    { label: "LUGGAGE STORAGE", on: a.luggage_storage === true },
+    { label: "MAMO RIDE", on: a.mamoride === true },
+  ];
+}
+
+/**
+ * Email to Rental819 Japan requesting the booking (step 4).
+ *
+ * Laid out as the tables the Japan office already reads off — the same row
+ * order and wording as the message the team used to compose by hand. Returns
+ * HTML plus a plain-text fallback for clients that will not render it.
+ */
 export function jpReservationEmail(r: Reservation) {
   const subject = `RENTAL819 RESERVATION #${r.booking_ref ?? ""}`;
-  const dash = (v: string | null | undefined) => (v && String(v).trim()) || "—";
-  const body = `Dear Rental819 team,
+  const val = (v: string | null | undefined) => (v ?? "").toString().trim();
 
-This is Helmet King, your agent in Hong Kong and Macau.
-We would like to request the following motorcycle rental reservation.
+  const booking: [string, string][] = [
+    ["BOOKING REF #", val(r.booking_ref)],
+    ["SHOP", val(r.shop)],
+    ["RENTAL DATE", slashDate(r.pickup_date)],
+    ["RENTAL TIME", hhmm(r.pickup_time)],
+    ["RETURNING DATE", slashDate(r.return_date)],
+    ["RETURNING TIME", hhmm(r.return_time)],
+    ["BIKE PREFERENCE #1", val(r.bike_pref_1)],
+    ["BIKE PREFERENCE #2", val(r.bike_pref_2)],
+    ["BIKE PREFERENCE #3", val(r.bike_pref_3)],
+  ];
 
-■ Booking ref: ${dash(r.booking_ref)}
-■ Shop: ${dash(r.shop)}
-■ Rental period: ${period(r)}
+  const customer: [string, string][] = [
+    ["NAME", [val(r.name_en), val(r.name_zh)].filter(Boolean).join(" / ")],
+    ["GENDER", val(r.gender)],
+    ["DATE OF BIRTH", slashDate(r.dob)],
+    ["EMAIL", val(r.email)],
+    ["JAPANESE", val(r.japanese_ability)],
+    ["ENGLISH", val(r.english_ability)],
+    ["ADDRESS IN JAPAN", val(r.jp_address)],
+    ["PHONE IN JAPAN", val(r.jp_phone)],
+  ];
 
-[Customer]
-- Name: ${dash(r.name_en)} / ${dash(r.name_zh)}
-- Gender: ${dash(r.gender)}
-- Date of birth: ${dash(r.dob)}
-- Email: ${dash(r.email)}
-- Japanese level: ${dash(r.japanese_ability)}
-- English level: ${dash(r.english_ability)}
-- Address in Japan: ${dash(r.jp_address)}
-- Phone in Japan: ${dash(r.jp_phone)}
+  const options = optionRows(r);
 
-[Preferred motorcycle]
-1. ${dash(r.bike_pref_1)}
-2. ${dash(r.bike_pref_2)}
-3. ${dash(r.bike_pref_3)}
+  // ---- plain-text fallback ----
+  const pad = (s: string) => s.padEnd(20, " ");
+  const textRows = (rows: [string, string][]) =>
+    rows.map(([k, v]) => `  ${pad(k)}${v || "-"}`).join("\n");
+  const body = `Dear Ms Amano & team,
 
-[Add-ons]
-${addonList(r, "en")}
+Greetings from Motoblog HK.
+Below please find our new motorcycle rental request.
 
-Please confirm availability and the reservation.
+[BOOKING]
+${textRows(booking)}
+
+[OPTION(S) REQUEST]
+${options.map((o) => `  ${pad(o.label)}${o.on ? "Y" : "-"}`).join("\n")}
+
+[CUSTOMER]
+${textRows(customer)}
+
+Please refer to the online excel file for reference.
 Thank you very much for your support.
 
-Helmet King × RENTAL819.HK`;
-  return { subject, body };
+Motoblog HK / Helmet King × RENTAL819.HK`;
+
+  // ---- HTML ----
+  const border = "1px solid #000000";
+  const th = `padding:6px 10px;border:${border};font-weight:700;white-space:nowrap;text-align:left`;
+  const td = `padding:6px 10px;border:${border};text-align:center`;
+  const row = ([k, v]: [string, string]) =>
+    `<tr><td style="${th}">${escapeHtml(k)}</td><td style="${td}">${escapeHtml(v)}</td></tr>`;
+  const table = (inner: string) =>
+    `<table role="presentation" style="border-collapse:collapse;width:100%;max-width:620px;margin:0 0 18px;font-size:14px;border:2px solid #000000"><tbody>${inner}</tbody></table>`;
+  const heading = (label: string) =>
+    `<tr><td colspan="2" style="${th};background:#f1f5f9">${label}</td></tr>`;
+
+  const html = `<div style="margin:0;padding:0;background:#ffffff">
+  <div style="max-width:680px;margin:0 auto;padding:8px 4px;font-family:-apple-system,'Segoe UI',Helvetica,Arial,'Noto Sans JP',sans-serif;color:#0f172a;line-height:1.6">
+    <p style="margin:0 0 14px">Dear Ms Amano &amp; team,</p>
+    <p style="margin:0 0 18px">
+      Greetings from Motoblog HK.<br />
+      Below please find our new motorcycle rental request.
+    </p>
+
+    ${table(booking.map(row).join(""))}
+
+    ${table(
+      heading("OPTION(S) REQUEST") +
+        options
+          .map(
+            (o) =>
+              `<tr><td style="${th}">${o.label}</td><td style="${td}">${o.on ? "Y" : "&nbsp;"}</td></tr>`,
+          )
+          .join(""),
+    )}
+
+    ${table(heading("CUSTOMER") + customer.map(row).join(""))}
+
+    <p style="margin:0 0 14px">Please refer to the online excel file for reference.</p>
+    <p style="margin:0 0 18px">Thank you very much for your support.</p>
+    <p style="margin:0;color:#334155">
+      Motoblog HK / Helmet King × RENTAL819.HK<br />
+      <a href="mailto:${site.email}" style="color:#005bac">${site.email}</a>
+    </p>
+  </div>
+</div>`;
+
+  return { subject, body, html };
 }
 
 /**

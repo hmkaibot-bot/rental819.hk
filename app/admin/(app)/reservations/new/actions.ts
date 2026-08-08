@@ -1,5 +1,7 @@
 "use server";
 
+import { assertCanWrite } from "@/lib/admin/auth";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createReservation } from "@/lib/reservations/store";
@@ -7,6 +9,7 @@ import type { ReservationAddons } from "@/lib/reservations/types";
 
 /** Create a reservation from the back-office form. */
 export async function createReservationAction(formData: FormData) {
+  assertCanWrite();
   const s = (k: string) => {
     const v = formData.get(k);
     return v == null || String(v).trim() === "" ? null : String(v).trim();

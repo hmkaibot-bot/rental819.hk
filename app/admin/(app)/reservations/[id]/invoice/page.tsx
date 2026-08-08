@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getReservation } from "@/lib/reservations/store";
 import { getCatalog } from "@/lib/reservations/items-store";
 import { defaultInvoiceItems } from "@/lib/reservations/invoice";
+import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
 import { adminDict } from "@/lib/admin/i18n";
 import { rt819GroupLabels } from "@/lib/reservations/items";
@@ -18,6 +19,7 @@ export default async function InvoicePage({
   const r = await getReservation(params.id);
   if (!r) notFound();
   const catalog = await getCatalog();
+  const readOnly = !canWrite();
   const lang = getAdminLang();
   const t = adminDict(lang);
 
@@ -38,6 +40,7 @@ export default async function InvoicePage({
         catalog={catalog}
         t={t.invoice}
         groupLabels={rt819GroupLabels(lang)}
+        readOnly={readOnly}
       />
     </div>
   );

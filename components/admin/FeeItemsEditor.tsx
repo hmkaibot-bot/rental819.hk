@@ -34,10 +34,12 @@ export default function FeeItemsEditor({
   items,
   t,
   groupLabels = RT819_GROUP_LABELS,
+  readOnly = false,
 }: {
   items: FeeItemRow[];
   t: AdminDict["items"];
   groupLabels?: Record<Rt819Item["group"], string>;
+  readOnly?: boolean;
 }) {
   const [draft, setDraft] = useState<Draft>(() =>
     Object.fromEntries(
@@ -133,6 +135,7 @@ export default function FeeItemsEditor({
                           onChange={(e) =>
                             set(it.code, "unit_price", Number(e.target.value))
                           }
+                          disabled={readOnly}
                           className={cell}
                         />
                       </td>
@@ -144,6 +147,7 @@ export default function FeeItemsEditor({
                           onChange={(e) =>
                             set(it.code, "cost_hkd", Number(e.target.value))
                           }
+                          disabled={readOnly}
                           className={cell}
                         />
                       </td>
@@ -155,6 +159,7 @@ export default function FeeItemsEditor({
                           onChange={(e) =>
                             set(it.code, "yen_cost", Number(e.target.value))
                           }
+                          disabled={readOnly}
                           className={cell}
                         />
                       </td>
@@ -177,7 +182,9 @@ export default function FeeItemsEditor({
         ))}
       </div>
 
-      {/* Sticky save bar */}
+      {/* Sticky save bar — this rewrites the catalogue every future invoice
+          is priced from, so it is admin-only. */}
+      {!readOnly && (
       <div className="sticky bottom-4 mt-6 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-card backdrop-blur">
         <span className="text-sm text-ink-muted">
           {dirty.length ? `${t.dirty.pre}${dirty.length}${t.dirty.post}` : t.hint}
@@ -190,6 +197,7 @@ export default function FeeItemsEditor({
           {pending ? t.saving : saved ? t.savedOk : t.saveChanges}
         </button>
       </div>
+      )}
     </div>
   );
 }
