@@ -72,12 +72,15 @@ function addressList(values?: string[]): string | null {
   return list.length ? list.join(", ") : null;
 }
 
+const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
+
 function buildMime(msg: GmailMessage, from?: string): string {
-  const contentType = msg.html
-    ? 'text/html; charset="UTF-8"'
-    : 'text/plain; charset="UTF-8"';
   const cc = addressList(msg.cc);
   const bcc = addressList(msg.bcc);
+  // A fixed boundary is fine — it only has to be absent from the parts, and
+  // base64 bodies cannot contain it.
+  const boundary = "r819-alt-boundary";
+
   const headers = [
     from ? `From: ${from}` : null,
     msg.to ? `To: ${msg.to}` : null,
@@ -87,13 +90,37 @@ function buildMime(msg: GmailMessage, from?: string): string {
     bcc ? `Bcc: ${bcc}` : null,
     `Subject: ${encodeHeader(msg.subject)}`,
     "MIME-Version: 1.0",
-    `Content-Type: ${contentType}`,
-    "Content-Transfer-Encoding: base64",
+    msg.html
+      ? `Content-Type: multipart/alternative; boundary="${boundary}"`
+      : 'Content-Type: text/plain; charset="UTF-8"',
+    msg.html ? null : "Content-Transfer-Encoding: base64",
   ]
     .filter(Boolean)
     .join("\r\n");
-  const encodedBody = Buffer.from(msg.html ?? msg.body, "utf8").toString("base64");
-  return `${headers}\r\n\r\n${encodedBody}`;
+
+  if (!msg.html) return `${headers}\r\n\r\n${b64(msg.body)}`;
+
+  // multipart/alternative rather than a bare text/html part: this used to send
+  // the HTML *instead of* the text, so the plain-text body the callers build
+  // never actually went on the wire. Clients that will not render HTML — and
+  // anything downstream reading the archived Cc copy — got nothing readable.
+  // Least-preferred part first, per RFC 2046.
+  return [
+    headers,
+    "",
+    `--${boundary}`,
+    'Content-Type: text/plain; charset="UTF-8"',
+    "Content-Transfer-Encoding: base64",
+    "",
+    b64(msg.body),
+    `--${boundary}`,
+    'Content-Type: text/html; charset="UTF-8"',
+    "Content-Transfer-Encoding: base64",
+    "",
+    b64(msg.html),
+    `--${boundary}--`,
+    "",
+  ].join("\r\n");
 }
 
 /**
