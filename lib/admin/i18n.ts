@@ -247,6 +247,8 @@ export interface AdminDict {
     copy: string;
     copyAll: string;
     copied: string;
+    copyRichHint: string;
+    copyPlainHint: string;
     to: string;
     cc: string;
     bcc: string;
@@ -484,6 +486,8 @@ const zh: AdminDict = {
     copy: "複製",
     copyAll: "複製全文",
     copied: "已複製 ✓",
+    copyRichHint: "貼上 Gmail／Outlook 會保留表格框線同對齊。",
+    copyPlainHint: "純文字：貼上到 Gmail 欄位可能對唔齊；寄件建議用「直接發送」，或切去「預覽」再複製。",
     to: "收件人",
     cc: "副本 Cc",
     bcc: "密件副本 Bcc",
@@ -721,6 +725,8 @@ const ja: AdminDict = {
     copy: "コピー",
     copyAll: "全文をコピー",
     copied: "コピーしました ✓",
+    copyRichHint: "Gmail・Outlook に貼り付けると表の枠線と桁揃えが保持されます。",
+    copyPlainHint: "プレーンテキスト：Gmail では桁がずれることがあります。送信は「直接送信」、または「プレビュー」からコピーしてください。",
     to: "宛先",
     cc: "Cc",
     bcc: "Bcc",
