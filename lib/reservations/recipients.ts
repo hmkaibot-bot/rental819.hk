@@ -11,7 +11,7 @@ import { addressFromEnv, isEmailAddress } from "@/lib/email-address";
 /** Rental819 Japan — the partner that actually holds the bikes. */
 export const JP_PARTNER_EMAIL = addressFromEnv(
   "RENTAL819_JP_EMAIL",
-  "info@mototoursjapan.com",
+  "inquiry@mototoursjapan.com",
 );
 
 /**
