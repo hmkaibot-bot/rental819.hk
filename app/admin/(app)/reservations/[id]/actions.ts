@@ -1,5 +1,7 @@
 "use server";
 
+import { assertCanWrite } from "@/lib/admin/auth";
+
 import { revalidatePath } from "next/cache";
 import { getReservation, updateReservation } from "@/lib/reservations/store";
 import {
@@ -53,6 +55,7 @@ const NULLABLE_TEXT = [
 
 /** Generic patch: applies whatever editable fields are present in the form. */
 export async function patchReservation(formData: FormData) {
+  assertCanWrite();
   const id = String(formData.get("id"));
   const patch: Partial<Reservation> = {};
 
@@ -85,6 +88,7 @@ export async function patchReservation(formData: FormData) {
  * explicitly rather than merged over the existing object.
  */
 export async function saveAddons(formData: FormData) {
+  assertCanWrite();
   const id = String(formData.get("id"));
   const addons: ReservationAddons = {};
   for (const a of ADDON_LABELS) {
@@ -107,6 +111,7 @@ export async function saveAddons(formData: FormData) {
  * the base bike rental, so the two can never drift out of step.
  */
 export async function saveCostItems(formData: FormData) {
+  assertCanWrite();
   const id = String(formData.get("id"));
   const items: CostItems = {};
   for (const l of COST_ITEM_LABELS) {
@@ -143,6 +148,7 @@ export async function saveCostItems(formData: FormData) {
  * The invoice then seeds its line items from all of this.
  */
 export async function confirmReservation(formData: FormData) {
+  assertCanWrite();
   const id = String(formData.get("id"));
   const current = await getReservation(id);
 
@@ -191,6 +197,7 @@ export async function confirmReservation(formData: FormData) {
 
 /** Toggle the HK-side CARDO value-add (handled by Helmet King, not Japan). */
 export async function setCardo(formData: FormData) {
+  assertCanWrite();
   const id = String(formData.get("id"));
   const current = await getReservation(id);
   const cardo = formData.get("cardo") === "on";

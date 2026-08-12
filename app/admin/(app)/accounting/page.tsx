@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listReservations } from "@/lib/reservations/store";
 import { invoiceTotal } from "@/lib/reservations/invoice";
 import { RT819_EXCHANGE_RATE } from "@/lib/reservations/items";
+import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
 import { adminDict } from "@/lib/admin/i18n";
 import { statusMeta, type Reservation } from "@/lib/reservations/types";
@@ -44,6 +45,7 @@ function netCostHkd(r: Reservation) {
 
 export default async function AccountingPage() {
   const all = await listReservations();
+  const readOnly = !canWrite();
   const lang = getAdminLang();
   const t = adminDict(lang);
   // A booking counts toward accounting once it is billed — an in-app pipeline
@@ -85,7 +87,7 @@ export default async function AccountingPage() {
           {t.accounting.toReservations}
         </Link>
       </div>
-      <AccountingTable rows={rows} t={t.accounting} />
+      <AccountingTable rows={rows} t={t.accounting} readOnly={readOnly} />
     </div>
   );
 }

@@ -14,6 +14,7 @@ export default function SendEmailButton({
   lang,
   enabled,
   hasRecipient,
+  readOnly,
   t,
 }: {
   id: string;
@@ -21,11 +22,17 @@ export default function SendEmailButton({
   lang?: "en" | "zh";
   enabled: boolean;
   hasRecipient: boolean;
+  readOnly: boolean;
   t: AdminDict["email"];
 }) {
   const [state, setState] = useState<"idle" | "armed" | "sending" | "done" | "error">("idle");
   const [detail, setDetail] = useState("");
 
+  // The arming click is client state only — the real guard is the 403 the send
+  // route returns for a read-only session. This just removes a dead control.
+  if (readOnly) {
+    return <p className="text-xs text-ink-muted">{t.readOnlyNotice}</p>;
+  }
   if (!enabled) {
     return <p className="text-xs text-ink-muted">{t.notConfigured}</p>;
   }
