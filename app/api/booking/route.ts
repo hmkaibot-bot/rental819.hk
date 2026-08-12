@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createReservation } from "@/lib/reservations/store";
 import { notifyNewBooking } from "@/lib/reservations/notify";
+import { bookingReceivedEmail } from "@/lib/reservations/emails";
+import { INTERNAL_COPY } from "@/lib/reservations/recipients";
+import { isGmailConfigured, sendGmailMessage } from "@/lib/gmail";
 import type { ReservationAddons } from "@/lib/reservations/types";
 
 export const runtime = "nodejs";
@@ -116,7 +119,7 @@ export async function POST(request: Request) {
     .filter(Boolean)
     .join("\n");
 
-  let created: { id: string };
+  let created: { id: string; booking_ref: string | null };
   try {
     created = await createReservation({
       name_zh: clean(body.name_zh),
@@ -150,9 +153,44 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "store_failed" }, { status: 500 });
   }
 
-  // Push a Slack alert to the 電單車旅行 channel (soft-fail — never blocks booking).
+  // Acknowledge to the customer right away — 已收到申請, not a confirmation.
+  // Soft-fail: a mail problem must never break the submission, but its outcome
+  // is reported in the Slack notice so staff know to follow up by hand.
+  let ackEmailSent = false;
+  if (isGmailConfigured()) {
+    try {
+      const ack = bookingReceivedEmail({
+        booking_ref: created.booking_ref,
+        name_en: clean(body.name_en),
+        name_zh: clean(body.name_zh),
+        shop: clean(body.shop),
+        pickup_date: clean(body.pickup_date),
+        pickup_time: clean(body.pickup_time),
+        return_date: clean(body.return_date),
+        return_time: clean(body.return_time),
+        bike_pref_1: clean(body.bike_pref_1),
+        bike_pref_2: clean(body.bike_pref_2),
+        bike_pref_3: clean(body.bike_pref_3),
+        addons,
+        promo: clean(body.promo),
+      });
+      await sendGmailMessage({
+        to: email,
+        subject: ack.subject,
+        body: ack.body,
+        html: ack.html,
+        bcc: INTERNAL_COPY,
+      });
+      ackEmailSent = true;
+    } catch (err) {
+      console.error("booking acknowledgement email failed", err);
+    }
+  }
+
+  // 新預約提示 to the Slack 電單車旅行 channel (soft-fail — never blocks booking).
   await notifyNewBooking({
     id: created.id,
+    booking_ref: created.booking_ref,
     name: name,
     name_zh: clean(body.name_zh),
     shop: clean(body.shop),
@@ -161,10 +199,13 @@ export async function POST(request: Request) {
     return_date: clean(body.return_date),
     return_time: clean(body.return_time),
     bike_pref_1: clean(body.bike_pref_1),
+    bike_pref_2: clean(body.bike_pref_2),
+    bike_pref_3: clean(body.bike_pref_3),
     email,
     hk_phone: clean(body.hk_phone),
     addons,
     promo: clean(body.promo),
+    ackEmailSent,
   });
 
   const webhook = process.env.BOOKING_WEBHOOK_URL;
