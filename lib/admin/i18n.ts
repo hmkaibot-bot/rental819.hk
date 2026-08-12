@@ -259,6 +259,9 @@ export interface AdminDict {
     notConfigured: string;
     noRecipient: string;
     readOnlyNotice: string;
+    staffNameLabel: string;
+    staffNamePlaceholder: string;
+    staffNameRequired: string;
   };
   newBooking: {
     title: string;
@@ -493,6 +496,9 @@ const zh: AdminDict = {
     notConfigured: "（設定 Gmail API 後可由後台直接發送。見 .env.example）",
     noRecipient: "此預約未有客人電郵地址，請先在客人資料填寫。",
     readOnlyNotice: "（檢視模式：此帳戶不能發送郵件）",
+    staffNameLabel: "負責同事",
+    staffNamePlaceholder: "輸入姓名",
+    staffNameRequired: "請先輸入負責同事姓名",
   },
   newBooking: {
     title: "新增預約",
@@ -727,6 +733,9 @@ const ja: AdminDict = {
     notConfigured: "（Gmail API を設定すると管理画面から直接送信できます。.env.example を参照）",
     noRecipient: "この予約にはお客様のメールアドレスがありません。先にお客様情報へ入力してください。",
     readOnlyNotice: "（閲覧モード：このアカウントはメールを送信できません）",
+    staffNameLabel: "担当者",
+    staffNamePlaceholder: "氏名を入力",
+    staffNameRequired: "先に担当者名を入力してください",
   },
   newBooking: {
     title: "予約を追加",

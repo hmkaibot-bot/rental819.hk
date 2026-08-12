@@ -27,6 +27,12 @@ export default function SendEmailButton({
 }) {
   const [state, setState] = useState<"idle" | "armed" | "sending" | "done" | "error">("idle");
   const [detail, setDetail] = useState("");
+  const [staffName, setStaffName] = useState("");
+
+  // The JP mail is signed by the sending colleague, so their name is required
+  // before it can go out. The customer mail carries no such signature.
+  const isJp = kind === "jp";
+  const nameOk = !isJp || staffName.trim().length > 0;
 
   // The arming click is client state only — the real guard is the 403 the send
   // route returns for a read-only session. This just removes a dead control.
@@ -41,6 +47,7 @@ export default function SendEmailButton({
   }
 
   const send = async () => {
+    if (!nameOk) return;
     if (state === "idle") {
       setState("armed");
       return;
@@ -51,7 +58,7 @@ export default function SendEmailButton({
       const res = await fetch("/api/admin/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, kind, lang }),
+        body: JSON.stringify({ id, kind, lang, staffName: staffName.trim() || undefined }),
       });
       if (res.ok) {
         setState("done");
@@ -68,9 +75,22 @@ export default function SendEmailButton({
 
   return (
     <div className="flex flex-wrap items-center gap-3">
+      {isJp && (
+        <label className="flex items-center gap-1.5 text-sm text-ink-soft">
+          <span className="whitespace-nowrap">{t.staffNameLabel}</span>
+          <input
+            value={staffName}
+            onChange={(e) => setStaffName(e.target.value)}
+            placeholder={t.staffNamePlaceholder}
+            aria-label={t.staffNameLabel}
+            className="w-40 rounded-lg border border-slate-200 px-3 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+          />
+        </label>
+      )}
       <button
         onClick={send}
-        disabled={state === "sending" || state === "done"}
+        disabled={state === "sending" || state === "done" || !nameOk}
+        title={!nameOk ? t.staffNameRequired : undefined}
         className={`text-sm disabled:opacity-60 ${state === "armed" ? "btn-primary" : "btn-brand"}`}
       >
         {state === "sending" ? t.sending : state === "armed" ? t.confirmSend : t.send}
