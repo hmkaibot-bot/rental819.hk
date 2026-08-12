@@ -242,13 +242,10 @@ export interface AdminDict {
     customerIntro: string;
     subject: string;
     body: string;
-    preview: string;
-    plain: string;
     copy: string;
     copyAll: string;
     copied: string;
     copyRichHint: string;
-    copyPlainHint: string;
     to: string;
     cc: string;
     bcc: string;
@@ -481,13 +478,10 @@ const zh: AdminDict = {
     customerIntro: "揀語言後直接發送給客人；香港同事會收到密件副本。",
     subject: "主旨 Subject",
     body: "內容 Body",
-    preview: "預覽",
-    plain: "純文字",
     copy: "複製",
     copyAll: "複製全文",
     copied: "已複製 ✓",
-    copyRichHint: "貼上 Gmail／Outlook 會保留表格框線同對齊。",
-    copyPlainHint: "純文字：貼上到 Gmail 欄位可能對唔齊；寄件建議用「直接發送」，或切去「預覽」再複製。",
+    copyRichHint: "「複製全文」會複製保留格式版本：貼上 Gmail／Outlook 有齊表格框線同對齊。",
     to: "收件人",
     cc: "副本 Cc",
     bcc: "密件副本 Bcc",
@@ -720,13 +714,10 @@ const ja: AdminDict = {
     customerIntro: "言語を選んでお客様へ直接送信します。香港チームには Bcc で控えが届きます。",
     subject: "件名 Subject",
     body: "本文 Body",
-    preview: "プレビュー",
-    plain: "テキスト",
     copy: "コピー",
     copyAll: "全文をコピー",
     copied: "コピーしました ✓",
-    copyRichHint: "Gmail・Outlook に貼り付けると表の枠線と桁揃えが保持されます。",
-    copyPlainHint: "プレーンテキスト：Gmail では桁がずれることがあります。送信は「直接送信」、または「プレビュー」からコピーしてください。",
+    copyRichHint: "「全文をコピー」は書式付きでコピーされます。Gmail・Outlook に貼り付けると表の枠線と桁揃えが保持されます。",
     to: "宛先",
     cc: "Cc",
     bcc: "Bcc",
