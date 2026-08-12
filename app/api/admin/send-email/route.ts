@@ -37,7 +37,10 @@ export async function POST(request: Request) {
     ? jpReservationEmail(r)
     : customerConfirmEmail(r, lang === "zh" ? "zh" : "en");
   const to = isJp ? JP_PARTNER_EMAIL : (r.email ?? "").trim();
-  const html = isJp ? undefined : (mail as { html?: string }).html;
+  // Both mails are HTML now. This used to force the JP one to plain text, which
+  // meant the table only ever existed in the admin preview — the copy that
+  // reached Japan was still the old text body.
+  const html = (mail as { html?: string }).html;
 
   if (!to) {
     // Only reachable for the customer mail — the JP address is a constant.
