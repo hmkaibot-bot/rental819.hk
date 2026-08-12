@@ -29,17 +29,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "gmail_not_configured" }, { status: 400 });
   }
 
-  const { id, kind, lang } = (await request.json().catch(() => ({}))) as {
+  const { id, kind, lang, staffName } = (await request.json().catch(() => ({}))) as {
     id?: string;
     kind?: string;
     lang?: string;
+    staffName?: string;
   };
   const r = id ? await getReservation(id) : null;
   if (!r) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
 
   const isJp = kind === "jp";
+  const signer = (staffName ?? "").trim();
+  // The JP mail is signed by the sending colleague; the UI requires the name
+  // before it lets the button fire, and this backs that up server-side.
+  if (isJp && !signer) {
+    return NextResponse.json({ ok: false, error: "staff_required" }, { status: 400 });
+  }
   const mail = isJp
-    ? jpReservationEmail(r)
+    ? jpReservationEmail(r, signer)
     : customerConfirmEmail(r, lang === "zh" ? "zh" : "en");
   const to = isJp ? JP_PARTNER_EMAIL : (r.email ?? "").trim();
   // Both mails are HTML now. This used to force the JP one to plain text, which

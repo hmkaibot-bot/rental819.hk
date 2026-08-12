@@ -72,16 +72,24 @@ function optionRows(r: Reservation): { label: string; on: boolean }[] {
   ];
 }
 
+/** The admin login the Japan office is pointed to for the full booking detail. */
+const BOOKING_PANEL_URL = "https://rental819.hk/admin/login";
+
 /**
  * Email to Rental819 Japan requesting the booking (step 4).
  *
  * Laid out as the tables the Japan office already reads off — the same row
  * order and wording as the message the team used to compose by hand. Returns
  * HTML plus a plain-text fallback for clients that will not render it.
+ *
+ * `staffName` is the responsible colleague, signed under "Best regards,". It is
+ * typed on the send screen at the moment of sending, so the preview (called
+ * without it) simply shows "Best regards," on its own.
  */
-export function jpReservationEmail(r: Reservation) {
+export function jpReservationEmail(r: Reservation, staffName?: string) {
   const subject = `RENTAL819 RESERVATION #${r.booking_ref ?? ""}`;
   const val = (v: string | null | undefined) => (v ?? "").toString().trim();
+  const signer = (staffName ?? "").trim();
 
   const booking: [string, string][] = [
     ["BOOKING REF #", val(r.booking_ref)],
@@ -112,38 +120,46 @@ export function jpReservationEmail(r: Reservation) {
   const pad = (s: string) => s.padEnd(20, " ");
   const textRows = (rows: [string, string][]) =>
     rows.map(([k, v]) => `  ${pad(k)}${v || "-"}`).join("\n");
-  const body = `Dear Ms Amano & team,
-
-Greetings from Motoblog HK.
-Below please find our new motorcycle rental request.
-
-[BOOKING]
-${textRows(booking)}
-
-[OPTION(S) REQUEST]
-${options.map((o) => `  ${pad(o.label)}${o.on ? "Y" : "-"}`).join("\n")}
-
-[CUSTOMER]
-${textRows(customer)}
-
-Please refer to the online excel file for reference.
-Thank you very much for your support.
-
-Motoblog HK / Helmet King × RENTAL819.HK`;
+  const body = [
+    "Dear Ms Amano & team,",
+    "",
+    "Greetings from Motoblog HK.",
+    "Below please find our new motorcycle rental request.",
+    "",
+    "[BOOKING]",
+    textRows(booking),
+    "",
+    "[OPTION(S) REQUEST]",
+    options.map((o) => `  ${pad(o.label)}${o.on ? "Y" : "-"}`).join("\n"),
+    "",
+    "[CUSTOMER]",
+    textRows(customer),
+    "",
+    `Please refer to the booking panel (${BOOKING_PANEL_URL}) for more detail.`,
+    "Thank you very much for your support.",
+    "",
+    "Best regards,",
+    ...(signer ? [signer] : []),
+  ].join("\n");
 
   // ---- HTML ----
   const border = "1px solid #000000";
-  const th = `padding:6px 10px;border:${border};font-weight:700;white-space:nowrap;text-align:left`;
-  const td = `padding:6px 10px;border:${border};text-align:center`;
+  const th = `padding:8px 10px;border:${border};font-weight:700;white-space:nowrap;text-align:left`;
+  const td = `padding:8px 10px;border:${border};text-align:center`;
   const row = ([k, v]: [string, string]) =>
     `<tr><td style="${th}">${escapeHtml(k)}</td><td style="${td}">${escapeHtml(v)}</td></tr>`;
+  // The legacy `border` / `cellspacing` / `cellpadding` attributes are here on
+  // purpose alongside the CSS: when the rendered preview is copied out and
+  // pasted into Gmail's compose window, Gmail's sanitiser strips most inline
+  // styling — but it keeps these HTML attributes, so the gridlines survive.
   const table = (inner: string) =>
-    `<table role="presentation" style="border-collapse:collapse;width:100%;max-width:620px;margin:0 0 18px;font-size:14px;border:2px solid #000000"><tbody>${inner}</tbody></table>`;
+    `<table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse;width:100%;max-width:620px;margin:0 0 18px;font-size:14px;border:${border}"><tbody>${inner}</tbody></table>`;
   const heading = (label: string) =>
     `<tr><td colspan="2" style="${th};background:#f1f5f9">${label}</td></tr>`;
 
+  // Font matches the customer confirmation email so the two read as one house.
   const html = `<div style="margin:0;padding:0;background:#ffffff">
-  <div style="max-width:680px;margin:0 auto;padding:8px 4px;font-family:-apple-system,'Segoe UI',Helvetica,Arial,'Noto Sans JP',sans-serif;color:#0f172a;line-height:1.6">
+  <div style="max-width:680px;margin:0 auto;padding:8px 4px;font-family:-apple-system,'Segoe UI',Helvetica,Arial,'Noto Sans HK',sans-serif;color:#0f172a;line-height:1.6">
     <p style="margin:0 0 14px">Dear Ms Amano &amp; team,</p>
     <p style="margin:0 0 18px">
       Greetings from Motoblog HK.<br />
@@ -164,12 +180,9 @@ Motoblog HK / Helmet King × RENTAL819.HK`;
 
     ${table(heading("CUSTOMER") + customer.map(row).join(""))}
 
-    <p style="margin:0 0 14px">Please refer to the online excel file for reference.</p>
+    <p style="margin:0 0 14px">Please refer to the booking panel (<a href="${BOOKING_PANEL_URL}" style="color:#005bac">${BOOKING_PANEL_URL}</a>) for more detail.</p>
     <p style="margin:0 0 18px">Thank you very much for your support.</p>
-    <p style="margin:0;color:#334155">
-      Motoblog HK / Helmet King × RENTAL819.HK<br />
-      <a href="mailto:${site.email}" style="color:#005bac">${site.email}</a>
-    </p>
+    <p style="margin:0;color:#334155">Best regards,${signer ? `<br />${escapeHtml(signer)}` : ""}</p>
   </div>
 </div>`;
 
