@@ -78,6 +78,8 @@ export interface AdminDict {
     logout: string;
     demo: string;
     langAria: string;
+    viewerBadge: string;
+    viewerNotice: string;
   };
   common: {
     save: string;
@@ -94,6 +96,8 @@ export interface AdminDict {
   };
   login: {
     subtitle: string;
+    account: string;
+    accountHint: string;
     error: string;
     password: string;
     submit: string;
@@ -254,6 +258,7 @@ export interface AdminDict {
     failed: string;
     notConfigured: string;
     noRecipient: string;
+    readOnlyNotice: string;
   };
   newBooking: {
     title: string;
@@ -277,6 +282,8 @@ const zh: AdminDict = {
     logout: "登出",
     demo: "示範模式（未連接資料庫）— 顯示的是範例資料，任何修改不會儲存。設定 Supabase 後即可正式使用。",
     langAria: "介面語言",
+    viewerBadge: "檢視模式",
+    viewerNotice: "此帳戶只可查看資料，不能修改或發送。",
   },
   common: {
     save: "儲存",
@@ -293,6 +300,8 @@ const zh: AdminDict = {
   },
   login: {
     subtitle: "租車管理後台",
+    account: "帳戶（管理員可留空）",
+    accountHint: "inquiry@mototoursjapan.com",
     error: "密碼錯誤，請再試。",
     password: "管理密碼",
     submit: "登入",
@@ -483,6 +492,7 @@ const zh: AdminDict = {
     failed: "發送失敗，請重試。",
     notConfigured: "（設定 Gmail API 後可由後台直接發送。見 .env.example）",
     noRecipient: "此預約未有客人電郵地址，請先在客人資料填寫。",
+    readOnlyNotice: "（檢視模式：此帳戶不能發送郵件）",
   },
   newBooking: {
     title: "新增預約",
@@ -506,6 +516,8 @@ const ja: AdminDict = {
     logout: "ログアウト",
     demo: "デモモード（データベース未接続）— 表示されているのはサンプルデータで、変更は保存されません。Supabase を設定すると本番運用できます。",
     langAria: "表示言語",
+    viewerBadge: "閲覧モード",
+    viewerNotice: "このアカウントは閲覧のみです。変更や送信はできません。",
   },
   common: {
     save: "保存",
@@ -522,6 +534,8 @@ const ja: AdminDict = {
   },
   login: {
     subtitle: "レンタル管理画面",
+    account: "アカウント（管理者は空欄可）",
+    accountHint: "inquiry@mototoursjapan.com",
     error: "パスワードが違います。もう一度お試しください。",
     password: "管理パスワード",
     submit: "ログイン",
@@ -712,6 +726,7 @@ const ja: AdminDict = {
     failed: "送信に失敗しました。もう一度お試しください。",
     notConfigured: "（Gmail API を設定すると管理画面から直接送信できます。.env.example を参照）",
     noRecipient: "この予約にはお客様のメールアドレスがありません。先にお客様情報へ入力してください。",
+    readOnlyNotice: "（閲覧モード：このアカウントはメールを送信できません）",
   },
   newBooking: {
     title: "予約を追加",

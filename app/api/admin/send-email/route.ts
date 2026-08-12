@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAuthed } from "@/lib/admin/auth";
+import { isAuthed, canWrite } from "@/lib/admin/auth";
 import { getReservation } from "@/lib/reservations/store";
 import { jpReservationEmail, customerConfirmEmail } from "@/lib/reservations/emails";
 import { JP_PARTNER_EMAIL, INTERNAL_COPY } from "@/lib/reservations/recipients";
@@ -19,6 +19,11 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   if (!isAuthed()) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+  // Sending is irreversible and reaches a customer or the Japan partner, so it
+  // is a write even though it changes no row.
+  if (!canWrite()) {
+    return NextResponse.json({ ok: false, error: "read_only" }, { status: 403 });
   }
   if (!isGmailConfigured()) {
     return NextResponse.json({ ok: false, error: "gmail_not_configured" }, { status: 400 });

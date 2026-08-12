@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getReservation } from "@/lib/reservations/store";
+import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
 import { adminDict, type AdminLang } from "@/lib/admin/i18n";
 import {
@@ -51,22 +52,42 @@ function Edit({
   value,
   type = "text",
   wide,
+  readOnly,
 }: {
   label: string;
   name: string;
   value?: string | null;
   type?: string;
   wide?: boolean;
+  readOnly?: boolean;
 }) {
   return (
     <div className={`py-2 ${wide ? "col-span-2" : ""}`}>
       <label className={fieldLabel} htmlFor={name}>{label}</label>
-      <input id={name} name={name} type={type} defaultValue={value ?? ""} className={`mt-1 ${input}`} />
+      <input
+        id={name}
+        name={name}
+        type={type}
+        defaultValue={value ?? ""}
+        disabled={readOnly}
+        className={`mt-1 ${input} ${readOnly ? "bg-slate-50 text-ink-muted" : ""}`}
+      />
     </div>
   );
 }
 
-function SaveRow({ label, children }: { label: string; children?: React.ReactNode }) {
+function SaveRow({
+  label,
+  readOnly,
+  children,
+}: {
+  label: string;
+  readOnly: boolean;
+  children?: React.ReactNode;
+}) {
+  // A read-only session gets no submit control at all — the action behind it
+  // would refuse anyway, and an inert button invites a pointless click.
+  if (readOnly) return null;
   return (
     <div className="col-span-2 mt-3 flex items-center gap-3 border-t border-slate-100 pt-3">
       <button className="btn-brand text-xs">{label}</button>
@@ -82,6 +103,7 @@ export default async function ReservationDetail({
 }) {
   const r = await getReservation(params.id);
   if (!r) notFound();
+  const readOnly = !canWrite();
   const lang = getAdminLang();
   const t = adminDict(lang);
   const f = t.fields;
@@ -129,9 +151,10 @@ export default async function ReservationDetail({
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
             <h2 className="mb-2 text-sm font-bold text-brand-700">{t.detail.sectionCustomer}</h2>
             <form action={patchReservation} className="grid grid-cols-2 gap-x-6">
+              <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
-              <Edit label={f.nameZh} name="name_zh" value={r.name_zh} />
-              <Edit label={f.nameEn} name="name_en" value={r.name_en} />
+              <Edit label={f.nameZh} name="name_zh" value={r.name_zh} readOnly={readOnly} />
+              <Edit label={f.nameEn} name="name_en" value={r.name_en} readOnly={readOnly} />
               <div className="py-2">
                 <label className={fieldLabel} htmlFor="gender">{f.gender}</label>
                 <select id="gender" name="gender" defaultValue={r.gender ?? ""} className={`mt-1 ${input}`}>
@@ -141,9 +164,9 @@ export default async function ReservationDetail({
                   <option value="女性">{f.female}</option>
                 </select>
               </div>
-              <Edit label={f.dob} name="dob" value={r.dob} type="date" />
-              <Edit label={f.email} name="email" value={r.email} type="email" />
-              <Edit label={f.hkPhone} name="hk_phone" value={r.hk_phone} />
+              <Edit label={f.dob} name="dob" value={r.dob} type="date" readOnly={readOnly} />
+              <Edit label={f.email} name="email" value={r.email} type="email" readOnly={readOnly} />
+              <Edit label={f.hkPhone} name="hk_phone" value={r.hk_phone} readOnly={readOnly} />
               <AbilitySelect
                 name="japanese_ability"
                 label={f.japaneseAbility}
@@ -164,18 +187,20 @@ export default async function ReservationDetail({
                 labelClassName={fieldLabel}
                 wrapperClassName="py-2"
               />
-              <Edit label={f.hkAddress} name="hk_address" value={r.hk_address} wide />
-              <Edit label={f.jpAddress} name="jp_address" value={r.jp_address} wide />
-              <Edit label={f.jpPhone} name="jp_phone" value={r.jp_phone} />
-              <Edit label={f.emergencyContact} name="emergency_contact" value={r.emergency_contact} />
-              <Edit label={f.emergencyPhone} name="emergency_phone" value={r.emergency_phone} />
-              <SaveRow label={t.common.save} />
+              <Edit label={f.hkAddress} name="hk_address" value={r.hk_address} wide readOnly={readOnly} />
+              <Edit label={f.jpAddress} name="jp_address" value={r.jp_address} wide readOnly={readOnly} />
+              <Edit label={f.jpPhone} name="jp_phone" value={r.jp_phone} readOnly={readOnly} />
+              <Edit label={f.emergencyContact} name="emergency_contact" value={r.emergency_contact} readOnly={readOnly} />
+              <Edit label={f.emergencyPhone} name="emergency_phone" value={r.emergency_phone} readOnly={readOnly} />
+              <SaveRow label={t.common.save} readOnly={readOnly} />
+              </fieldset>
             </form>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
             <h2 className="mb-2 text-sm font-bold text-brand-700">{t.detail.sectionRental}</h2>
             <form action={patchReservation} className="grid grid-cols-2 gap-x-6">
+              <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <div className="py-2">
                 <label className={fieldLabel} htmlFor="shop">{f.shop}</label>
@@ -196,22 +221,24 @@ export default async function ReservationDetail({
                   ))}
                 </select>
               </div>
-              <Edit label={f.confirmedBike} name="confirmed_bike" value={r.confirmed_bike} />
-              <Edit label={f.pickupDate} name="pickup_date" value={r.pickup_date} type="date" />
-              <Edit label={f.pickupTime} name="pickup_time" value={r.pickup_time} type="time" />
-              <Edit label={f.returnDate} name="return_date" value={r.return_date} type="date" />
-              <Edit label={f.returnTime} name="return_time" value={r.return_time} type="time" />
-              <Edit label={f.bikePref1} name="bike_pref_1" value={r.bike_pref_1} />
-              <Edit label={f.bikePref2} name="bike_pref_2" value={r.bike_pref_2} />
-              <Edit label={f.bikePref3} name="bike_pref_3" value={r.bike_pref_3} />
-              <Edit label={f.promo} name="promo" value={r.promo} />
-              <SaveRow label={t.common.save} />
+              <Edit label={f.confirmedBike} name="confirmed_bike" value={r.confirmed_bike} readOnly={readOnly} />
+              <Edit label={f.pickupDate} name="pickup_date" value={r.pickup_date} type="date" readOnly={readOnly} />
+              <Edit label={f.pickupTime} name="pickup_time" value={r.pickup_time} type="time" readOnly={readOnly} />
+              <Edit label={f.returnDate} name="return_date" value={r.return_date} type="date" readOnly={readOnly} />
+              <Edit label={f.returnTime} name="return_time" value={r.return_time} type="time" readOnly={readOnly} />
+              <Edit label={f.bikePref1} name="bike_pref_1" value={r.bike_pref_1} readOnly={readOnly} />
+              <Edit label={f.bikePref2} name="bike_pref_2" value={r.bike_pref_2} readOnly={readOnly} />
+              <Edit label={f.bikePref3} name="bike_pref_3" value={r.bike_pref_3} readOnly={readOnly} />
+              <Edit label={f.promo} name="promo" value={r.promo} readOnly={readOnly} />
+              <SaveRow label={t.common.save} readOnly={readOnly} />
+              </fieldset>
             </form>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
             <h2 className="mb-2 text-sm font-bold text-brand-700">{t.detail.sectionAddons}</h2>
             <form action={saveAddons}>
+              <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
                 {ADDON_LABELS.map((a) =>
@@ -245,6 +272,7 @@ export default async function ReservationDetail({
               <div className="mt-3 border-t border-slate-100 pt-3">
                 <button className="btn-brand text-xs">{t.common.save}</button>
               </div>
+              </fieldset>
             </form>
           </section>
 
@@ -302,6 +330,7 @@ export default async function ReservationDetail({
 
             {/* Status — the master-Excel 狀態 dropdown */}
             <form action={patchReservation} className="flex flex-wrap items-center gap-2">
+              <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <label className="text-xs font-medium text-ink-soft">{f.status}</label>
               <select name="status" defaultValue={r.status} className={`${input} max-w-[210px]`}>
@@ -314,10 +343,12 @@ export default async function ReservationDetail({
               <button className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-slate-200">
                 {t.detail.updateStatus}
               </button>
+              </fieldset>
             </form>
 
             {/* Japan confirmation → confirmed (bike + grade + dates + add-ons) */}
-            <form action={confirmReservation} className="space-y-2 border-t border-slate-100 pt-3">
+            <form action={confirmReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+              <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <div className="text-xs font-bold text-brand-700">{t.detail.jpConfirmTitle}</div>
               <label className="text-xs font-medium text-ink-soft">{f.confirmedBike}</label>
@@ -380,10 +411,12 @@ export default async function ReservationDetail({
                 </div>
               </div>
               <button className="btn-brand w-full text-xs">{t.common.save}</button>
+              </fieldset>
             </form>
 
             {/* CARDO — HK-side value-add (not Japan-confirmed) */}
-            <form action={setCardo} className="space-y-2 border-t border-slate-100 pt-3">
+            <form action={setCardo} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+              <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <div className="text-xs font-bold text-brand-700">{t.detail.cardoTitle}</div>
               <label className="flex items-center gap-2 text-xs text-ink-soft">
@@ -400,10 +433,12 @@ export default async function ReservationDetail({
                   </Link>
                 )}
               </div>
+              </fieldset>
             </form>
 
             {/* Invoice — supplier cost is entered per line, mirroring the Excel */}
-            <form action={saveCostItems} className="space-y-2 border-t border-slate-100 pt-3">
+            <form action={saveCostItems} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+              <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <div className="text-xs font-medium text-ink-soft">{t.detail.billingTitle}</div>
               <div>
@@ -450,14 +485,17 @@ export default async function ReservationDetail({
               </dl>
               <p className="text-[11px] leading-4 text-ink-muted">{t.detail.costHint}</p>
               <button className="btn-brand w-full text-xs">{t.detail.saveSiCost}</button>
+              </fieldset>
             </form>
 
             {/* Customer paid → paid */}
-            <form action={patchReservation} className="space-y-2 border-t border-slate-100 pt-3">
+            <form action={patchReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+              <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <label className="text-xs font-medium text-ink-soft">{t.detail.customerPaidDate}</label>
               <input name="customer_paid_date" type="date" defaultValue={r.customer_paid_date ?? ""} className={input} />
               <button className="btn-brand w-full text-xs">{t.common.save}</button>
+              </fieldset>
             </form>
 
             {/* Settlement moved to the accounting module */}

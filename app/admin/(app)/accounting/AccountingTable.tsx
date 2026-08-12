@@ -68,7 +68,15 @@ const COLS: Col[] = [
   { key: "supplier", label: (t) => t.cols.supplier, filter: "select", sortVal: (r) => (r.paid_to_supplier ? 1 : 0), text: (r, t) => (r.paid_to_supplier ? `${t.paid} ${r.supplier_paid_date ?? ""}` : t.unpaid) },
 ];
 
-export default function AccountingTable({ rows, t }: { rows: AcctRow[]; t: AcctDict }) {
+export default function AccountingTable({
+  rows,
+  t,
+  readOnly,
+}: {
+  rows: AcctRow[];
+  t: AcctDict;
+  readOnly: boolean;
+}) {
   const [year, setYear] = useState("all");
   const [month, setMonth] = useState("all");
   const [colFilter, setColFilter] = useState<Record<string, string>>({});
@@ -214,7 +222,9 @@ export default function AccountingTable({ rows, t }: { rows: AcctRow[]; t: AcctD
           <thead className="border-b border-slate-200 bg-slate-50">
             <tr>
               <th className={th}>
+                {!readOnly && (
                 <input type="checkbox" checked={allSelected} onChange={toggleAll} className="h-4 w-4 rounded border-slate-300" aria-label={t.selectAllAria} />
+                )}
               </th>
               {COLS.map((c) => (
                 <th key={c.key} className={`${th} ${c.align === "right" ? "text-right" : ""}`}>
@@ -259,7 +269,9 @@ export default function AccountingTable({ rows, t }: { rows: AcctRow[]; t: AcctD
               return (
                 <tr key={r.id} className={r.paid_to_supplier ? "bg-emerald-50/40" : ""}>
                   <td className={td}>
+                    {!readOnly && (
                     <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleOne(r.id)} className="h-4 w-4 rounded border-slate-300" />
+                    )}
                   </td>
                   <td className={td}>
                     <Link href={`/admin/reservations/${r.id}`} className="font-medium text-brand-700 hover:underline">
@@ -323,7 +335,9 @@ export default function AccountingTable({ rows, t }: { rows: AcctRow[]; t: AcctD
         </table>
       </div>
 
-      {/* Batch supplier-payment bar */}
+      {/* Batch supplier-payment bar — settlement is a write, so a read-only
+          session does not get it, nor the row checkboxes that feed it. */}
+      {!readOnly && (
       <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
         <span className="text-sm font-medium text-ink-soft">
           {t.batch.pre} <span className="font-bold text-brand-700">{selected.size}</span> {t.batch.post}
@@ -338,6 +352,7 @@ export default function AccountingTable({ rows, t }: { rows: AcctRow[]; t: AcctD
         </button>
         {pending && <span className="text-xs text-ink-muted">{t.updating}</span>}
       </div>
+      )}
     </div>
   );
 }
