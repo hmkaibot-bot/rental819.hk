@@ -65,18 +65,24 @@ export async function getReservation(id: string): Promise<Reservation | null> {
 
 export async function createReservation(
   input: NewReservation,
-): Promise<{ ok: true; id: string; demo?: boolean }> {
+): Promise<{ ok: true; id: string; booking_ref: string | null; demo?: boolean }> {
   if (isDemoMode()) {
     // No persistence in demo mode — acknowledge so the public form still works.
-    return { ok: true, id: "demo-new", demo: true };
+    return { ok: true, id: "demo-new", booking_ref: null, demo: true };
   }
+  // booking_ref is assigned by a DB trigger on insert (YYYY-NNN), so read it
+  // back — the acknowledgement email and Slack notice both quote it.
   const { data, error } = await supabaseAdmin()
     .from(TABLE)
     .insert({ ...input, addons: input.addons ?? {}, status: "new" })
-    .select("id")
+    .select("id, booking_ref")
     .single();
   if (error) throw error;
-  return { ok: true, id: data.id as string };
+  return {
+    ok: true,
+    id: data.id as string,
+    booking_ref: (data.booking_ref as string | null) ?? null,
+  };
 }
 
 export async function updateReservation(

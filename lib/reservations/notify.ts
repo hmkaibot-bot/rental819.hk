@@ -1,6 +1,7 @@
 import "server-only";
 import { isGmailConfigured, sendGmailMessage } from "@/lib/gmail";
 import { site } from "@/lib/site";
+import { slashDate, hhmm } from "./emails";
 import { ADDON_LABELS, type ReservationAddons } from "./types";
 
 // Slack "email to channel" address for the 電單車旅行 group. Override in the
@@ -11,6 +12,7 @@ const SLACK_BOOKING_EMAIL =
 
 export interface BookingNotice {
   id: string;
+  booking_ref?: string | null;
   name: string | null;
   name_zh?: string | null;
   shop?: string | null;
@@ -19,10 +21,15 @@ export interface BookingNotice {
   return_date?: string | null;
   return_time?: string | null;
   bike_pref_1?: string | null;
+  bike_pref_2?: string | null;
+  bike_pref_3?: string | null;
   email?: string | null;
   hk_phone?: string | null;
   addons?: ReservationAddons;
   promo?: string | null;
+  /** Whether the automatic customer acknowledgement went out, so the channel
+   *  knows when a manual follow-up is needed. */
+  ackEmailSent?: boolean;
 }
 
 function addonList(a?: ReservationAddons): string {
@@ -36,10 +43,52 @@ function addonList(a?: ReservationAddons): string {
   return on.length ? on.join("、") : "—";
 }
 
+/** Pure builder for the 新預約提示, exported so a preview renders exactly
+ *  what will be sent. */
+export function buildBookingNotice(b: BookingNotice): {
+  subject: string;
+  body: string;
+} {
+  const ref = (b.booking_ref ?? "").trim();
+  const who = [b.name, b.name_zh].filter(Boolean).join(" / ") || "客人";
+  const pickup =
+    [slashDate(b.pickup_date), hhmm(b.pickup_time)].filter(Boolean).join(" ") || "—";
+  const ret =
+    [slashDate(b.return_date), hhmm(b.return_time)].filter(Boolean).join(" ") || "—";
+  const bikes =
+    [b.bike_pref_1, b.bike_pref_2, b.bike_pref_3].filter(Boolean).join("｜") || "—";
+
+  const subject = `🏍️【新預約提示】${ref ? `#${ref} ` : ""}${who}${b.shop ? `（${b.shop}）` : ""}`;
+  const body = [
+    "【新預約提示】RENTAL819.HK 網站收到新預約申請",
+    "",
+    ref && `預約編號：#${ref}`,
+    `姓名：${who}`,
+    b.email && `電郵：${b.email}`,
+    b.hk_phone && `電話：${b.hk_phone}`,
+    b.shop && `取車店舖：${b.shop}`,
+    `取車：${pickup}`,
+    `還車：${ret}`,
+    `車款志願：${bikes}`,
+    `加購項目：${addonList(b.addons)}`,
+    b.promo && `優惠代碼：${b.promo}`,
+    "",
+    b.ackEmailSent
+      ? "系統已自動向客人發出「已收到申請」通知電郵。"
+      : "注意：未能向客人發出自動通知電郵，請人手跟進。",
+    `▶ 後台處理：${site.url}/admin/reservations/${b.id}`,
+  ]
+    // Keep "" spacer lines; drop only the conditional entries that are off.
+    .filter((line): line is string => typeof line === "string")
+    .join("\n");
+
+  return { subject, body };
+}
+
 /**
- * Notify the Slack 電單車旅行 channel of a new rental booking, by emailing its
- * email-to-channel address. Soft-fails: a notification problem must never break
- * the customer's booking submission.
+ * 「新預約提示」to the Slack 電單車旅行 channel, sent by emailing the
+ * channel's email-to-channel address. Soft-fails: a notification problem must
+ * never break the customer's booking submission.
  */
 export async function notifyNewBooking(b: BookingNotice): Promise<void> {
   if (!isGmailConfigured()) {
@@ -49,26 +98,7 @@ export async function notifyNewBooking(b: BookingNotice): Promise<void> {
     return;
   }
 
-  const who = [b.name, b.name_zh].filter(Boolean).join(" / ") || "客人";
-  const period = `${[b.pickup_date, b.pickup_time].filter(Boolean).join(" ") || "?"} → ${
-    [b.return_date, b.return_time].filter(Boolean).join(" ") || "?"
-  }`;
-  const subject = `🏍️ 新租車預約 — ${who}${b.shop ? `（${b.shop}）` : ""}`;
-  const body = [
-    "🏍️ 新租車預約",
-    `姓名：${who}`,
-    b.shop && `出發店：${b.shop}`,
-    `租期：${period}`,
-    b.bike_pref_1 && `車款首選：${b.bike_pref_1}`,
-    b.email && `電郵：${b.email}`,
-    b.hk_phone && `電話：${b.hk_phone}`,
-    `加購：${addonList(b.addons)}`,
-    b.promo && `優惠：${b.promo}`,
-    `後台：${site.url}/admin/reservations/${b.id}`,
-  ]
-    .filter(Boolean)
-    .join("\n");
-
+  const { subject, body } = buildBookingNotice(b);
   try {
     await sendGmailMessage({ to: SLACK_BOOKING_EMAIL, subject, body });
   } catch (err) {
