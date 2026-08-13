@@ -23,7 +23,7 @@ export default function AdminAppLayout({
       <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Link href="/admin" className="flex items-center gap-2">
-            <Image src="/logo-lg.png" alt="RENTAL819" width={768} height={488} className="h-8 w-auto rounded" />
+            <Image src="/logo-lg.png" alt="RENTAL819" width={450} height={285} className="h-8 w-auto rounded" />
             <span className="text-xs font-semibold text-ink-muted">{t.nav.badge}</span>
             {readOnly && (
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">

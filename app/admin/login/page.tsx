@@ -20,8 +20,8 @@ export default function AdminLogin({
           <Image
             src="/logo-lg.png"
             alt="RENTAL819"
-            width={768}
-            height={488}
+            width={450}
+            height={285}
             priority
             className="mx-auto h-12 w-auto rounded-md"
           />
