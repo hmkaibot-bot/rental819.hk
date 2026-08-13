@@ -163,7 +163,10 @@ export function defaultInvoiceItems(
   if (a.cardo) push(items, L("HK-CARDO", 1));
 
   if (!items.length) {
-    const bike = r.confirmed_bike ?? r.bike_pref_1 ?? "電單車租賃";
+    // The invoice quotes the bike Japan finally confirmed (後台「確認車款」),
+    // never the customer's form preference — before Japan replies the line
+    // reads 待確認 so a mere preference cannot end up on an invoice.
+    const bike = r.confirmed_bike ?? "（待日本確認）";
     items.push({ description: `日本電單車租賃 — ${bike}`, qty: days, unit_price: 0, amount: 0 });
   }
   return items;
