@@ -1,4 +1,5 @@
 import { ADDON_LABELS, type Reservation, type ReservationAddons } from "./types";
+import { rentalDays } from "./duration";
 import { site } from "@/lib/site";
 
 /** Add-ons as a one-line summary, for the customer's confirmation email. */
@@ -10,13 +11,6 @@ function addonList(r: Reservation): string {
     else if (v === true) on.push(a.zh);
   }
   return on.length ? on.join(", ") : "—";
-}
-
-function rentalDays(r: Reservation): number {
-  if (!r.pickup_date || !r.return_date) return 1;
-  const d =
-    (new Date(r.return_date).getTime() - new Date(r.pickup_date).getTime()) / 86400000;
-  return Math.max(1, Math.round(d));
 }
 
 export type EmailLang = "en" | "zh";

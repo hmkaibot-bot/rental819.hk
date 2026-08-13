@@ -1,5 +1,6 @@
 import type { InvoiceItem, Reservation } from "./types";
 import { RT819_ITEMS, rt819Label, type Rt819Item } from "./items";
+import { rentalDays } from "./duration";
 
 /** Invoice issuer — matches the SI-24 template (Helmet King / MOTOBLOG). */
 export const ISSUER = {
@@ -72,14 +73,6 @@ export function invoiceInfoRows(r: Reservation): string[] {
   if (r.confirmed_bike) rows.push(`車型：${r.confirmed_bike}`);
   if (r.shop) rows.push(`RENTAL819 ${r.shop}`);
   return rows;
-}
-
-/** Number of rental days from the reservation dates (min 1). */
-function rentalDays(r: Reservation): number {
-  if (!r.pickup_date || !r.return_date) return 1;
-  const diff =
-    (new Date(r.return_date).getTime() - new Date(r.pickup_date).getTime()) / 86400000;
-  return Math.max(1, Math.round(diff));
 }
 
 function lineFromCode(
