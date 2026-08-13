@@ -308,8 +308,11 @@ ${t.arrive}
 
 ${t.thanks}
 
-Helmet King × RENTAL819.HK
-WhatsApp: ${site.phone}`;
+頭盔王 Helmet King
+店舖地址: 香港旺角東安街43號地舖
+營業時間: 星期一至星期日早上十一時到晚上八時半
+WhatsApp: ${site.phone}
+${site.email}`;
 
   // Public asset host that resolves regardless of DNS cut-over state (the
   // customer's mail client must be able to fetch the logo).
@@ -368,15 +371,20 @@ WhatsApp: ${site.phone}`;
       <p style="margin:16px 0 0;color:#334155">${t.thanks}</p>
     </div>
 
-    <div style="background:${b};color:#ffffff;text-align:center;padding:22px 20px;margin-top:24px">
-      <div style="font-weight:800;font-size:16px">Helmet King 頭盔王 × RENTAL819.HK</div>
-      <div style="margin-top:8px;font-size:13px;opacity:.9">Shop address: 香港旺角東安街43號地舖</div>
-      <div style="margin-top:4px;font-size:13px;opacity:.9">Business hours: Mon–Sun 11:00 – 20:30</div>
-      <div style="margin-top:10px;font-size:13px">
-        <a href="${site.whatsapp}" style="color:#ffffff;text-decoration:underline">WhatsApp ${site.phone}</a>
-        &nbsp;·&nbsp;
-        <a href="mailto:${site.email}" style="color:#ffffff;text-decoration:underline">${site.email}</a>
+    <div style="text-align:center;padding:16px 24px 30px">
+      <a href="${site.whatsapp}" style="display:inline-block;background:#33518f;color:#ffffff;font-weight:700;font-size:15px;padding:13px 30px;border-radius:8px;text-decoration:none">聯絡我們</a>
+    </div>
+    <div style="border-top:1px solid #d9dce1;margin:0 24px"></div>
+    <div style="text-align:center;padding:28px 24px 36px;color:#5f6368;font-size:14px;line-height:1.9">
+      <div>
+        <a href="${site.social.facebook}" style="text-decoration:none"><img src="${assetBase}/email/fb.png" alt="Facebook" width="44" height="44" style="border:0;margin:0 9px;vertical-align:middle" /></a>
+        <a href="${site.social.instagram}" style="text-decoration:none"><img src="${assetBase}/email/ig.png" alt="Instagram" width="44" height="44" style="border:0;margin:0 9px;vertical-align:middle" /></a>
+        <a href="mailto:${site.email}" style="text-decoration:none"><img src="${assetBase}/email/mail.png" alt="Email" width="44" height="44" style="border:0;margin:0 9px;vertical-align:middle" /></a>
+        <a href="${site.url}" style="text-decoration:none"><img src="${assetBase}/email/link.png" alt="Website" width="44" height="44" style="border:0;margin:0 9px;vertical-align:middle" /></a>
       </div>
+      <div style="margin-top:20px">頭盔王</div>
+      <div style="margin-top:10px">店舖地址: 香港旺角東安街43號地舖</div>
+      <div style="margin-top:10px">營業時間: 星期一至星期日早上十一時到晚上八時半</div>
     </div>
   </div>
 </div>`;

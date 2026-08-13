@@ -41,8 +41,8 @@ export default function Header({
           <Image
             src="/logo-lg.png"
             alt="RENTAL819"
-            width={768}
-            height={488}
+            width={450}
+            height={285}
             priority
             // Renders ~58px wide (70px from lg:) — without `sizes` Next preloads
             // the 828w candidate at high priority on every page.
@@ -161,8 +161,8 @@ export default function Header({
                 <Image
                   src="/logo-lg.png"
                   alt="RENTAL819"
-                  width={768}
-                  height={488}
+                  width={450}
+                  height={285}
                   sizes="50px"
                   className="h-8 w-auto"
                 />

@@ -33,8 +33,8 @@ export default function Footer({
           <Image
             src="/logo-lg.png"
             alt="RENTAL819 レンタルバイク"
-            width={768}
-            height={488}
+            width={450}
+            height={285}
             sizes="76px"
             className="h-12 w-auto rounded-md"
           />
