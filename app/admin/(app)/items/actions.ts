@@ -10,5 +10,7 @@ export async function saveFeeItems(patches: FeeItemPatch[]) {
   if (patches.length) await updateFeeItems(patches);
   revalidatePath("/admin/items");
   revalidatePath("/admin/accounting");
+  // Invoice pages seed their line items from this catalog.
+  revalidatePath("/admin/reservations", "layout");
   return { ok: true as const };
 }

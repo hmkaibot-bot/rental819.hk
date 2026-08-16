@@ -25,4 +25,6 @@ export async function recordSupplierPayment(formData: FormData) {
   await Promise.all(ids.map((id) => updateReservation(id, patch)));
   revalidatePath("/admin/accounting");
   revalidatePath("/admin");
+  // Each touched record's detail/invoice pages show the settlement state.
+  for (const id of ids) revalidatePath(`/admin/reservations/${id}`, "layout");
 }
