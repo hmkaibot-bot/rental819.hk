@@ -77,6 +77,7 @@ const t = {
       shuttle_bus: "穿梭巴士",
       luggage_storage: "行李寄存",
     },
+    shuttleNote: "只適用於部份分店",
     etcNote: "ETC 卡因供應有限，請到店取車時向職員查詢。",
     mamoride: "加購 MamoRide 補償（只限 15 日內預約）",
     promo: "優惠碼（如有）",
@@ -163,6 +164,7 @@ const t = {
       shuttle_bus: "Shuttle bus",
       luggage_storage: "Luggage storage",
     },
+    shuttleNote: "available at selected branches only",
     etcNote: "ETC cards are limited in supply — please ask staff at the branch when you collect the bike.",
     mamoride: "Add MamoRide compensation (reservations of 15 days or less)",
     promo: "Promo code (if any)",
@@ -573,6 +575,9 @@ export default function BookingForm({ locale }: { locale: Locale }) {
                   onChange={setCheck(key)}
                 />
                 {label}
+                {key === "addon_shuttle_bus" && (
+                  <span className="text-xs text-ink-muted">（{c.shuttleNote}）</span>
+                )}
               </label>
             ))}
           </div>
