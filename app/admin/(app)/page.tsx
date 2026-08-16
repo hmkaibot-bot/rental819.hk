@@ -12,6 +12,7 @@ import {
   type ReservationStatus,
 } from "@/lib/reservations/types";
 import { StatusFilter } from "./status-filter";
+import { StatusSelect } from "./status-select";
 
 /** Status label in the operator's language. */
 const statusName = (s: { zh: string; ja: string }, lang: AdminLang) =>
@@ -88,7 +89,7 @@ type Column = {
   sort?: SortKey;
   filter?: boolean;
   cls?: string;
-  cell: (r: Reservation, lang: AdminLang) => ReactNode;
+  cell: (r: Reservation, lang: AdminLang, ctx: { readOnly: boolean }) => ReactNode;
 };
 
 /** Header text in the chosen language, with the other language underneath. */
@@ -118,12 +119,29 @@ const COLUMNS: Column[] = [
     sort: "status",
     filter: true,
     cls: "whitespace-nowrap",
-    cell: (r, lang) => {
+    cell: (r, lang, ctx) => {
       const m = statusMeta(r.status);
+      if (ctx.readOnly) {
+        return (
+          <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
+            {statusName(m, lang)}
+          </span>
+        );
+      }
+      // key remounts the select when another session moved the status, so the
+      // local pick never masks fresher server data.
       return (
-        <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${m.tone}`}>
-          {statusName(m, lang)}
-        </span>
+        <StatusSelect
+          key={r.status}
+          id={r.id}
+          value={r.status}
+          ariaLabel={lang === "ja" ? "状態" : "狀態"}
+          options={STATUS_ORDER.map((s) => ({
+            key: s.key,
+            label: statusName(s, lang),
+            tone: s.tone,
+          }))}
+        />
       );
     },
   },
@@ -340,7 +358,7 @@ export default async function AdminDashboard({
               <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50/60">
                 {COLUMNS.map((c) => (
                   <td key={c.label} className={`px-3 py-3 align-top ${c.cls ?? ""}`}>
-                    {c.cell(r, lang)}
+                    {c.cell(r, lang, { readOnly })}
                   </td>
                 ))}
               </tr>
