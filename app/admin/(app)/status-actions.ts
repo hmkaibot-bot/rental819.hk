@@ -19,5 +19,6 @@ export async function updateStatusFromList(formData: FormData) {
   if (!id || !VALID.has(status)) return;
   await setStatus(id, status as ReservationStatus);
   revalidatePath("/admin");
-  revalidatePath(`/admin/reservations/${id}`);
+  // Subtree: the record's email/invoice pages render status-derived content.
+  revalidatePath(`/admin/reservations/${id}`, "layout");
 }

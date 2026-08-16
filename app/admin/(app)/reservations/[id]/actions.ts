@@ -78,7 +78,10 @@ export async function patchReservation(formData: FormData) {
   }
 
   await updateReservation(id, patch);
-  revalidatePath(`/admin/reservations/${id}`);
+  // "layout" invalidates the whole reservation subtree — the JP/customer email
+  // pages and the invoice render from this record too, and an exact-path
+  // revalidate leaves their client-cached copies stale after an edit.
+  revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
 }
 
@@ -101,7 +104,7 @@ export async function saveAddons(formData: FormData) {
     }
   }
   await updateReservation(id, { addons });
-  revalidatePath(`/admin/reservations/${id}`);
+  revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
 }
 
@@ -137,7 +140,7 @@ export async function saveCostItems(formData: FormData) {
       : {}),
     ...(si != null ? { si_number: si === "" ? null : String(si) } : {}),
   });
-  revalidatePath(`/admin/reservations/${id}`);
+  revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
   revalidatePath("/admin/accounting");
 }
@@ -191,7 +194,7 @@ export async function confirmReservation(formData: FormData) {
     settlement,
     // Status is never advanced automatically — staff set it in the 狀態 dropdown.
   });
-  revalidatePath(`/admin/reservations/${id}`);
+  revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
 }
 
@@ -204,5 +207,5 @@ export async function setCardo(formData: FormData) {
   await updateReservation(id, {
     addons: { ...(current?.addons ?? {}), cardo },
   });
-  revalidatePath(`/admin/reservations/${id}`);
+  revalidatePath(`/admin/reservations/${id}`, "layout");
 }

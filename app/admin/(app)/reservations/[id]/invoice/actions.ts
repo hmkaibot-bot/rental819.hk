@@ -22,7 +22,9 @@ export async function saveInvoice(input: {
     ...(input.settlement ? { settlement: input.settlement } : {}),
     ...(input.markInvoiced ? { status: "awaiting_payment" as const } : {}),
   });
-  revalidatePath(`/admin/reservations/${input.id}`);
-  revalidatePath(`/admin/reservations/${input.id}/invoice`);
+  // Subtree revalidate: the emails and the dashboard list read SI number and
+  // status too, so the exact-path pair used to leave them stale.
+  revalidatePath(`/admin/reservations/${input.id}`, "layout");
+  revalidatePath("/admin");
   return { ok: true };
 }
