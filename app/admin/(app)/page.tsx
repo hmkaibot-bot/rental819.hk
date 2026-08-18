@@ -42,6 +42,8 @@ function tabOf(r: Reservation): TabKey {
 
 type SortKey = "booking_ref" | "status" | "name" | "shop" | "pickup_date";
 const SORT_KEYS: SortKey[] = ["booking_ref", "status", "name", "shop", "pickup_date"];
+const DEFAULT_SORT: SortKey = "booking_ref";
+const DEFAULT_DIR: "asc" | "desc" = "desc";
 
 function fmtDate(d: string | null) {
   return d ? d : "—";
@@ -52,7 +54,9 @@ function nameOf(r: Reservation) {
 function compare(a: Reservation, b: Reservation, key: SortKey): number {
   switch (key) {
     case "booking_ref":
-      return (a.booking_ref ?? "").localeCompare(b.booking_ref ?? "");
+      // Numeric collation: refs are YYYY-NNN, so 2026-100 must outrank 2026-099
+      // even once the sequence grows past three digits.
+      return (a.booking_ref ?? "").localeCompare(b.booking_ref ?? "", undefined, { numeric: true });
     case "status":
       return statusIndex(a.status) - statusIndex(b.status);
     case "name":
@@ -205,10 +209,15 @@ export default async function AdminDashboard({
     ? (searchParams.tab as TabKey)
     : "2026";
   const activeStatus = searchParams.status as ReservationStatus | undefined;
-  const sortKey = SORT_KEYS.includes(searchParams.sort as SortKey)
+  // The list opens on 編號 newest-first — staff work down from the latest
+  // booking. An explicit ?sort/?dir from a header click still wins.
+  const sortKey: SortKey = SORT_KEYS.includes(searchParams.sort as SortKey)
     ? (searchParams.sort as SortKey)
-    : undefined;
-  const dir: "asc" | "desc" = searchParams.dir === "desc" ? "desc" : "asc";
+    : DEFAULT_SORT;
+  const dir: "asc" | "desc" =
+    searchParams.dir === "desc" || searchParams.dir === "asc"
+      ? searchParams.dir
+      : DEFAULT_DIR;
   const q = (searchParams.q ?? "").trim();
   const qLower = q.toLowerCase();
 
@@ -221,7 +230,7 @@ export default async function AdminDashboard({
 
   let list = q ? tabRows.filter((r) => searchable(r).includes(qLower)) : [...tabRows];
   if (activeStatus) list = list.filter((r) => r.status === activeStatus);
-  if (sortKey) list.sort((a, b) => compare(a, b, sortKey) * (dir === "desc" ? -1 : 1));
+  list.sort((a, b) => compare(a, b, sortKey) * (dir === "desc" ? -1 : 1));
 
   const th = "px-3 py-3 text-left align-middle whitespace-nowrap";
 
@@ -244,8 +253,8 @@ export default async function AdminDashboard({
           <form method="get" action="/admin" className="flex items-center gap-2">
             <input type="hidden" name="tab" value={tab} />
             {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
-            {sortKey && <input type="hidden" name="sort" value={sortKey} />}
-            {sortKey && <input type="hidden" name="dir" value={dir} />}
+            <input type="hidden" name="sort" value={sortKey} />
+            <input type="hidden" name="dir" value={dir} />
             <input
               type="search"
               name="q"
@@ -259,7 +268,7 @@ export default async function AdminDashboard({
           </form>
           {(activeStatus || q) && (
             <Link
-              href={`/admin${qs({ tab, sort: sortKey, dir: sortKey ? dir : undefined })}`}
+              href={`/admin${qs({ tab, sort: sortKey, dir })}`}
               className="text-sm text-brand-700 hover:underline"
             >
               {t.dashboard.clear}
@@ -280,7 +289,7 @@ export default async function AdminDashboard({
           return (
             <Link
               key={t.key}
-              href={`/admin${qs({ tab: t.key, status: activeStatus, sort: sortKey, dir: sortKey ? dir : undefined, q: q || undefined })}`}
+              href={`/admin${qs({ tab: t.key, status: activeStatus, sort: sortKey, dir, q: q || undefined })}`}
               className={`-mb-px inline-flex items-center gap-1.5 rounded-t-lg border-b-2 px-4 py-2 text-sm font-medium ${
                 activeT
                   ? "border-brand-600 text-brand-700"
@@ -331,7 +340,7 @@ export default async function AdminDashboard({
                         <StatusFilter
                           value={activeStatus ?? ""}
                           ariaLabel={t.dashboard.statusFilterAria}
-                          keep={{ tab, sort: sortKey, dir: sortKey ? dir : undefined, q: q || undefined }}
+                          keep={{ tab, sort: sortKey, dir, q: q || undefined }}
                           options={[
                             { key: "", label: t.common.all, count: tabRows.length },
                             ...STATUS_ORDER.map((s) => ({
