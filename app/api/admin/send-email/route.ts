@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { isAuthed, canWrite } from "@/lib/admin/auth";
-import { getReservation } from "@/lib/reservations/store";
+import { getReservation, setStatus } from "@/lib/reservations/store";
+import { statusAfterJpEmail } from "@/lib/reservations/types";
 import { jpReservationEmail, customerConfirmEmail } from "@/lib/reservations/emails";
 import { JP_PARTNER_EMAIL, INTERNAL_COPY } from "@/lib/reservations/recipients";
 import { isGmailConfigured, sendGmailMessage } from "@/lib/gmail";
@@ -68,7 +70,25 @@ export async function POST(request: Request) {
       cc: isJp ? INTERNAL_COPY : undefined,
       bcc: isJp ? undefined : INTERNAL_COPY,
     });
-    return NextResponse.json({ ok: true, to, copies: INTERNAL_COPY });
+    // The Japan mail going out IS the 已通知日本 step, so record it instead of
+    // making staff set the same thing by hand right after. Only ever forwards
+    // (see statusAfterJpEmail), and a failure here must not report the sent
+    // mail as failed — it is already gone.
+    let statusAdvanced = false;
+    if (isJp) {
+      const next = statusAfterJpEmail(r.status);
+      if (next) {
+        try {
+          await setStatus(r.id, next);
+          revalidatePath(`/admin/reservations/${r.id}`, "layout");
+          revalidatePath("/admin");
+          statusAdvanced = true;
+        } catch (statusErr) {
+          console.error("status advance after JP email failed", statusErr);
+        }
+      }
+    }
+    return NextResponse.json({ ok: true, to, copies: INTERNAL_COPY, statusAdvanced });
   } catch (err) {
     console.error("reservation email send failed", err);
     const message = err instanceof Error ? err.message : "send_failed";

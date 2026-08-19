@@ -126,7 +126,9 @@ export default async function ReservationDetail({
         ? t.detail.refRequired
         : searchParams?.err === "date_required"
           ? t.detail.dateRequired
-          : null;
+          : searchParams?.err === "paid_date_required"
+            ? t.detail.paidDateRequired
+            : null;
 
   return (
     <div>
