@@ -3,6 +3,7 @@
 import { assertCanWrite } from "@/lib/admin/auth";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getReservation, updateReservation } from "@/lib/reservations/store";
 import {
   costItemsTotal,
@@ -21,6 +22,7 @@ import {
  */
 const NULLABLE_TEXT = [
   "status",
+  "source",
   // customer details
   "name_zh",
   "name_en",
@@ -53,6 +55,10 @@ const NULLABLE_TEXT = [
   "notes",
 ] as const;
 
+/** Postgres unique_violation — booking_ref carries a UNIQUE index. */
+const isUniqueViolation = (e: unknown) =>
+  typeof e === "object" && e !== null && (e as { code?: string }).code === "23505";
+
 /** Generic patch: applies whatever editable fields are present in the form. */
 export async function patchReservation(formData: FormData) {
   assertCanWrite();
@@ -77,12 +83,35 @@ export async function patchReservation(formData: FormData) {
     patch.paid_to_supplier = formData.get("paid_to_supplier") === "on";
   }
 
-  await updateReservation(id, patch);
+  // 預約編號 is UNIQUE and 提交日期 is NOT NULL in the schema, so neither may go
+  // through the blank-means-null path above: a blank one would either break the
+  // constraint or leave the booking without the number every email, the invoice
+  // and the SI number are keyed on. Both come back as a message on the page
+  // instead of a 500. redirect() throws, so it stays out of the try below.
+  if (formData.has("booking_ref")) {
+    const ref = String(formData.get("booking_ref") ?? "").trim();
+    if (!ref) redirect(`/admin/reservations/${id}?err=ref_required`);
+    patch.booking_ref = ref;
+  }
+  if (formData.has("request_date")) {
+    const requested = String(formData.get("request_date") ?? "").trim();
+    if (!requested) redirect(`/admin/reservations/${id}?err=date_required`);
+    patch.request_date = requested;
+  }
+
+  try {
+    await updateReservation(id, patch);
+  } catch (e) {
+    if (!isUniqueViolation(e)) throw e;
+    redirect(`/admin/reservations/${id}?err=ref_taken`);
+  }
   // "layout" invalidates the whole reservation subtree — the JP/customer email
   // pages and the invoice render from this record too, and an exact-path
   // revalidate leaves their client-cached copies stale after an edit.
   revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
+  // Land on the clean URL so a fixed-and-resaved edit drops the stale ?err=.
+  redirect(`/admin/reservations/${id}`);
 }
 
 /**
@@ -106,6 +135,8 @@ export async function saveAddons(formData: FormData) {
   await updateReservation(id, { addons });
   revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
+  // Land on the clean URL so a stale ?err= from a refused save never sticks.
+  redirect(`/admin/reservations/${id}`);
 }
 
 /**
@@ -143,6 +174,8 @@ export async function saveCostItems(formData: FormData) {
   revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
   revalidatePath("/admin/accounting");
+  // Land on the clean URL so a stale ?err= from a refused save never sticks.
+  redirect(`/admin/reservations/${id}`);
 }
 
 /**
@@ -196,6 +229,8 @@ export async function confirmReservation(formData: FormData) {
   });
   revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
+  // Land on the clean URL so a stale ?err= from a refused save never sticks.
+  redirect(`/admin/reservations/${id}`);
 }
 
 /** Toggle the HK-side CARDO value-add (handled by Helmet King, not Japan). */
@@ -208,4 +243,6 @@ export async function setCardo(formData: FormData) {
     addons: { ...(current?.addons ?? {}), cardo },
   });
   revalidatePath(`/admin/reservations/${id}`, "layout");
+  // Land on the clean URL so a stale ?err= from a refused save never sticks.
+  redirect(`/admin/reservations/${id}`);
 }
