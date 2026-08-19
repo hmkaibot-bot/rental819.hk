@@ -120,6 +120,9 @@ export interface AdminDict {
   fields: FieldLabels;
   detail: {
     sectionBooking: string;
+    refTaken: string;
+    refRequired: string;
+    dateRequired: string;
     sectionCustomer: string;
     sectionRental: string;
     sectionAddons: string;
@@ -131,7 +134,6 @@ export interface AdminDict {
     jpEmail: string;
     customerEmail: string;
     invoice: string;
-    updateStatus: string;
     jpConfirmTitle: string;
     bikePlaceholder: string;
     grade: string;
@@ -356,6 +358,9 @@ const zh: AdminDict = {
   },
   detail: {
     sectionBooking: "預約",
+    refTaken: "此預約編號已被其他預約使用，未有儲存。請改用另一個編號。",
+    refRequired: "預約編號不可留空，未有儲存。",
+    dateRequired: "提交日期不可留空，未有儲存。",
     sectionCustomer: "客人資料",
     sectionRental: "租車詳情",
     sectionAddons: "配件及加購",
@@ -367,7 +372,6 @@ const zh: AdminDict = {
     jpEmail: "✉️ 生成日本預約信",
     customerEmail: "✉️ 生成客人確認信",
     invoice: "🧾 開單 / 生成 PDF",
-    updateStatus: "更新狀態",
     jpConfirmTitle: "日本確認（回覆後）",
     bikePlaceholder: "例：Rebel 1100 (2023) / ID：334",
     grade: "級別",
@@ -592,6 +596,9 @@ const ja: AdminDict = {
   },
   detail: {
     sectionBooking: "予約",
+    refTaken: "この予約番号は他の予約で使用中のため、保存されていません。別の番号をご使用ください。",
+    refRequired: "予約番号は空欄にできません。保存されていません。",
+    dateRequired: "申込日は空欄にできません。保存されていません。",
     sectionCustomer: "お客様情報",
     sectionRental: "レンタル詳細",
     sectionAddons: "オプション・追加",
@@ -603,7 +610,6 @@ const ja: AdminDict = {
     jpEmail: "✉️ 日本向け予約メール",
     customerEmail: "✉️ お客様確認メール",
     invoice: "🧾 請求書作成 / PDF",
-    updateStatus: "状態を更新",
     jpConfirmTitle: "日本からの回答（確定内容）",
     bikePlaceholder: "例：Rebel 1100 (2023) / ID：334",
     grade: "グレード",

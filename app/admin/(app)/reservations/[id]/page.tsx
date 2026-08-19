@@ -79,17 +79,19 @@ function Edit({
 function SaveRow({
   label,
   readOnly,
+  span = "col-span-2",
   children,
 }: {
   label: string;
   readOnly: boolean;
+  span?: string;
   children?: React.ReactNode;
 }) {
   // A read-only session gets no submit control at all — the action behind it
   // would refuse anyway, and an inert button invites a pointless click.
   if (readOnly) return null;
   return (
-    <div className="col-span-2 mt-3 flex items-center gap-3 border-t border-slate-100 pt-3">
+    <div className={`${span} mt-3 flex items-center gap-3 border-t border-slate-100 pt-3`}>
       <button className="btn-brand text-xs">{label}</button>
       {children}
     </div>
@@ -98,8 +100,10 @@ function SaveRow({
 
 export default async function ReservationDetail({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams?: { err?: string };
 }) {
   const r = await getReservation(params.id);
   if (!r) notFound();
@@ -114,6 +118,15 @@ export default async function ReservationDetail({
       ? ((r.settlement as Record<string, unknown>).grade as string)
       : "") || "";
   const GRADES = ["P1", "P2", "P3", "P4", "P5", "P6", "P7"];
+  // Set by patchReservation when a save was refused before it reached the DB.
+  const bookingErr =
+    searchParams?.err === "ref_taken"
+      ? t.detail.refTaken
+      : searchParams?.err === "ref_required"
+        ? t.detail.refRequired
+        : searchParams?.err === "date_required"
+          ? t.detail.dateRequired
+          : null;
 
   return (
     <div>
@@ -139,13 +152,37 @@ export default async function ReservationDetail({
         <div className="space-y-5">
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
             <h2 className="mb-2 text-sm font-bold text-brand-700">{t.detail.sectionBooking}</h2>
-            <dl className="grid grid-cols-2 gap-x-6 sm:grid-cols-3">
-              <Field label={f.bookingRef} value={r.booking_ref} />
-              <Field label={f.requestDate} value={r.request_date} />
-              <Field label={f.status} value={L(m, lang)} />
-              <Field label={f.promo} value={r.promo} />
-              <Field label={f.source} value={r.source} />
-            </dl>
+            {bookingErr && (
+              <p className="mb-3 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+                {bookingErr}
+              </p>
+            )}
+            <form action={patchReservation} className="grid grid-cols-2 gap-x-6 sm:grid-cols-3">
+              <fieldset disabled={readOnly} className="contents">
+              <input type="hidden" name="id" value={r.id} />
+              <Edit label={f.bookingRef} name="booking_ref" value={r.booking_ref} readOnly={readOnly} />
+              <Edit label={f.requestDate} name="request_date" value={r.request_date} type="date" readOnly={readOnly} />
+              <div className="py-2">
+                <label className={fieldLabel} htmlFor="status">{f.status}</label>
+                <select
+                  id="status"
+                  key={r.status}
+                  name="status"
+                  defaultValue={r.status}
+                  className={`mt-1 ${input}`}
+                >
+                  {[...STATUS_FLOW, ...TERMINAL_STATUS].map((s) => (
+                    <option key={s.key} value={s.key}>
+                      {L(s, lang)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Edit label={f.promo} name="promo" value={r.promo} readOnly={readOnly} />
+              <Edit label={f.source} name="source" value={r.source} readOnly={readOnly} />
+              <SaveRow label={t.common.save} readOnly={readOnly} span="col-span-2 sm:col-span-3" />
+              </fieldset>
+            </form>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
@@ -229,7 +266,6 @@ export default async function ReservationDetail({
               <Edit label={f.bikePref1} name="bike_pref_1" value={r.bike_pref_1} readOnly={readOnly} />
               <Edit label={f.bikePref2} name="bike_pref_2" value={r.bike_pref_2} readOnly={readOnly} />
               <Edit label={f.bikePref3} name="bike_pref_3" value={r.bike_pref_3} readOnly={readOnly} />
-              <Edit label={f.promo} name="promo" value={r.promo} readOnly={readOnly} />
               <SaveRow label={t.common.save} readOnly={readOnly} />
               </fieldset>
             </form>
@@ -327,24 +363,6 @@ export default async function ReservationDetail({
                 {t.detail.invoice}
               </Link>
             </div>
-
-            {/* Status — the master-Excel 狀態 dropdown */}
-            <form action={patchReservation} className="flex flex-wrap items-center gap-2">
-              <fieldset disabled={readOnly} className="contents">
-              <input type="hidden" name="id" value={r.id} />
-              <label className="text-xs font-medium text-ink-soft">{f.status}</label>
-              <select name="status" defaultValue={r.status} className={`${input} max-w-[210px]`}>
-                {[...STATUS_FLOW, ...TERMINAL_STATUS].map((s) => (
-                  <option key={s.key} value={s.key}>
-                    {L(s, lang)}
-                  </option>
-                ))}
-              </select>
-              <button className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-slate-200">
-                {t.detail.updateStatus}
-              </button>
-              </fieldset>
-            </form>
 
             {/* Japan confirmation → confirmed (bike + grade + dates + add-ons) */}
             <form action={confirmReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">

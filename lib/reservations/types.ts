@@ -120,7 +120,8 @@ export interface Reservation {
   settlement: Record<string, unknown>;
 
   notes: string | null;
-  source: string;
+  // Nullable in the schema, and staff may now clear it from the 預約 card.
+  source: string | null;
   created_at: string;
   updated_at: string;
 }
