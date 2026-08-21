@@ -116,11 +116,13 @@ export interface AdminDict {
     newBooking: string;
     empty: string;
     statusFilterAria: string;
+    paidDateRequired: string;
   };
   fields: FieldLabels;
   detail: {
     sectionBooking: string;
     refTaken: string;
+    paidDateRequired: string;
     refRequired: string;
     dateRequired: string;
     sectionCustomer: string;
@@ -263,6 +265,7 @@ export interface AdminDict {
     staffNameLabel: string;
     staffNamePlaceholder: string;
     staffNameRequired: string;
+    statusAdvanced: string;
   };
   newBooking: {
     title: string;
@@ -321,6 +324,7 @@ const zh: AdminDict = {
     newBooking: "＋ 新增預約",
     empty: "沒有符合的預約。",
     statusFilterAria: "篩選狀態",
+    paidDateRequired: "要先填客人付款日期",
   },
   fields: {
     bookingRef: "預約編號",
@@ -359,6 +363,7 @@ const zh: AdminDict = {
   detail: {
     sectionBooking: "預約",
     refTaken: "此預約編號已被其他預約使用，未有儲存。請改用另一個編號。",
+    paidDateRequired: "要先填寫「客人付款日期」，先可以將狀態改為「已確認預定」。未有儲存。",
     refRequired: "預約編號不可留空，未有儲存。",
     dateRequired: "提交日期不可留空，未有儲存。",
     sectionCustomer: "客人資料",
@@ -501,6 +506,7 @@ const zh: AdminDict = {
     staffNameLabel: "負責同事",
     staffNamePlaceholder: "輸入姓名",
     staffNameRequired: "請先輸入負責同事姓名",
+    statusAdvanced: "（狀態已更新為「已通知日本」）",
   },
   newBooking: {
     title: "新增預約",
@@ -559,6 +565,7 @@ const ja: AdminDict = {
     newBooking: "＋ 予約を追加",
     empty: "該当する予約はありません。",
     statusFilterAria: "状態で絞り込み",
+    paidDateRequired: "先にお客様の入金日を入力",
   },
   fields: {
     bookingRef: "予約番号",
@@ -597,6 +604,7 @@ const ja: AdminDict = {
   detail: {
     sectionBooking: "予約",
     refTaken: "この予約番号は他の予約で使用中のため、保存されていません。別の番号をご使用ください。",
+    paidDateRequired: "「お客様の入金日」を入力しないと、状態を「予約確定」に変更できません。保存されていません。",
     refRequired: "予約番号は空欄にできません。保存されていません。",
     dateRequired: "申込日は空欄にできません。保存されていません。",
     sectionCustomer: "お客様情報",
@@ -739,6 +747,7 @@ const ja: AdminDict = {
     staffNameLabel: "担当者",
     staffNamePlaceholder: "氏名を入力",
     staffNameRequired: "先に担当者名を入力してください",
+    statusAdvanced: "（状態を「日本へ連絡済」に更新しました）",
   },
   newBooking: {
     title: "予約を追加",

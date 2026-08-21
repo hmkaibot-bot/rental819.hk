@@ -8,6 +8,7 @@ import { getReservation, updateReservation } from "@/lib/reservations/store";
 import {
   costItemsTotal,
   rebateFromCostItems,
+  confirmNeedsPaidDate,
   COST_ITEM_LABELS,
   ADDON_LABELS,
   type CostItems,
@@ -97,6 +98,18 @@ export async function patchReservation(formData: FormData) {
     const requested = String(formData.get("request_date") ?? "").trim();
     if (!requested) redirect(`/admin/reservations/${id}?err=date_required`);
     patch.request_date = requested;
+  }
+
+  // 已確認預定 means the money is in, so it needs 客人付款日期 on record. The date
+  // lives in its own form, so take it from this submit when present and fall
+  // back to what is already stored.
+  if (patch.status === "confirmed") {
+    const paidDate = formData.has("customer_paid_date")
+      ? String(formData.get("customer_paid_date") ?? "")
+      : (await getReservation(id))?.customer_paid_date;
+    if (confirmNeedsPaidDate("confirmed", paidDate)) {
+      redirect(`/admin/reservations/${id}?err=paid_date_required`);
+    }
   }
 
   try {

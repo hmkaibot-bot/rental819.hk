@@ -152,6 +152,31 @@ export const TERMINAL_STATUS: {
   { key: "cancelled", zh: "顧客無反應/已取消", en: "No response / cancelled", ja: "連絡なし／キャンセル", tone: "bg-rose-100 text-rose-700" },
 ];
 
+/**
+ * 已確認預定 is the point the booking is treated as money-in, so it may only be
+ * set once 客人付款日期 is on record. Both places staff can move a status — the
+ * 預約 card and the dashboard's inline dropdown — run this one rule so the two
+ * can never drift apart.
+ */
+export function confirmNeedsPaidDate(
+  nextStatus: string,
+  customerPaidDate: string | null | undefined,
+): boolean {
+  return nextStatus === "confirmed" && !String(customerPaidDate ?? "").trim();
+}
+
+/**
+ * Sending the Japan email marks the booking 已通知日本 — but only ever forwards.
+ * Re-sending a mail for a booking that is already at 待SI or beyond must not
+ * drag it back down the pipeline, and a cancelled/變更溝通中 booking (neither is
+ * in STATUS_FLOW) keeps the status staff deliberately set.
+ */
+export function statusAfterJpEmail(current: string): ReservationStatus | null {
+  const target = STATUS_FLOW.findIndex((s) => s.key === "notified_jp");
+  const now = STATUS_FLOW.findIndex((s) => s.key === current);
+  return now >= 0 && now < target ? "notified_jp" : null;
+}
+
 const ALL = [...STATUS_FLOW, ...TERMINAL_STATUS];
 
 export function statusMeta(status: ReservationStatus) {

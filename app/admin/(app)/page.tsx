@@ -140,6 +140,7 @@ const COLUMNS: Column[] = [
           id={r.id}
           value={r.status}
           ariaLabel={lang === "ja" ? "状態" : "狀態"}
+          paidDateRequired={adminDict(lang).dashboard.paidDateRequired}
           options={STATUS_ORDER.map((s) => ({
             key: s.key,
             label: statusName(s, lang),

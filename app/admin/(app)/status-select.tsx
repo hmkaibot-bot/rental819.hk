@@ -18,19 +18,24 @@ export function StatusSelect({
   value,
   options,
   ariaLabel,
+  paidDateRequired,
 }: {
   id: string;
   value: string;
   options: { key: string; label: string; tone: string }[];
   ariaLabel: string;
+  /** Shown when 已確認預定 is refused for a booking with no 客人付款日期. */
+  paidDateRequired: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [current, setCurrent] = useState(value);
+  const [refused, setRefused] = useState("");
   const tone =
     options.find((o) => o.key === current)?.tone ?? "bg-slate-100 text-slate-700";
 
   return (
+    <span className="inline-flex flex-col gap-1">
     <select
       value={current}
       aria-label={ariaLabel}
@@ -39,13 +44,21 @@ export function StatusSelect({
         const next = e.target.value;
         const prev = current;
         setCurrent(next);
+        setRefused("");
         const fd = new FormData();
         fd.set("id", id);
         fd.set("status", next);
         startTransition(async () => {
           try {
-            await updateStatusFromList(fd);
-            router.refresh();
+            const res = await updateStatusFromList(fd);
+            if (res?.ok) {
+              router.refresh();
+              return;
+            }
+            // Refused by a rule, not by an outage — put the badge back and say
+            // which rule, otherwise the pick just silently springs back.
+            setCurrent(prev);
+            if (res?.error === "paid_date_required") setRefused(paidDateRequired);
           } catch {
             setCurrent(prev);
           }
@@ -66,5 +79,11 @@ export function StatusSelect({
         </option>
       ))}
     </select>
+    {refused && (
+      <span role="alert" className="max-w-[190px] text-[11px] leading-4 text-rose-600">
+        {refused}
+      </span>
+    )}
+    </span>
   );
 }

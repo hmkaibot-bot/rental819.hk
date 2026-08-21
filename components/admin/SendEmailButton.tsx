@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { AdminDict } from "@/lib/admin/i18n";
 
 /**
@@ -25,7 +26,9 @@ export default function SendEmailButton({
   readOnly: boolean;
   t: AdminDict["email"];
 }) {
+  const router = useRouter();
   const [state, setState] = useState<"idle" | "armed" | "sending" | "done" | "error">("idle");
+  const [advanced, setAdvanced] = useState(false);
   const [detail, setDetail] = useState("");
   const [staffName, setStaffName] = useState("");
 
@@ -61,7 +64,12 @@ export default function SendEmailButton({
         body: JSON.stringify({ id, kind, lang, staffName: staffName.trim() || undefined }),
       });
       if (res.ok) {
+        const j = (await res.json().catch(() => ({}))) as { statusAdvanced?: boolean };
+        setAdvanced(Boolean(j.statusAdvanced));
         setState("done");
+        // The JP send moves the booking to 已通知日本 server-side; refresh so the
+        // status shown here is not the one from before the mail went out.
+        router.refresh();
       } else {
         const j = (await res.json().catch(() => ({}))) as { error?: string; detail?: string };
         setDetail(j.detail || j.error || `HTTP ${res.status}`);
@@ -96,7 +104,12 @@ export default function SendEmailButton({
         {state === "sending" ? t.sending : state === "armed" ? t.confirmSend : t.send}
       </button>
       {state === "armed" && <span className="text-xs text-ink-muted">{t.confirmHint}</span>}
-      {state === "done" && <span className="text-sm text-emerald-700">{t.sent}</span>}
+      {state === "done" && (
+        <span className="text-sm text-emerald-700">
+          {t.sent}
+          {advanced && <span className="ml-1 text-xs">{t.statusAdvanced}</span>}
+        </span>
+      )}
       {state === "error" && (
         <span className="text-sm text-rose-600">
           {t.failed}
