@@ -328,7 +328,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             ["竊盜補償", "損害上限額 50%（自付額 50%）"],
           ],
         },
-        { type: "h", text: "車輛損傷補償（可選加購，費用不含在上表）（港元）" },
+        { type: "h", text: "車輛損傷補償（費用不含在上表）（港元）" },
         {
           type: "table",
           head: ["等級（自付額）", "1 天（24 小時）", "第 2 天以後每天"],
@@ -1135,7 +1135,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             ["Theft cover", "Up to 50% of damage value (50% deductible)"],
           ],
         },
-        { type: "h", text: "Vehicle damage compensation (optional add-on, not in the table above) (HK$)" },
+        { type: "h", text: "Vehicle damage compensation (not in the table above) (HK$)" },
         {
           type: "table",
           head: ["Class (deductible)", "1 day (24 hrs)", "Each day from day 2"],
