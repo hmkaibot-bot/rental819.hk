@@ -408,7 +408,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       slug: "insurance",
       title: "保險",
       intro:
-        "基本費用已包含日本國內的強制險及任意保險，另有可選加購的車輛補償及 MamoRide 補償。",
+        "基本費用已包含日本國內的強制險及任意保險，另有車輛補償及 MamoRide 補償。",
       seoTitle: "日本租電單車保險｜強制險、車輛補償及 MamoRide",
       seoDescription:
         "基本費用已包強制險、任意保險及竊盜險：對人賠償無上限，對物每件事故最高 1,000 萬日圓。另可加購車輛補償及 MamoRide。營業損失賠償為能騎回店家 20,000 日圓、需拖吊 50,000 日圓。",
@@ -446,7 +446,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           type: "note",
           text: "如未將車輛上鎖，或將鑰匙遺留在車輛上，竊盜險將不理賠。離開車輛時請務必上龍頭鎖並拔下鑰匙。",
         },
-        { type: "h3", text: "車輛補償（可選加入）" },
+        { type: "h3", text: "車輛補償" },
         {
           type: "p",
           text: "透過支付額外費用可加入「車輛補償」。若因意外摔車或事故而產生需由顧客負擔的修理費，超過免責額的部分將由補償承擔。",
@@ -1215,7 +1215,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       slug: "insurance",
       title: "Insurance",
       intro:
-        "The basic fee already includes Japan's compulsory and voluntary insurance, with optional vehicle compensation and MamoRide compensation available.",
+        "The basic fee already includes Japan's compulsory and voluntary insurance, with vehicle compensation and MamoRide compensation also available.",
       seoTitle: "Japan motorcycle rental insurance explained",
       updated: "2026-08-06",
       blocks: [
@@ -1251,7 +1251,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           type: "note",
           text: "Theft insurance does not apply if the vehicle was not locked, or if the key was left in the vehicle. When leaving the bike, always engage the steering lock and remove the key.",
         },
-        { type: "h3", text: "Vehicle compensation (optional)" },
+        { type: "h3", text: "Vehicle compensation" },
         {
           type: "p",
           text: "For an extra fee you can add Vehicle Compensation. If a crash or accident results in repair costs that the customer would have to bear, the portion above the deductible is covered by the compensation.",
