@@ -52,6 +52,7 @@ const NULLABLE_TEXT = [
   // billing / ops
   "si_number",
   "customer_paid_date",
+  "payment_channel",
   "supplier_paid_date",
   "notes",
 ] as const;

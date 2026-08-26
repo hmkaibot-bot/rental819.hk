@@ -152,6 +152,7 @@ export interface AdminDict {
     costHint: string;
     saveSiCost: string;
     customerPaidDate: string;
+    paymentChannel: string;
     settlementMoved: string;
     accountingModule: string;
     settlementMovedTail: string;
@@ -393,6 +394,7 @@ const zh: AdminDict = {
     costHint: "合計及回贈由各項自動計算，毋須手動輸入；回贈固定為基本車租的 10%。",
     saveSiCost: "儲存單號及成本",
     customerPaidDate: "客人付款日期",
+    paymentChannel: "收款渠道",
     settlementMoved: "月結（向日本供應商付款）已移至",
     accountingModule: "會計模組",
     settlementMovedTail: "，可一次過剔選多個預約記錄付款。",
@@ -634,6 +636,7 @@ const ja: AdminDict = {
     costHint: "合計とリベートは各項目から自動計算されるため、手入力は不要です。リベートは基本車両料金の 10% で固定です。",
     saveSiCost: "SI 番号と原価を保存",
     customerPaidDate: "お客様の入金日",
+    paymentChannel: "入金経路",
     settlementMoved: "月次精算（日本の仕入先への支払）は",
     accountingModule: "会計モジュール",
     settlementMovedTail: "に移動しました。複数の予約をまとめて選び、支払処理ができます。",
