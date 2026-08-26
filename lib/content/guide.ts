@@ -627,7 +627,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "p",
-          text: "在填寫租用表格時請表明需要租借 ETC 卡，客服會為你安排可租借的店舖並確認車輛已裝設 ETC 系統。租車當日除車輛租金外，你亦要繳付 ETC 卡租金，費用為每天 220 日圓。還車時請一併繳交高速公路費用；如延遲還車則需繳付額外延遲費用。",
+          text: "ETC 卡因供應有限，請到店取車時向職員查詢。租車當日除車輛租金外，你亦要繳付 ETC 卡租金，費用為每天 220 日圓。還車時請一併繳交高速公路費用；如延遲還車則需繳付額外延遲費用。",
         },
         { type: "h", text: "使用 ETC 卡的注意事項" },
         {
@@ -1451,7 +1451,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "p",
-          text: "Please indicate on the rental form that you need to rent an ETC card, and our staff will arrange a shop that can lend one and confirm the vehicle is fitted with the system. On the rental day, besides the vehicle rent you also pay the ETC card rental of 220 yen per day. When returning the bike, settle the highway tolls at the same time; a late return incurs an additional late fee.",
+          text: "ETC cards are limited in supply — please ask staff at the branch when you collect the bike. On the rental day, besides the vehicle rent you also pay the ETC card rental of 220 yen per day. When returning the bike, settle the highway tolls at the same time; a late return incurs an additional late fee.",
         },
         { type: "h", text: "Precautions when using an ETC card" },
         {
