@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { isAuthed, canWrite } from "@/lib/admin/auth";
 import { getReservation, setStatus } from "@/lib/reservations/store";
-import { statusAfterJpEmail } from "@/lib/reservations/types";
+import {
+  statusAfterJpEmail,
+  statusAfterCustomerEmail,
+  confirmNeedsPaidDate,
+} from "@/lib/reservations/types";
 import { jpReservationEmail, customerConfirmEmail } from "@/lib/reservations/emails";
 import { JP_PARTNER_EMAIL, INTERNAL_COPY } from "@/lib/reservations/recipients";
 import { isGmailConfigured, sendGmailMessage } from "@/lib/gmail";
@@ -74,21 +78,30 @@ export async function POST(request: Request) {
     // making staff set the same thing by hand right after. Only ever forwards
     // (see statusAfterJpEmail), and a failure here must not report the sent
     // mail as failed — it is already gone.
+    // Either mail going out IS a pipeline step, so record it instead of making
+    // staff set the same thing by hand right after: the JP mail → 已通知日本,
+    // the customer confirmation → 已確認預定. Both only ever move forward, and
+    // 已確認預定 still requires 客人付款日期 (the same gate as the two status
+    // dropdowns) — without it the status is left alone and the UI says why.
+    // A failure here must not report the sent mail as failed — it is gone.
     let statusAdvanced = false;
-    if (isJp) {
-      const next = statusAfterJpEmail(r.status);
-      if (next) {
+    let statusSkipped: string | undefined;
+    const next = isJp ? statusAfterJpEmail(r.status) : statusAfterCustomerEmail(r.status);
+    if (next) {
+      if (!isJp && confirmNeedsPaidDate(next, r.customer_paid_date)) {
+        statusSkipped = "paid_date_required";
+      } else {
         try {
           await setStatus(r.id, next);
           revalidatePath(`/admin/reservations/${r.id}`, "layout");
           revalidatePath("/admin");
           statusAdvanced = true;
         } catch (statusErr) {
-          console.error("status advance after JP email failed", statusErr);
+          console.error("status advance after email failed", statusErr);
         }
       }
     }
-    return NextResponse.json({ ok: true, to, copies: INTERNAL_COPY, statusAdvanced });
+    return NextResponse.json({ ok: true, to, copies: INTERNAL_COPY, statusAdvanced, statusSkipped });
   } catch (err) {
     console.error("reservation email send failed", err);
     const message = err instanceof Error ? err.message : "send_failed";

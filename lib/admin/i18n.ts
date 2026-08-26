@@ -267,6 +267,8 @@ export interface AdminDict {
     staffNamePlaceholder: string;
     staffNameRequired: string;
     statusAdvanced: string;
+    statusAdvancedConfirmed: string;
+    statusSkippedPaidDate: string;
   };
   newBooking: {
     title: string;
@@ -509,6 +511,8 @@ const zh: AdminDict = {
     staffNamePlaceholder: "輸入姓名",
     staffNameRequired: "請先輸入負責同事姓名",
     statusAdvanced: "（狀態已更新為「已通知日本」）",
+    statusAdvancedConfirmed: "（狀態已更新為「已確認預定」）",
+    statusSkippedPaidDate: "（狀態未變更：要先填「客人付款日期」先可以轉為已確認預定）",
   },
   newBooking: {
     title: "新增預約",
@@ -751,6 +755,8 @@ const ja: AdminDict = {
     staffNamePlaceholder: "氏名を入力",
     staffNameRequired: "先に担当者名を入力してください",
     statusAdvanced: "（状態を「日本へ連絡済」に更新しました）",
+    statusAdvancedConfirmed: "（状態を「予約確定」に更新しました）",
+    statusSkippedPaidDate: "（状態は未変更：「お客様の入金日」を入力すると予約確定に変更できます）",
   },
   newBooking: {
     title: "予約を追加",

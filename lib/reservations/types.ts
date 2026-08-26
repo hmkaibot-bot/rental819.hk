@@ -179,6 +179,19 @@ export function statusAfterJpEmail(current: string): ReservationStatus | null {
   return now >= 0 && now < target ? "notified_jp" : null;
 }
 
+/**
+ * Sending the customer confirmation email marks the booking 已確認預定 — but,
+ * like statusAfterJpEmail, only ever forwards: a booking already confirmed
+ * stays put on a re-send, and cancelled/變更溝通中 (not in STATUS_FLOW) keep
+ * whatever staff set. The caller still applies confirmNeedsPaidDate — the
+ * confirmation email does not get to skip the 客人付款日期 gate.
+ */
+export function statusAfterCustomerEmail(current: string): ReservationStatus | null {
+  const target = STATUS_FLOW.findIndex((s) => s.key === "confirmed");
+  const now = STATUS_FLOW.findIndex((s) => s.key === current);
+  return now >= 0 && now < target ? "confirmed" : null;
+}
+
 /** 收款渠道 options for the customer payment dropdown. */
 export const PAYMENT_CHANNELS = ["LIVI", "AW", "BOC MAC"] as const;
 
