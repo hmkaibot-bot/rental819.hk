@@ -29,6 +29,7 @@ export default function SendEmailButton({
   const router = useRouter();
   const [state, setState] = useState<"idle" | "armed" | "sending" | "done" | "error">("idle");
   const [advanced, setAdvanced] = useState(false);
+  const [skipNote, setSkipNote] = useState("");
   const [detail, setDetail] = useState("");
   const [staffName, setStaffName] = useState("");
 
@@ -64,8 +65,12 @@ export default function SendEmailButton({
         body: JSON.stringify({ id, kind, lang, staffName: staffName.trim() || undefined }),
       });
       if (res.ok) {
-        const j = (await res.json().catch(() => ({}))) as { statusAdvanced?: boolean };
+        const j = (await res.json().catch(() => ({}))) as {
+          statusAdvanced?: boolean;
+          statusSkipped?: string;
+        };
         setAdvanced(Boolean(j.statusAdvanced));
+        if (j.statusSkipped === "paid_date_required") setSkipNote(t.statusSkippedPaidDate);
         setState("done");
         // The JP send moves the booking to 已通知日本 server-side; refresh so the
         // status shown here is not the one from before the mail went out.
@@ -107,7 +112,10 @@ export default function SendEmailButton({
       {state === "done" && (
         <span className="text-sm text-emerald-700">
           {t.sent}
-          {advanced && <span className="ml-1 text-xs">{t.statusAdvanced}</span>}
+          {advanced && (
+            <span className="ml-1 text-xs">{isJp ? t.statusAdvanced : t.statusAdvancedConfirmed}</span>
+          )}
+          {skipNote && <span className="ml-1 text-xs text-amber-700">{skipNote}</span>}
         </span>
       )}
       {state === "error" && (
