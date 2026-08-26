@@ -12,6 +12,7 @@ import {
   COST_ITEM_LABELS,
   SHOP_AREAS,
   SHOPS,
+  PAYMENT_CHANNELS,
   JP_ABILITY_OPTIONS,
   EN_ABILITY_OPTIONS,
   costItemsTotal,
@@ -512,8 +513,24 @@ export default async function ReservationDetail({
             <form action={patchReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
-              <label className="text-xs font-medium text-ink-soft">{t.detail.customerPaidDate}</label>
-              <input name="customer_paid_date" type="date" defaultValue={r.customer_paid_date ?? ""} className={input} />
+              <label className="text-xs font-medium text-ink-soft" htmlFor="customer_paid_date">
+                {t.detail.customerPaidDate}
+              </label>
+              <input id="customer_paid_date" name="customer_paid_date" type="date" defaultValue={r.customer_paid_date ?? ""} className={input} />
+              <label className="text-xs font-medium text-ink-soft" htmlFor="payment_channel">
+                {t.detail.paymentChannel}
+              </label>
+              <select id="payment_channel" name="payment_channel" defaultValue={r.payment_channel ?? ""} className={input}>
+                <option value="">—</option>
+                {/* A legacy/hand-entered value stays selectable so saving the
+                    date never silently wipes it — same rule as the shop list. */}
+                {r.payment_channel && !(PAYMENT_CHANNELS as readonly string[]).includes(r.payment_channel) && (
+                  <option value={r.payment_channel}>{r.payment_channel}{t.detail.existingSuffix}</option>
+                )}
+                {PAYMENT_CHANNELS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
               <button className="btn-brand w-full text-xs">{t.common.save}</button>
               </fieldset>
             </form>
@@ -545,6 +562,7 @@ export default async function ReservationDetail({
                 }
               />
               <Field label={t.detail.customerPaidOn} value={r.customer_paid_date} />
+              <Field label={t.detail.paymentChannel} value={r.payment_channel} />
               <Field label={t.detail.supplierPaidOn} value={r.supplier_paid_date} />
               <Field label={t.detail.paidToSupplier} value={r.paid_to_supplier ? t.common.yes : t.common.no} />
             </dl>

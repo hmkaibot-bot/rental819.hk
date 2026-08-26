@@ -104,6 +104,8 @@ export interface Reservation {
   invoice_date: string | null;
   invoice_items: InvoiceItem[];
   customer_paid_date: string | null;
+  // 收款渠道 the customer paid through (LIVI / AW / BOC MAC).
+  payment_channel: string | null;
   paid_to_supplier: boolean;
   supplier_paid_date: string | null;
   cost_jpy: number | null; // gross supplier cost (¥), before the Japan rebate
@@ -176,6 +178,9 @@ export function statusAfterJpEmail(current: string): ReservationStatus | null {
   const now = STATUS_FLOW.findIndex((s) => s.key === current);
   return now >= 0 && now < target ? "notified_jp" : null;
 }
+
+/** 收款渠道 options for the customer payment dropdown. */
+export const PAYMENT_CHANNELS = ["LIVI", "AW", "BOC MAC"] as const;
 
 const ALL = [...STATUS_FLOW, ...TERMINAL_STATUS];
 
