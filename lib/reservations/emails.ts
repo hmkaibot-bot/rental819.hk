@@ -138,18 +138,36 @@ export function jpReservationEmail(r: Reservation, staffName?: string) {
 
   // ---- HTML ----
   const border = "1px solid #000000";
-  const th = `padding:8px 10px;border:${border};font-weight:700;white-space:nowrap;text-align:left`;
-  const td = `padding:8px 10px;border:${border};text-align:center`;
+  // One label width for all three tables. Without it each table sizes its own
+  // columns from its own content — and OPTION(S) REQUEST, whose values are just
+  // "Y", hands almost the whole width to the label column, so the three tables
+  // come out visibly out of step. A fixed 195px (the longest label, BIKE
+  // PREFERENCE #1, measures ~185px with its padding) beats a percentage: it is
+  // identical in every table at every width, and it leaves the whole remainder
+  // to the value column instead of starving long values like a Japan address
+  // into extra wrapped lines.
+  const LABEL_W = "195";
+  const cell = `padding:8px 10px;border:${border};vertical-align:middle`;
+  const th = `${cell};width:${LABEL_W}px;font-weight:700;text-align:left`;
+  // A fixed column never widens for its content, so a value with no break
+  // opportunity — an email address, a Japan address — would otherwise overflow
+  // the cell and paint straight through the table's right rule on a phone.
+  const td = `${cell};text-align:center;word-break:break-word;overflow-wrap:anywhere`;
   const row = ([k, v]: [string, string]) =>
-    `<tr><td style="${th}">${escapeHtml(k)}</td><td style="${td}">${escapeHtml(v)}</td></tr>`;
-  // The legacy `border` / `cellspacing` / `cellpadding` attributes are here on
-  // purpose alongside the CSS: when the rendered preview is copied out and
-  // pasted into Gmail's compose window, Gmail's sanitiser strips most inline
-  // styling — but it keeps these HTML attributes, so the gridlines survive.
+    `<tr><td width="${LABEL_W}" style="${th}">${escapeHtml(k)}</td><td style="${td}">${escapeHtml(v)}</td></tr>`;
+  // The legacy `border` / `cellspacing` / `cellpadding` / `width` attributes are
+  // here on purpose alongside the CSS: when the rendered preview is copied out
+  // and pasted into Gmail's compose window, Gmail's sanitiser strips most inline
+  // styling — but it keeps these HTML attributes, so the gridlines and the
+  // column split both survive. colgroup carries the same split for the clients
+  // that honour it (Outlook's Word engine among them).
   const table = (inner: string) =>
-    `<table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse;width:100%;max-width:620px;margin:0 0 18px;font-size:14px;border:${border}"><tbody>${inner}</tbody></table>`;
+    `<table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse;table-layout:fixed;width:100%;max-width:620px;margin:0 0 18px;font-size:14px;border:${border}"><colgroup><col width="${LABEL_W}" style="width:${LABEL_W}px" /><col /></colgroup><tbody>${inner}</tbody></table>`;
+  // The heading spans both columns, so it must NOT carry the label width —
+  // under table-layout:fixed the first row decides the columns, and a colspan
+  // cell claiming 195px there overrides the colgroup for the whole table.
   const heading = (label: string) =>
-    `<tr><td colspan="2" style="${th};background:#f1f5f9">${label}</td></tr>`;
+    `<tr><td colspan="2" style="${cell};font-weight:700;text-align:left;background:#f1f5f9">${label}</td></tr>`;
 
   // Font matches the customer confirmation email so the two read as one house.
   const html = `<div style="margin:0;padding:0;background:#ffffff">
@@ -167,7 +185,7 @@ export function jpReservationEmail(r: Reservation, staffName?: string) {
         options
           .map(
             (o) =>
-              `<tr><td style="${th}">${o.label}</td><td style="${td}">${o.on ? "Y" : "&nbsp;"}</td></tr>`,
+              `<tr><td width="${LABEL_W}" style="${th}">${o.label}</td><td style="${td}">${o.on ? "Y" : "&nbsp;"}</td></tr>`,
           )
           .join(""),
     )}
