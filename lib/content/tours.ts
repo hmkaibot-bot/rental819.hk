@@ -20,6 +20,12 @@ export interface Package {
   region: string;
   tiers: string;
   priceFrom: number;
+  /**
+   * HK$ price of the top tier, when one is published. Optional because the
+   * cards only print a "from" figure — `highPrice` is emitted in structured
+   * data solely when this is set, never guessed from `priceFrom`.
+   */
+  priceTo?: number;
   blurb: string;
   /** Roads and places on this route, all named elsewhere in the repo (roads.ts / tours). */
   highlights: string[];
