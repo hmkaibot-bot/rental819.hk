@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { listReservations } from "@/lib/reservations/store";
-import { invoiceTotal, invoiceNetTotal } from "@/lib/reservations/invoice";
+import { invoiceTotal } from "@/lib/reservations/invoice";
 import { RT819_EXCHANGE_RATE } from "@/lib/reservations/items";
 import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
@@ -17,13 +17,11 @@ const EXCLUDED = ["cancelled"];
 // Revenue = the in-app invoice total when there is one, otherwise the imported
 // customer price (單價（港幣）) from the master Excel.
 //
-// The gate stays on the GROSS line-item total — an invoice discounted to zero is
-// still a real invoice, and falling back to the imported Excel price there would
-// report the undiscounted amount as income. Only the figure returned is net.
+// Each line's `amount` is already net of that line's discount, so this total is
+// what the customer is actually billed — no discount adjustment belongs here.
 function revenue(r: Reservation) {
-  const items = r.invoice_items ?? [];
-  if (invoiceTotal(items) > 0) return invoiceNetTotal(items, r.settlement);
-  return Number(r.revenue_hkd) || 0;
+  const inv = invoiceTotal(r.invoice_items ?? []);
+  return inv > 0 ? inv : Number(r.revenue_hkd) || 0;
 }
 /** Japan's 10% base-rental rebate, in yen (stored positive). */
 function rebateJpy(r: Reservation) {

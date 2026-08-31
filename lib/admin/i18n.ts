@@ -224,20 +224,10 @@ export interface AdminDict {
     siNo: string;
     date: string;
     paymentDate: string;
-    deposit: string;
-    discount: string;
-    discountMode: string;
-    discountPercent: string;
-    discountRate: string;
-    discountAmount: string;
-    discountHint: string;
-    discountNoEffect: string;
-    discountOff: string;
-    subtotal: string;
-    depositShort: string;
     fromCatalog: string;
     pickItem: string;
     colDesc: string;
+    colDiscount: string;
     colUnitPrice: string;
     colQty: string;
     colAmount: string;
@@ -478,20 +468,10 @@ const zh: AdminDict = {
     siNo: "單號 (SI No.)",
     date: "單據日期 Date",
     paymentDate: "付款日期 Payment date",
-    deposit: "訂金 Deposit (HK$)",
-    discount: "折扣 Discount",
-    discountMode: "折扣方式",
-    discountPercent: "百分比 %（例：10 = 減 10%）",
-    discountRate: "折數（例：9 = 9折）",
-    discountAmount: "固定金額 HK$",
-    discountHint: "留空或填 0 即冇折扣。",
-    discountNoEffect: "呢個數字喺所揀嘅方式下等於冇折扣，請檢查方式揀啱未。",
-    discountOff: "折扣金額",
-    subtotal: "小計",
-    depositShort: "訂金",
     fromCatalog: "由 RT819 項目表加入",
     pickItem: "＋ 選擇項目加入單據…",
     colDesc: "項目說明 Description",
+    colDiscount: "折扣 %",
     colUnitPrice: "單價 (HK$)",
     colQty: "數量",
     colAmount: "金額",
@@ -732,20 +712,10 @@ const ja: AdminDict = {
     siNo: "SI 番号 (SI No.)",
     date: "発行日 Date",
     paymentDate: "入金日 Payment date",
-    deposit: "手付金 Deposit (HK$)",
-    discount: "割引 Discount",
-    discountMode: "割引方式",
-    discountPercent: "パーセント %（例：10 = 10% 引き）",
-    discountRate: "掛け率（例：9 = 9掛け）",
-    discountAmount: "定額 HK$",
-    discountHint: "空欄または 0 で割引なし。",
-    discountNoEffect: "選択中の方式では、この数値は割引なしになります。方式をご確認ください。",
-    discountOff: "割引額",
-    subtotal: "小計",
-    depositShort: "手付金",
     fromCatalog: "RT819 項目表から追加",
     pickItem: "＋ 項目を選んで追加…",
     colDesc: "項目説明 Description",
+    colDiscount: "割引 %",
     colUnitPrice: "単価 (HK$)",
     colQty: "数量",
     colAmount: "金額",

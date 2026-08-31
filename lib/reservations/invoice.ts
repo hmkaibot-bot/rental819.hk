@@ -52,93 +52,25 @@ export function fmtHKD(n: number): string {
 }
 
 /**
- * Invoice discount modes. "打折" means a different number to different people,
- * so the agent picks which one they are typing rather than us guessing:
- *   percent — 10  → 10% off                     (subtotal x 10/100 deducted)
- *   rate    — 9   → 9折, the HK/JP convention   (subtotal x (10-9)/10 deducted)
- *   amount  — 300 → a flat HK$300 off
+ * A line's billed amount: quantity x list unit price, less that line's own
+ * discount. The percentage is clamped to [0, 100] so a mistyped 120 or -5 can
+ * never turn a charge into a credit, and the result is rounded to cents once,
+ * here, so the editor, the printed invoice and the accounting page can never
+ * disagree about a line by a rounding step.
  */
-export const DISCOUNT_MODES = ["percent", "rate", "amount"] as const;
-export type DiscountMode = (typeof DISCOUNT_MODES)[number];
-
-export interface InvoiceDiscount {
-  mode: DiscountMode;
-  value: number;
-}
-
-const isDiscountMode = (v: unknown): v is DiscountMode =>
-  typeof v === "string" && (DISCOUNT_MODES as readonly string[]).includes(v);
-
-/**
- * Read the discount off a settlement blob. It lives there — not as a line item —
- * so re-editing the rate never means hunting for a magic negative row, and so
- * the printed invoice can show it in the totals block beside the deposit rather
- * than among the goods. Every pre-discount booking reads back as "no discount".
- */
-export function readInvoiceDiscount(
-  settlement: Record<string, unknown> | null | undefined,
-): InvoiceDiscount {
-  const s = settlement ?? {};
-  const mode = isDiscountMode(s.invoice_discount_mode)
-    ? s.invoice_discount_mode
-    : "percent";
-  const value = Number(s.invoice_discount_value);
-  return { mode, value: Number.isFinite(value) && value > 0 ? value : 0 };
-}
-
-/**
- * HK$ taken off the subtotal, always clamped to [0, subtotal]: a mistyped 120%
- * or a flat HK$9,999 off a HK$3,095 invoice must not flip the balance negative
- * and hand the customer a refund. A rate of 10 or more (10折 = full price) and
- * any non-positive value both mean no discount.
- */
-export function invoiceDiscountAmount(
-  subtotal: number,
-  d: InvoiceDiscount,
+export function lineAmount(
+  qty: number,
+  unitPrice: number,
+  discountPct?: number,
 ): number {
-  const base = Number(subtotal) || 0;
-  const value = Number(d?.value) || 0;
-  if (base <= 0 || value <= 0) return 0;
-  const raw =
-    d.mode === "amount"
-      ? value
-      : d.mode === "rate"
-        ? (base * (10 - Math.min(value, 10))) / 10
-        : (base * value) / 100;
-  return Number(Math.min(Math.max(raw, 0), base).toFixed(2));
+  const gross = (Number(qty) || 0) * (Number(unitPrice) || 0);
+  const pct = Math.min(Math.max(Number(discountPct) || 0, 0), 100);
+  return Number((gross * (1 - pct / 100)).toFixed(2));
 }
 
-/** Badge for the printed DISCOUNT row: "9折" / "-10%" / "" for a flat sum. */
-export function invoiceDiscountBadge(d: InvoiceDiscount): string {
-  const value = Number(d?.value) || 0;
-  if (value <= 0) return "";
-  if (d.mode === "rate") {
-    const rate = Math.min(value, 10);
-    return rate >= 10 ? "" : `${trimNumber(rate)}折`;
-  }
-  if (d.mode === "percent") return `-${trimNumber(Math.min(value, 100))}%`;
-  return "";
-}
-
-/** 9.5 -> "9.5", 9.00 -> "9" — no trailing zeros on a rate badge. */
-function trimNumber(n: number): string {
-  return String(Number(n.toFixed(2)));
-}
-
-/**
- * What the customer is actually billed: line items less the discount. This — not
- * `invoiceTotal` — is the figure the accounting module must count as revenue,
- * otherwise a discounted booking reports the undiscounted price as income.
- * (The deposit is deliberately NOT deducted: it is money already received, not
- * a reduction in price.)
- */
-export function invoiceNetTotal(
-  items: InvoiceItem[],
-  settlement: Record<string, unknown> | null | undefined,
-): number {
-  const subtotal = invoiceTotal(items);
-  const off = invoiceDiscountAmount(subtotal, readInvoiceDiscount(settlement));
-  return Number((subtotal - off).toFixed(2));
+/** Normalised discount for a line — 0 when absent, mistyped or out of range. */
+export function lineDiscountPct(item: InvoiceItem): number {
+  return Math.min(Math.max(Number(item.discount_pct) || 0, 0), 100);
 }
 
 function fmtDateTime(date?: string | null, time?: string | null): string {

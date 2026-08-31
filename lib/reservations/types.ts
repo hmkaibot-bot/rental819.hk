@@ -65,7 +65,13 @@ export interface InvoiceItem {
   description: string;
   qty: number;
   unit_price: number; // HKD
-  amount: number; // HKD
+  /**
+   * Per-line discount, in percent off the list unit price. Optional: every
+   * invoice written before this field existed simply has no discount, and
+   * `lineAmount` treats undefined as 0.
+   */
+  discount_pct?: number;
+  amount: number; // HKD — already net of discount_pct
 }
 
 export interface Reservation {
