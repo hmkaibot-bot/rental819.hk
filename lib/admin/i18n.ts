@@ -231,8 +231,10 @@ export interface AdminDict {
     discountRate: string;
     discountAmount: string;
     discountHint: string;
+    discountNoEffect: string;
     discountOff: string;
     subtotal: string;
+    depositShort: string;
     fromCatalog: string;
     pickItem: string;
     colDesc: string;
@@ -482,9 +484,11 @@ const zh: AdminDict = {
     discountPercent: "百分比 %（例：10 = 減 10%）",
     discountRate: "折數（例：9 = 9折）",
     discountAmount: "固定金額 HK$",
-    discountHint: "填 0 或留空即冇折扣。",
+    discountHint: "留空或填 0 即冇折扣。",
+    discountNoEffect: "呢個數字喺所揀嘅方式下等於冇折扣，請檢查方式揀啱未。",
     discountOff: "折扣金額",
     subtotal: "小計",
+    depositShort: "訂金",
     fromCatalog: "由 RT819 項目表加入",
     pickItem: "＋ 選擇項目加入單據…",
     colDesc: "項目說明 Description",
@@ -734,9 +738,11 @@ const ja: AdminDict = {
     discountPercent: "パーセント %（例：10 = 10% 引き）",
     discountRate: "掛け率（例：9 = 9掛け）",
     discountAmount: "定額 HK$",
-    discountHint: "0 または空欄で割引なし。",
+    discountHint: "空欄または 0 で割引なし。",
+    discountNoEffect: "選択中の方式では、この数値は割引なしになります。方式をご確認ください。",
     discountOff: "割引額",
     subtotal: "小計",
+    depositShort: "手付金",
     fromCatalog: "RT819 項目表から追加",
     pickItem: "＋ 項目を選んで追加…",
     colDesc: "項目説明 Description",

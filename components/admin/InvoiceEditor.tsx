@@ -61,7 +61,14 @@ export default function InvoiceEditor({
   );
   const savedDiscount = readInvoiceDiscount(settlement);
   const [discountMode, setDiscountMode] = useState<DiscountMode>(savedDiscount.mode);
-  const [discountValue, setDiscountValue] = useState<number>(savedDiscount.value);
+  // Held as the raw string, not a number. A controlled type="number" bound to a
+  // number can never be truly empty (it renders a literal 0, so typing 8.5 gives
+  // "08.5"), and a half-typed decimal like "9." sanitises to "" -> 0, which in
+  // some browsers snaps the field back and silently turns 9.5折 into 5折.
+  const [discountInput, setDiscountInput] = useState(
+    savedDiscount.value > 0 ? String(savedDiscount.value) : "",
+  );
+  const discountValue = Number(discountInput) || 0;
   const [items, setItems] = useState<InvoiceItem[]>(
     r.invoice_items?.length ? r.invoice_items : seed,
   );
@@ -173,17 +180,22 @@ export default function InvoiceEditor({
               </select>
               <input
                 type="number"
+                inputMode="decimal"
                 min={0}
-                step="0.01"
-                value={discountValue}
-                onChange={(e) => setDiscountValue(Number(e.target.value))}
+                max={discountMode === "rate" ? 10 : discountMode === "percent" ? 100 : undefined}
+                step="0.1"
+                placeholder="0"
+                value={discountInput}
+                onChange={(e) => setDiscountInput(e.target.value)}
                 className={`${cell} w-24 shrink-0`}
               />
             </div>
             <span className="mt-1 block text-xs text-ink-muted">
               {discount > 0
                 ? `${t.discountOff} −HK$${fmtAmount(discount)}${discountBadge ? ` (${discountBadge})` : ""}`
-                : t.discountHint}
+                : discountValue > 0
+                  ? t.discountNoEffect
+                  : t.discountHint}
             </span>
           </div>
         </div>
@@ -250,12 +262,19 @@ export default function InvoiceEditor({
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">{t.addRow}</button>
           <div className="text-right">
-            {discount > 0 && (
+            {(discount > 0 || (Number(deposit) || 0) > 0) && (
               <div className="text-xs text-ink-muted">
                 {t.subtotal} HK${fmtAmount(subtotal)}
-                <span className="ml-2 text-rose-600">
-                  {t.discountOff} −HK${fmtAmount(discount)}
-                </span>
+                {discount > 0 && (
+                  <span className="ml-2 text-rose-600">
+                    {t.discountOff} −HK${fmtAmount(discount)}
+                  </span>
+                )}
+                {(Number(deposit) || 0) > 0 && (
+                  <span className="ml-2">
+                    {t.depositShort} −HK${fmtAmount(Number(deposit) || 0)}
+                  </span>
+                )}
               </div>
             )}
             <div className="flex items-center justify-end gap-2">
