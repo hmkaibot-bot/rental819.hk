@@ -223,11 +223,31 @@ export function serviceLd(
 }
 
 /**
+ * How many purchasable variants a package card actually offers: the duration
+ * tiers printed on it ("3日 / 4日 / 5日" -> 3). Derived from the very string the
+ * card renders, so the count can never drift from what a visitor is shown.
+ */
+function tierCount(tiers: string): number {
+  return tiers.split("/").filter((t) => t.trim()).length;
+}
+
+/**
  * Product list for /packages. Prices are the HK$ "from" figures printed on the
  * cards. The seller is the licensed travel agent named in the disclosure line
  * on the same page — not this organization, which only arranges the bikes.
- * No ratings, reviews or availability are stated anywhere on the page, so none
- * are emitted.
+ *
+ * Search Console flags `highPrice`, `aggregateRating` and `review` as missing
+ * recommended fields here. Three deliberate positions, so nobody "fixes" them
+ * by inventing data:
+ *
+ *  - `highPrice` is emitted only from `priceTo`, i.e. only once a top-tier
+ *    price is actually published on the card. Deriving one from `priceFrom`
+ *    would put a number in the search result that appears nowhere on the page.
+ *  - `aggregateRating` and `review` are NOT emitted. The site displays no
+ *    customer reviews at all, and Google's structured-data policy requires
+ *    review markup to reflect genuine reviews visible on that page; marking up
+ *    ratings that do not exist risks a manual action against the whole site.
+ *    The fix is to publish real reviews first, then mark them up.
  */
 export function packagesLd(
   locale: Locale,
@@ -252,6 +272,8 @@ export function packagesLd(
         offers: {
           "@type": "AggregateOffer",
           lowPrice: p.priceFrom,
+          ...(p.priceTo ? { highPrice: p.priceTo } : {}),
+          offerCount: tierCount(p.tiers),
           priceCurrency: "HKD",
           url,
           seller: {
