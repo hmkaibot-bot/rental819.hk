@@ -225,6 +225,14 @@ export interface AdminDict {
     date: string;
     paymentDate: string;
     deposit: string;
+    discount: string;
+    discountMode: string;
+    discountPercent: string;
+    discountRate: string;
+    discountAmount: string;
+    discountHint: string;
+    discountOff: string;
+    subtotal: string;
     fromCatalog: string;
     pickItem: string;
     colDesc: string;
@@ -469,6 +477,14 @@ const zh: AdminDict = {
     date: "單據日期 Date",
     paymentDate: "付款日期 Payment date",
     deposit: "訂金 Deposit (HK$)",
+    discount: "折扣 Discount",
+    discountMode: "折扣方式",
+    discountPercent: "百分比 %（例：10 = 減 10%）",
+    discountRate: "折數（例：9 = 9折）",
+    discountAmount: "固定金額 HK$",
+    discountHint: "填 0 或留空即冇折扣。",
+    discountOff: "折扣金額",
+    subtotal: "小計",
     fromCatalog: "由 RT819 項目表加入",
     pickItem: "＋ 選擇項目加入單據…",
     colDesc: "項目說明 Description",
@@ -713,6 +729,14 @@ const ja: AdminDict = {
     date: "発行日 Date",
     paymentDate: "入金日 Payment date",
     deposit: "手付金 Deposit (HK$)",
+    discount: "割引 Discount",
+    discountMode: "割引方式",
+    discountPercent: "パーセント %（例：10 = 10% 引き）",
+    discountRate: "掛け率（例：9 = 9掛け）",
+    discountAmount: "定額 HK$",
+    discountHint: "0 または空欄で割引なし。",
+    discountOff: "割引額",
+    subtotal: "小計",
     fromCatalog: "RT819 項目表から追加",
     pickItem: "＋ 項目を選んで追加…",
     colDesc: "項目説明 Description",

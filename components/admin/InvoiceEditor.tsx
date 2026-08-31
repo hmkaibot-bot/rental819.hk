@@ -10,6 +10,10 @@ import {
   invoiceTotal,
   invoiceInfoRows,
   autoSiNumber,
+  readInvoiceDiscount,
+  invoiceDiscountAmount,
+  invoiceDiscountBadge,
+  type DiscountMode,
 } from "@/lib/reservations/invoice";
 import {
   RT819_ITEMS,
@@ -55,6 +59,9 @@ export default function InvoiceEditor({
   const [deposit, setDeposit] = useState<number>(
     Number(settlement.invoice_deposit ?? 0) || 0,
   );
+  const savedDiscount = readInvoiceDiscount(settlement);
+  const [discountMode, setDiscountMode] = useState<DiscountMode>(savedDiscount.mode);
+  const [discountValue, setDiscountValue] = useState<number>(savedDiscount.value);
   const [items, setItems] = useState<InvoiceItem[]>(
     r.invoice_items?.length ? r.invoice_items : seed,
   );
@@ -62,7 +69,15 @@ export default function InvoiceEditor({
   const [pending, start] = useTransition();
 
   const subtotal = useMemo(() => invoiceTotal(items), [items]);
-  const remaintance = Math.max(0, subtotal - (Number(deposit) || 0));
+  const discount = useMemo(
+    () => invoiceDiscountAmount(subtotal, { mode: discountMode, value: discountValue }),
+    [subtotal, discountMode, discountValue],
+  );
+  const discountBadge = invoiceDiscountBadge({ mode: discountMode, value: discountValue });
+  // Discount comes off the price; the deposit comes off what is still owed. Both
+  // are floored at zero so a mistyped rate can never print a negative balance.
+  const netTotal = Math.max(0, subtotal - discount);
+  const remaintance = Math.max(0, netTotal - (Number(deposit) || 0));
   const infoRows = invoiceInfoRows(r);
 
   const update = (i: number, patch: Partial<InvoiceItem>) =>
@@ -104,6 +119,8 @@ export default function InvoiceEditor({
           ...settlement,
           invoice_payment_date: paymentDate || null,
           invoice_deposit: Number(deposit) || 0,
+          invoice_discount_mode: discountMode,
+          invoice_discount_value: Number(discountValue) || 0,
         },
         markInvoiced,
       });
@@ -138,6 +155,37 @@ export default function InvoiceEditor({
             <span className="mb-1 block font-medium text-ink-soft">{t.deposit}</span>
             <input type="number" value={deposit} onChange={(e) => setDeposit(Number(e.target.value))} className={`${cell} w-full`} />
           </label>
+          {/* Discount spans two columns so the mode picker and the number sit on
+              one line, with the resolved HK$ shown live underneath — whichever
+              convention the agent typed, they see the money before saving. */}
+          <div className="text-sm sm:col-span-2">
+            <span className="mb-1 block font-medium text-ink-soft">{t.discount}</span>
+            <div className="flex gap-2">
+              <select
+                aria-label={t.discountMode}
+                value={discountMode}
+                onChange={(e) => setDiscountMode(e.target.value as DiscountMode)}
+                className={`${cell} min-w-0 flex-1`}
+              >
+                <option value="percent">{t.discountPercent}</option>
+                <option value="rate">{t.discountRate}</option>
+                <option value="amount">{t.discountAmount}</option>
+              </select>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={discountValue}
+                onChange={(e) => setDiscountValue(Number(e.target.value))}
+                className={`${cell} w-24 shrink-0`}
+              />
+            </div>
+            <span className="mt-1 block text-xs text-ink-muted">
+              {discount > 0
+                ? `${t.discountOff} −HK$${fmtAmount(discount)}${discountBadge ? ` (${discountBadge})` : ""}`
+                : t.discountHint}
+            </span>
+          </div>
         </div>
 
         {/* Item picker from the RT819 catalog */}
@@ -201,9 +249,19 @@ export default function InvoiceEditor({
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">{t.addRow}</button>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-ink-muted">{t.total}</span>
-            <span className="text-lg font-black text-ink">HK${fmtAmount(remaintance)}</span>
+          <div className="text-right">
+            {discount > 0 && (
+              <div className="text-xs text-ink-muted">
+                {t.subtotal} HK${fmtAmount(subtotal)}
+                <span className="ml-2 text-rose-600">
+                  {t.discountOff} −HK${fmtAmount(discount)}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-end gap-2">
+              <span className="text-sm text-ink-muted">{t.total}</span>
+              <span className="text-lg font-black text-ink">HK${fmtAmount(remaintance)}</span>
+            </div>
           </div>
         </div>
 
@@ -345,6 +403,14 @@ export default function InvoiceEditor({
                   <td className="py-1.5 pr-4 text-right font-bold">SUBTOTAL 小計</td>
                   <td className="py-1.5 text-right">{fmtAmount(subtotal)}</td>
                 </tr>
+                {discount > 0 && (
+                  <tr className="border-b border-slate-200">
+                    <td className="py-1.5 pr-4 text-right font-bold">
+                      DISCOUNT 折扣{discountBadge ? ` (${discountBadge})` : ""}
+                    </td>
+                    <td className="py-1.5 text-right">-{fmtAmount(discount)}</td>
+                  </tr>
+                )}
                 {(Number(deposit) || 0) > 0 && (
                   <tr className="border-b border-slate-200">
                     <td className="py-1.5 pr-4 text-right font-bold">DEPOSIT 訂金</td>
