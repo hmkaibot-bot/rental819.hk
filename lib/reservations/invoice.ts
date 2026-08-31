@@ -51,6 +51,28 @@ export function fmtHKD(n: number): string {
   return `HK$${fmtAmount(n)}`;
 }
 
+/**
+ * A line's billed amount: quantity x list unit price, less that line's own
+ * discount. The percentage is clamped to [0, 100] so a mistyped 120 or -5 can
+ * never turn a charge into a credit, and the result is rounded to cents once,
+ * here, so the editor, the printed invoice and the accounting page can never
+ * disagree about a line by a rounding step.
+ */
+export function lineAmount(
+  qty: number,
+  unitPrice: number,
+  discountPct?: number,
+): number {
+  const gross = (Number(qty) || 0) * (Number(unitPrice) || 0);
+  const pct = Math.min(Math.max(Number(discountPct) || 0, 0), 100);
+  return Number((gross * (1 - pct / 100)).toFixed(2));
+}
+
+/** Normalised discount for a line — 0 when absent, mistyped or out of range. */
+export function lineDiscountPct(item: InvoiceItem): number {
+  return Math.min(Math.max(Number(item.discount_pct) || 0, 0), 100);
+}
+
 function fmtDateTime(date?: string | null, time?: string | null): string {
   if (!date) return "";
   const [y, m, d] = date.split("-");

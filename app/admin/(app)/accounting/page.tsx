@@ -16,6 +16,9 @@ const EXCLUDED = ["cancelled"];
 
 // Revenue = the in-app invoice total when there is one, otherwise the imported
 // customer price (單價（港幣）) from the master Excel.
+//
+// Each line's `amount` is already net of that line's discount, so this total is
+// what the customer is actually billed — no discount adjustment belongs here.
 function revenue(r: Reservation) {
   const inv = invoiceTotal(r.invoice_items ?? []);
   return inv > 0 ? inv : Number(r.revenue_hkd) || 0;

@@ -10,6 +10,8 @@ import {
   invoiceTotal,
   invoiceInfoRows,
   autoSiNumber,
+  lineAmount,
+  lineDiscountPct,
 } from "@/lib/reservations/invoice";
 import {
   RT819_ITEMS,
@@ -52,17 +54,15 @@ export default function InvoiceEditor({
   const [paymentDate, setPaymentDate] = useState(
     (settlement.invoice_payment_date as string) ?? "",
   );
-  const [deposit, setDeposit] = useState<number>(
-    Number(settlement.invoice_deposit ?? 0) || 0,
-  );
   const [items, setItems] = useState<InvoiceItem[]>(
     r.invoice_items?.length ? r.invoice_items : seed,
   );
   const [saved, setSaved] = useState(false);
   const [pending, start] = useTransition();
 
-  const subtotal = useMemo(() => invoiceTotal(items), [items]);
-  const remaintance = Math.max(0, subtotal - (Number(deposit) || 0));
+  // Every line's `amount` is already net of that line's own discount, so the
+  // invoice total needs no further adjustment.
+  const total = useMemo(() => invoiceTotal(items), [items]);
   const infoRows = invoiceInfoRows(r);
 
   const update = (i: number, patch: Partial<InvoiceItem>) =>
@@ -70,13 +70,16 @@ export default function InvoiceEditor({
       prev.map((it, idx) => {
         if (idx !== i) return it;
         const next = { ...it, ...patch };
-        next.amount = Number((Number(next.qty) * Number(next.unit_price)).toFixed(2));
+        next.amount = lineAmount(next.qty, next.unit_price, next.discount_pct);
         return next;
       }),
     );
 
   const addRow = () =>
-    setItems((prev) => [...prev, { description: "", qty: 1, unit_price: 0, amount: 0 }]);
+    setItems((prev) => [
+      ...prev,
+      { description: "", qty: 1, unit_price: 0, discount_pct: 0, amount: 0 },
+    ]);
   const removeRow = (i: number) => setItems((prev) => prev.filter((_, idx) => idx !== i));
 
   const addCatalogItem = (code: string) => {
@@ -88,6 +91,7 @@ export default function InvoiceEditor({
         description: rt819Label(it),
         qty: 1,
         unit_price: it.unit_price,
+        discount_pct: 0,
         amount: it.unit_price,
       },
     ]);
@@ -103,7 +107,6 @@ export default function InvoiceEditor({
         settlement: {
           ...settlement,
           invoice_payment_date: paymentDate || null,
-          invoice_deposit: Number(deposit) || 0,
         },
         markInvoiced,
       });
@@ -121,7 +124,7 @@ export default function InvoiceEditor({
             field is inert — leaving them live would let someone type a whole
             invoice that vanishes with no error. */}
         <fieldset disabled={readOnly} className="contents">
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-3">
           <label className="text-sm">
             <span className="mb-1 block font-medium text-ink-soft">{t.siNo}</span>
             <input value={si} onChange={(e) => setSi(e.target.value)} placeholder="SI-26-xxxxx" className={`${cell} w-full`} />
@@ -133,10 +136,6 @@ export default function InvoiceEditor({
           <label className="text-sm">
             <span className="mb-1 block font-medium text-ink-soft">{t.paymentDate}</span>
             <input type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} className={`${cell} w-full`} />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium text-ink-soft">{t.deposit}</span>
-            <input type="number" value={deposit} onChange={(e) => setDeposit(Number(e.target.value))} className={`${cell} w-full`} />
           </label>
         </div>
 
@@ -167,10 +166,11 @@ export default function InvoiceEditor({
         </div>
 
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[560px] text-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-ink-muted">
                 <th className="py-1 pr-2">{t.colDesc}</th>
+                <th className="w-20 py-1 px-2">{t.colDiscount}</th>
                 <th className="w-28 py-1 px-2">{t.colUnitPrice}</th>
                 <th className="w-16 py-1 px-2">{t.colQty}</th>
                 <th className="w-28 py-1 px-2 text-right">{t.colAmount}</th>
@@ -182,6 +182,24 @@ export default function InvoiceEditor({
                 <tr key={i}>
                   <td className="py-1 pr-2">
                     <input value={it.description} onChange={(e) => update(i, { description: e.target.value })} className={`${cell} w-full`} />
+                  </td>
+                  <td className="py-1 px-2">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      max={100}
+                      step="1"
+                      placeholder="0"
+                      value={it.discount_pct ?? ""}
+                      onChange={(e) =>
+                        update(i, {
+                          discount_pct:
+                            e.target.value === "" ? undefined : Number(e.target.value),
+                        })
+                      }
+                      className={`${cell} w-full`}
+                    />
                   </td>
                   <td className="py-1 px-2">
                     <input type="number" value={it.unit_price} onChange={(e) => update(i, { unit_price: Number(e.target.value) })} className={`${cell} w-full`} />
@@ -203,7 +221,7 @@ export default function InvoiceEditor({
           <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">{t.addRow}</button>
           <div className="flex items-center gap-2">
             <span className="text-sm text-ink-muted">{t.total}</span>
-            <span className="text-lg font-black text-ink">HK${fmtAmount(remaintance)}</span>
+            <span className="text-lg font-black text-ink">HK${fmtAmount(total)}</span>
           </div>
         </div>
 
@@ -288,6 +306,7 @@ export default function InvoiceEditor({
           <thead>
             <tr className="bg-slate-500 text-white">
               <th className="px-3 py-2 text-center font-bold">DESCRIPTION<br />貨品</th>
+              <th className="w-24 px-3 py-2 text-center font-bold">DISCOUNT<br />折扣</th>
               <th className="w-28 px-3 py-2 text-center font-bold">UNIT PRICE<br />單價</th>
               <th className="w-24 px-3 py-2 text-center font-bold">QUANTITY<br />數量</th>
               <th className="w-28 px-3 py-2 text-center font-bold">TOTAL<br />總額</th>
@@ -297,6 +316,9 @@ export default function InvoiceEditor({
             {items.map((it, i) => (
               <tr key={i} className="border-b border-slate-200">
                 <td className="px-3 py-1.5">{it.description || "—"}</td>
+                <td className="px-3 py-1.5 text-right">
+                  {lineDiscountPct(it) > 0 ? `${lineDiscountPct(it)}%` : "—"}
+                </td>
                 <td className="px-3 py-1.5 text-right">{fmtAmount(it.unit_price)}</td>
                 <td className="px-3 py-1.5 text-right">{fmtAmount(it.qty)}</td>
                 <td className="px-3 py-1.5 text-right">{fmtAmount(it.amount)}</td>
@@ -305,7 +327,7 @@ export default function InvoiceEditor({
             {infoRows.map((row, i) => (
               <tr key={`info-${i}`} className="border-b border-slate-100">
                 <td className="whitespace-pre-wrap px-3 py-1.5 text-ink-soft">{row}</td>
-                <td /><td /><td />
+                <td /><td /><td /><td />
               </tr>
             ))}
           </tbody>
@@ -343,21 +365,18 @@ export default function InvoiceEditor({
                 </tr>
                 <tr className="border-b border-slate-200">
                   <td className="py-1.5 pr-4 text-right font-bold">SUBTOTAL 小計</td>
-                  <td className="py-1.5 text-right">{fmtAmount(subtotal)}</td>
+                  <td className="py-1.5 text-right">{fmtAmount(total)}</td>
                 </tr>
-                {(Number(deposit) || 0) > 0 && (
-                  <tr className="border-b border-slate-200">
-                    <td className="py-1.5 pr-4 text-right font-bold">DEPOSIT 訂金</td>
-                    <td className="py-1.5 text-right">-{fmtAmount(deposit)}</td>
-                  </tr>
-                )}
+                {/* Kept from the SI template. With the deposit gone this equals
+                    BALANCE DUE, but it is the business's existing invoice layout
+                    and removing a row was not part of the change. */}
                 <tr className="border-b border-slate-200">
                   <td className="py-1.5 pr-4 text-right font-bold">REMAINTANCE 餘數</td>
-                  <td className="py-1.5 text-right">{fmtAmount(remaintance)}</td>
+                  <td className="py-1.5 text-right">{fmtAmount(total)}</td>
                 </tr>
                 <tr>
                   <td className="py-2 pr-4 text-right text-base font-black">BALANCE DUE (HKD) 總額(港幣)</td>
-                  <td className="py-2 text-right text-base font-black">{fmtAmount(remaintance)}</td>
+                  <td className="py-2 text-right text-base font-black">{fmtAmount(total)}</td>
                 </tr>
               </tbody>
             </table>

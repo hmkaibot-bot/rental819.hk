@@ -224,10 +224,10 @@ export interface AdminDict {
     siNo: string;
     date: string;
     paymentDate: string;
-    deposit: string;
     fromCatalog: string;
     pickItem: string;
     colDesc: string;
+    colDiscount: string;
     colUnitPrice: string;
     colQty: string;
     colAmount: string;
@@ -468,10 +468,10 @@ const zh: AdminDict = {
     siNo: "單號 (SI No.)",
     date: "單據日期 Date",
     paymentDate: "付款日期 Payment date",
-    deposit: "訂金 Deposit (HK$)",
     fromCatalog: "由 RT819 項目表加入",
     pickItem: "＋ 選擇項目加入單據…",
     colDesc: "項目說明 Description",
+    colDiscount: "折扣 %",
     colUnitPrice: "單價 (HK$)",
     colQty: "數量",
     colAmount: "金額",
@@ -712,10 +712,10 @@ const ja: AdminDict = {
     siNo: "SI 番号 (SI No.)",
     date: "発行日 Date",
     paymentDate: "入金日 Payment date",
-    deposit: "手付金 Deposit (HK$)",
     fromCatalog: "RT819 項目表から追加",
     pickItem: "＋ 項目を選んで追加…",
     colDesc: "項目説明 Description",
+    colDiscount: "割引 %",
     colUnitPrice: "単価 (HK$)",
     colQty: "数量",
     colAmount: "金額",
