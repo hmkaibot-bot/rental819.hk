@@ -335,7 +335,12 @@ ${site.email}`;
   // Public asset host that resolves regardless of DNS cut-over state (the
   // customer's mail client must be able to fetch the logo).
   const assetBase = "https://rental819-hk.vercel.app";
-  const b = "#005bac";
+  // Sampled from public/logo-lg.png, the very image sitting in this banner:
+  // that file is a white mark on a solid #004098 field (79% of its pixels).
+  // The banner used to be #005bac — brand-600, which matches logo.png and
+  // icon.png but NOT logo-lg.png — so the logo read as a darker rectangle
+  // pasted onto a lighter blue. Same colour on both makes it one field.
+  const b = "#004098";
   const row = (label: string, value: string) =>
     `<tr><td style="padding:4px 12px 4px 0;color:#64748b;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:4px 0;font-weight:600;color:#0f172a">${escapeHtml(value)}</td></tr>`;
 
