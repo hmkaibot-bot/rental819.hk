@@ -199,7 +199,7 @@ export function statusAfterCustomerEmail(current: string): ReservationStatus | n
 }
 
 /** 收款渠道 options for the customer payment dropdown. */
-export const PAYMENT_CHANNELS = ["LIVI", "AW", "BOC MAC"] as const;
+export const PAYMENT_CHANNELS = ["LIVI", "AW", "BOC MAC", "HSB"] as const;
 
 const ALL = [...STATUS_FLOW, ...TERMINAL_STATUS];
 
