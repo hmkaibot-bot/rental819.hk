@@ -335,11 +335,13 @@ ${site.email}`;
   // Public asset host that resolves regardless of DNS cut-over state (the
   // customer's mail client must be able to fetch the logo).
   const assetBase = "https://rental819-hk.vercel.app";
-  // Sampled from public/logo-lg.png, the very image sitting in this banner:
-  // that file is a white mark on a solid #004098 field (79% of its pixels).
-  // The banner used to be #005bac — brand-600, which matches logo.png and
-  // icon.png but NOT logo-lg.png — so the logo read as a darker rectangle
+  // Sampled from the logo artwork itself: a white mark on a solid #004098
+  // field. The banner used to be #005bac — brand-600, which matches logo.png
+  // and icon.png but NOT this artwork — so the logo read as a darker rectangle
   // pasted onto a lighter blue. Same colour on both makes it one field.
+  // The email asset is /email/logo.png, a cleaned copy of logo-lg.png with the
+  // white rounded-corner pixels and a stray right-edge column repainted to the
+  // field colour; the site keeps the original (white edges vanish on white).
   const b = "#004098";
   const row = (label: string, value: string) =>
     `<tr><td style="padding:4px 12px 4px 0;color:#64748b;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:4px 0;font-weight:600;color:#0f172a">${escapeHtml(value)}</td></tr>`;
@@ -347,7 +349,7 @@ ${site.email}`;
   const html = `<div style="margin:0;padding:0;background:#f1f5f9">
   <div style="max-width:640px;margin:0 auto;background:#ffffff;font-family:-apple-system,'Segoe UI',Helvetica,Arial,'Noto Sans HK',sans-serif;color:#0f172a">
     <div style="text-align:center;background:${b};padding:22px">
-      <img src="${assetBase}/logo-lg.png" alt="RENTAL819" width="150" style="height:auto;border:0;display:inline-block" />
+      <img src="${assetBase}/email/logo.png" alt="RENTAL819" width="150" style="height:auto;border:0;display:inline-block" />
     </div>
     <div style="padding:28px 28px 8px">
       <p style="margin:0 0 16px">${escapeHtml(t.dear(name))}</p>
@@ -505,14 +507,15 @@ export function bookingReceivedEmail(b: BookingAck) {
 
   // ---- HTML (house style shared with customerConfirmEmail) ----
   const assetBase = "https://rental819-hk.vercel.app";
-  const bl = "#005bac";
+  // Same blue as the logo artwork in the banner — see customerConfirmEmail.
+  const bl = "#004098";
   const row = ([label, value]: [string, string]) =>
     `<tr><td style="padding:5px 12px 5px 16px;color:#64748b;white-space:nowrap;vertical-align:top">${escapeHtml(label)}</td><td style="padding:5px 16px 5px 0;font-weight:600;color:#0f172a">${escapeHtml(value)}</td></tr>`;
 
   const html = `<div style="margin:0;padding:0;background:#f1f5f9">
   <div style="max-width:640px;margin:0 auto;background:#ffffff;font-family:-apple-system,'Segoe UI',Helvetica,Arial,'Noto Sans HK',sans-serif;color:#0f172a;line-height:1.7">
     <div style="text-align:center;background:${bl};padding:22px">
-      <img src="${assetBase}/logo-lg.png" alt="RENTAL819" width="150" style="height:auto;border:0;display:inline-block" />
+      <img src="${assetBase}/email/logo.png" alt="RENTAL819" width="150" style="height:auto;border:0;display:inline-block" />
     </div>
     <div style="padding:28px 28px 8px">
       <h2 style="margin:0 0 4px;text-align:center;color:${bl}">已收到您的預約申請</h2>
