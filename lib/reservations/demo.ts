@@ -1,7 +1,9 @@
 import type { Reservation } from "./types";
 
 /** Sample reservations so the admin backend is fully viewable without a live DB. */
-const rawDemo: Omit<Reservation, "invoice_date" | "invoice_items">[] = [
+const rawDemo: (Omit<Reservation, "invoice_date" | "invoice_items" | "cardo_only"> & {
+  cardo_only?: boolean;
+})[] = [
   {
     id: "demo-1",
     booking_ref: "2026-049",
@@ -210,10 +212,53 @@ const rawDemo: Omit<Reservation, "invoice_date" | "invoice_items">[] = [
     created_at: "2026-05-10T09:00:00Z",
     updated_at: "2026-07-05T09:00:00Z",
   },
+  {
+    id: "demo-cardo",
+    booking_ref: "2026-067",
+    status: "new",
+    request_date: "2026-08-30",
+    name_zh: "陳大文",
+    name_en: "Chan Tai Man",
+    gender: null,
+    dob: null,
+    email: "taiman@example.com",
+    hk_phone: "852 91234567",
+    hk_address: null,
+    jp_address: null,
+    jp_phone: null,
+    japanese_ability: null,
+    english_ability: null,
+    emergency_contact: null,
+    emergency_phone: null,
+    shop: null,
+    bike_pref_1: null,
+    bike_pref_2: null,
+    bike_pref_3: null,
+    confirmed_bike: null,
+    pickup_date: "2026-09-05",
+    pickup_time: null,
+    return_date: "2026-09-12",
+    return_time: null,
+    addons: { cardo: true },
+    promo: null,
+    si_number: null,
+    customer_paid_date: null,
+    payment_channel: null,
+    paid_to_supplier: false,
+    supplier_paid_date: null,
+    cost_jpy: null,
+    settlement: {},
+    notes: "只租 CARDO 對講機（示範）",
+    cardo_only: true,
+    source: "admin",
+    created_at: "2026-08-30T09:00:00Z",
+    updated_at: "2026-08-30T09:00:00Z",
+  },
 ];
 
 export const demoReservations: Reservation[] = rawDemo.map((r) => ({
   ...r,
+  cardo_only: r.cardo_only ?? false,
   invoice_date: null,
   invoice_items: [],
 }));

@@ -278,6 +278,15 @@ export interface AdminDict {
     notesPlaceholder: string;
     create: string;
   };
+  newCardo: {
+    button: string;
+    title: string;
+    intro: string;
+    badge: string;
+    rentFrom: string;
+    rentTo: string;
+    create: string;
+  };
   cardo: {
     backTo: string;
   };
@@ -522,6 +531,15 @@ const zh: AdminDict = {
     notesPlaceholder: "內部備註…",
     create: "建立預約",
   },
+  newCardo: {
+    button: "＋ CARDO 租賃",
+    title: "新增 CARDO 租賃",
+    intro: "只租 CARDO 對講機（唔連日本租車）。開單會自動加 HK-CARDO HK$200，可以列印租賃條款。",
+    badge: "CARDO 租賃",
+    rentFrom: "租借日期",
+    rentTo: "歸還日期",
+    create: "建立 CARDO 租賃",
+  },
   cardo: {
     backTo: "← 返回預約",
   },
@@ -765,6 +783,15 @@ const ja: AdminDict = {
     bookingRefPlaceholder: "例：2026-050 / P-2025-010",
     notesPlaceholder: "社内メモ…",
     create: "予約を作成",
+  },
+  newCardo: {
+    button: "＋ CARDO レンタル",
+    title: "CARDO レンタルを追加",
+    intro: "CARDO インカムのみのレンタル（日本のバイク予約なし）。請求書に HK-CARDO HK$200 が自動追加され、貸出規約も印刷できます。",
+    badge: "CARDO レンタル",
+    rentFrom: "貸出日",
+    rentTo: "返却日",
+    create: "CARDO レンタルを作成",
   },
   cardo: {
     backTo: "← 予約に戻る",

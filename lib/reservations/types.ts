@@ -128,6 +128,13 @@ export interface Reservation {
   settlement: Record<string, unknown>;
 
   notes: string | null;
+  /**
+   * A standalone CARDO intercom rental — HK-side only, no Japan bike booking.
+   * Such bookings skip the whole Japan pipeline (no JP email, no bike
+   * confirmation, no yen cost) but keep the invoice, terms page and payment
+   * tracking. Created from /admin/reservations/new-cardo.
+   */
+  cardo_only: boolean;
   // Nullable in the schema, and staff may now clear it from the 預約 card.
   source: string | null;
   created_at: string;

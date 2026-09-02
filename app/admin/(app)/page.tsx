@@ -108,11 +108,16 @@ const COLUMNS: Column[] = [
     ja: "予約番号",
     sort: "booking_ref",
     cls: "whitespace-nowrap",
-    cell: (r) => (
+    cell: (r, lang) => (
       <>
         <Link href={`/admin/reservations/${r.id}`} className="font-semibold text-brand-700 hover:underline">
           {r.booking_ref ?? "—"}
         </Link>
+        {r.cardo_only && (
+          <span className="ml-1.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 align-middle">
+            {adminDict(lang).newCardo.badge}
+          </span>
+        )}
         <div className="text-xs text-ink-muted">{fmtDate(r.request_date)}</div>
       </>
     ),
@@ -276,9 +281,14 @@ export default async function AdminDashboard({
             </Link>
           )}
           {!readOnly && (
-            <Link href="/admin/reservations/new" className="btn-brand text-sm">
-              {t.dashboard.newBooking}
-            </Link>
+            <>
+              <Link href="/admin/reservations/new-cardo" className="btn-outline text-sm">
+                {t.newCardo.button}
+              </Link>
+              <Link href="/admin/reservations/new" className="btn-brand text-sm">
+                {t.dashboard.newBooking}
+              </Link>
+            </>
           )}
         </div>
       </div>
