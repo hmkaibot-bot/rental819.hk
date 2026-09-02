@@ -140,6 +140,11 @@ export default async function ReservationDetail({
           </Link>
           <h1 className="mt-1 text-xl font-bold">
             {r.booking_ref}{" "}
+            {r.cardo_only && (
+              <span className="mr-1 inline-block rounded bg-amber-100 px-2 py-0.5 align-middle text-xs font-bold text-amber-800">
+                {t.newCardo.badge}
+              </span>
+            )}
             <span className="ml-1 text-base font-medium text-ink-muted">
               {r.name_en ?? r.name_zh}
             </span>
@@ -174,11 +179,21 @@ export default async function ReservationDetail({
                   defaultValue={r.status}
                   className={`mt-1 ${input}`}
                 >
-                  {[...STATUS_FLOW, ...TERMINAL_STATUS].map((s) => (
-                    <option key={s.key} value={s.key}>
-                      {L(s, lang)}
-                    </option>
-                  ))}
+                  {[...STATUS_FLOW, ...TERMINAL_STATUS]
+                    /* A CARDO-only rental never goes to Japan, so the two
+                       Japan-facing stages would be lies; the current status
+                       stays listed either way so the select is never blank. */
+                    .filter(
+                      (s) =>
+                        !r.cardo_only ||
+                        s.key === r.status ||
+                        !["notified_jp", "awaiting_si", "change_pending"].includes(s.key),
+                    )
+                    .map((s) => (
+                      <option key={s.key} value={s.key}>
+                        {L(s, lang)}
+                      </option>
+                    ))}
                 </select>
               </div>
               <Edit label={f.promo} name="promo" value={r.promo} readOnly={readOnly} />
@@ -242,6 +257,7 @@ export default async function ReservationDetail({
             <form action={patchReservation} className="grid grid-cols-2 gap-x-6">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
+              {!r.cardo_only && (
               <div className="py-2">
                 <label className={fieldLabel} htmlFor="shop">{f.shop}</label>
                 <select id="shop" name="shop" defaultValue={r.shop ?? ""} className={`mt-1 ${input}`}>
@@ -261,14 +277,21 @@ export default async function ReservationDetail({
                   ))}
                 </select>
               </div>
-              <Edit label={f.confirmedBike} name="confirmed_bike" value={r.confirmed_bike} readOnly={readOnly} />
+              )}
+              {!r.cardo_only && (
+                <Edit label={f.confirmedBike} name="confirmed_bike" value={r.confirmed_bike} readOnly={readOnly} />
+              )}
               <Edit label={f.pickupDate} name="pickup_date" value={r.pickup_date} type="date" readOnly={readOnly} />
               <Edit label={f.pickupTime} name="pickup_time" value={r.pickup_time} type="time" readOnly={readOnly} />
               <Edit label={f.returnDate} name="return_date" value={r.return_date} type="date" readOnly={readOnly} />
               <Edit label={f.returnTime} name="return_time" value={r.return_time} type="time" readOnly={readOnly} />
-              <Edit label={f.bikePref1} name="bike_pref_1" value={r.bike_pref_1} readOnly={readOnly} />
-              <Edit label={f.bikePref2} name="bike_pref_2" value={r.bike_pref_2} readOnly={readOnly} />
-              <Edit label={f.bikePref3} name="bike_pref_3" value={r.bike_pref_3} readOnly={readOnly} />
+              {!r.cardo_only && (
+                <>
+                  <Edit label={f.bikePref1} name="bike_pref_1" value={r.bike_pref_1} readOnly={readOnly} />
+                  <Edit label={f.bikePref2} name="bike_pref_2" value={r.bike_pref_2} readOnly={readOnly} />
+                  <Edit label={f.bikePref3} name="bike_pref_3" value={r.bike_pref_3} readOnly={readOnly} />
+                </>
+              )}
               <SaveRow label={t.common.save} readOnly={readOnly} />
               </fieldset>
             </form>
@@ -325,7 +348,8 @@ export default async function ReservationDetail({
 
         {/* ---- Pipeline / actions ---- */}
         <div className="space-y-5">
-          {/* Stepper */}
+          {/* Stepper — the Japan pipeline, meaningless for a CARDO-only rental */}
+          {!r.cardo_only && (
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold text-brand-700">{t.detail.sectionFlow}</h2>
             <ol className="space-y-2">
@@ -349,6 +373,7 @@ export default async function ReservationDetail({
               ))}
             </ol>
           </section>
+          )}
 
           {/* Step actions */}
           <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
@@ -356,18 +381,23 @@ export default async function ReservationDetail({
 
             {/* Emails (steps 4 & 8) + invoice (step 6) */}
             <div className="flex flex-wrap gap-2">
-              <Link href={`/admin/reservations/${r.id}/email/jp`} className="btn-outline text-xs">
-                {t.detail.jpEmail}
-              </Link>
-              <Link href={`/admin/reservations/${r.id}/email/customer`} className="btn-outline text-xs">
-                {t.detail.customerEmail}
-              </Link>
+              {!r.cardo_only && (
+                <>
+                  <Link href={`/admin/reservations/${r.id}/email/jp`} className="btn-outline text-xs">
+                    {t.detail.jpEmail}
+                  </Link>
+                  <Link href={`/admin/reservations/${r.id}/email/customer`} className="btn-outline text-xs">
+                    {t.detail.customerEmail}
+                  </Link>
+                </>
+              )}
               <Link href={`/admin/reservations/${r.id}/invoice`} className="btn-brand text-xs">
                 {t.detail.invoice}
               </Link>
             </div>
 
             {/* Japan confirmation → confirmed (bike + grade + dates + add-ons) */}
+            {!r.cardo_only && (
             <form action={confirmReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
@@ -434,6 +464,7 @@ export default async function ReservationDetail({
               <button className="btn-brand w-full text-xs">{t.common.save}</button>
               </fieldset>
             </form>
+            )}
 
             {/* CARDO — HK-side value-add (not Japan-confirmed) */}
             <form action={setCardo} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
@@ -458,6 +489,7 @@ export default async function ReservationDetail({
             </form>
 
             {/* Invoice — supplier cost is entered per line, mirroring the Excel */}
+            {!r.cardo_only && (
             <form action={saveCostItems} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
@@ -508,6 +540,7 @@ export default async function ReservationDetail({
               <button className="btn-brand w-full text-xs">{t.detail.saveSiCost}</button>
               </fieldset>
             </form>
+            )}
 
             {/* Customer paid → paid */}
             <form action={patchReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
@@ -551,20 +584,28 @@ export default async function ReservationDetail({
             <h2 className="mb-2 text-sm font-bold text-brand-700">{t.detail.sectionBilling}</h2>
             <dl className="grid grid-cols-2 gap-x-6">
               <Field label={t.detail.siNumber} value={r.si_number} />
-              <Field label={t.detail.costJpy} value={r.cost_jpy?.toLocaleString("en-US")} />
-              <Field label={t.detail.rebateJpy} value={r.rebate_jpy ? `−${r.rebate_jpy.toLocaleString("en-US")}` : undefined} />
-              <Field
-                label={t.detail.netCostJpy}
-                value={
-                  r.cost_jpy != null
-                    ? (Number(r.cost_jpy) - (Number(r.rebate_jpy) || 0)).toLocaleString("en-US")
-                    : undefined
-                }
-              />
+              {!r.cardo_only && (
+                <>
+                  <Field label={t.detail.costJpy} value={r.cost_jpy?.toLocaleString("en-US")} />
+                  <Field label={t.detail.rebateJpy} value={r.rebate_jpy ? `−${r.rebate_jpy.toLocaleString("en-US")}` : undefined} />
+                  <Field
+                    label={t.detail.netCostJpy}
+                    value={
+                      r.cost_jpy != null
+                        ? (Number(r.cost_jpy) - (Number(r.rebate_jpy) || 0)).toLocaleString("en-US")
+                        : undefined
+                    }
+                  />
+                </>
+              )}
               <Field label={t.detail.customerPaidOn} value={r.customer_paid_date} />
               <Field label={t.detail.paymentChannel} value={r.payment_channel} />
-              <Field label={t.detail.supplierPaidOn} value={r.supplier_paid_date} />
-              <Field label={t.detail.paidToSupplier} value={r.paid_to_supplier ? t.common.yes : t.common.no} />
+              {!r.cardo_only && (
+                <>
+                  <Field label={t.detail.supplierPaidOn} value={r.supplier_paid_date} />
+                  <Field label={t.detail.paidToSupplier} value={r.paid_to_supplier ? t.common.yes : t.common.no} />
+                </>
+              )}
             </dl>
           </section>
         </div>

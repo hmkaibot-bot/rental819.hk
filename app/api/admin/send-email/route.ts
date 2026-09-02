@@ -43,6 +43,11 @@ export async function POST(request: Request) {
   };
   const r = id ? await getReservation(id) : null;
   if (!r) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
+  // A CARDO-only rental has no Japan booking: both mail kinds describe one, so
+  // refuse here as well — the UI hides the buttons, but the URL is typeable.
+  if (r.cardo_only) {
+    return NextResponse.json({ ok: false, error: "cardo_only" }, { status: 400 });
+  }
 
   const isJp = kind === "jp";
   const signer = (staffName ?? "").trim();

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getReservation } from "@/lib/reservations/store";
 import { jpReservationEmail, customerConfirmEmail } from "@/lib/reservations/emails";
 import { JP_PARTNER_EMAIL, INTERNAL_COPY } from "@/lib/reservations/recipients";
@@ -21,6 +21,9 @@ export default async function EmailDraft({
   const r = await getReservation(params.id);
   if (!r) notFound();
   if (params.kind !== "jp" && params.kind !== "customer") notFound();
+  // Both drafts describe a Japan bike booking; a CARDO-only rental has neither
+  // a Japan partner to notify nor an SI trip to confirm.
+  if (r.cardo_only) redirect(`/admin/reservations/${r.id}`);
 
   const t = getAdminDict();
   const readOnly = !canWrite();

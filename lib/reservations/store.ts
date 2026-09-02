@@ -32,6 +32,7 @@ export interface NewReservation {
   promo?: string | null;
   notes?: string | null;
   source?: string;
+  cardo_only?: boolean;
 }
 
 export const isDemoMode = () => !isSupabaseConfigured();

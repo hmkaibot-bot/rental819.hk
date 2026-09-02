@@ -90,6 +90,14 @@ export function invoiceInfoRows(r: Reservation): string[] {
   if (r.booking_ref) rows.push(`預約編號: ${r.booking_ref}`);
   const from = fmtDateTime(r.pickup_date, r.pickup_time);
   const to = fmtDateTime(r.return_date, r.return_time);
+  // A CARDO-only rental has no Japan trip: the dates are the device's rental
+  // period and the Japan bike/shop lines would be false statements on a tax
+  // document, so they are replaced rather than merely blanked.
+  if (r.cardo_only) {
+    if (from || to) rows.push(`租借日期：${from} - ${to}`);
+    rows.push("CARDO Packtalk Bold 對講機租賃（頭盔王 Helmet King）");
+    return rows;
+  }
   if (from || to) rows.push(`出發日期：${from} - ${to}`);
   rows.push("電單車租賃：RENTAL819 優質電單車租賃、強制保險及車輛損傷補償保險");
   if (r.confirmed_bike) rows.push(`車型：${r.confirmed_bike}`);
@@ -127,6 +135,14 @@ export function defaultInvoiceItems(
   r: Reservation,
   catalog: Rt819Item[] = RT819_ITEMS,
 ): InvoiceItem[] {
+  // A CARDO-only rental bills exactly the intercom — never the bike
+  // placeholder, even if someone unticked the CARDO box on the detail page.
+  if (r.cardo_only) {
+    const it = lineFromCode(catalog, "HK-CARDO", 1);
+    return it
+      ? [it]
+      : [{ description: "CARDO PACKTALK BOLD INTERCOM RENTAL 對講機租賃", qty: 1, unit_price: 200, amount: 200 }];
+  }
   const grade = gradeFromReservation(r); // "P1".."P7" or null
   const days = rentalDays(r);
   const extra = Math.max(0, days - 1);
