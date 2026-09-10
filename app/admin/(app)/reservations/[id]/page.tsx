@@ -568,13 +568,9 @@ export default async function ReservationDetail({
               </fieldset>
             </form>
 
-            {/* Refund — for cancelled (or renegotiating) bookings. Hidden on a
-                live booking so nobody records a refund by mistake, but any
-                already-saved refund stays visible whatever the status. */}
-            {(TERMINAL_STATUS.some((ts) => ts.key === r.status) ||
-              r.refund_date ||
-              r.refund_channel ||
-              r.refund_note) && (
+            {/* Refund — always visible, whatever the status (the operator asked
+                for no status gating: refunds get recorded before or after the
+                booking is formally cancelled). */}
             <form action={patchReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
@@ -604,7 +600,6 @@ export default async function ReservationDetail({
               <button className="btn-brand w-full text-xs">{t.common.save}</button>
               </fieldset>
             </form>
-            )}
 
             {/* Settlement moved to the accounting module */}
             <div className="border-t border-slate-100 pt-3 text-xs text-ink-muted">
