@@ -573,7 +573,8 @@ export default async function ReservationDetail({
                 already-saved refund stays visible whatever the status. */}
             {(TERMINAL_STATUS.some((ts) => ts.key === r.status) ||
               r.refund_date ||
-              r.refund_channel) && (
+              r.refund_channel ||
+              r.refund_note) && (
             <form action={patchReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
@@ -596,6 +597,10 @@ export default async function ReservationDetail({
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
+              <label className="text-xs font-medium text-ink-soft" htmlFor="refund_note">
+                {t.detail.refundNote}
+              </label>
+              <textarea id="refund_note" name="refund_note" rows={2} defaultValue={r.refund_note ?? ""} className={input} />
               <button className="btn-brand w-full text-xs">{t.common.save}</button>
               </fieldset>
             </form>
@@ -633,10 +638,15 @@ export default async function ReservationDetail({
               )}
               <Field label={t.detail.customerPaidOn} value={r.customer_paid_date} />
               <Field label={t.detail.paymentChannel} value={r.payment_channel} />
-              {(r.refund_date || r.refund_channel) && (
+              {(r.refund_date || r.refund_channel || r.refund_note) && (
                 <>
                   <Field label={t.detail.refundDate} value={r.refund_date} />
                   <Field label={t.detail.refundChannel} value={r.refund_channel} />
+                  {r.refund_note && (
+                    <div className="col-span-2">
+                      <Field label={t.detail.refundNote} value={r.refund_note} />
+                    </div>
+                  )}
                 </>
               )}
               {!r.cardo_only && (

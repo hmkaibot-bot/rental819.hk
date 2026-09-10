@@ -3,11 +3,17 @@ import type { Reservation } from "./types";
 /** Sample reservations so the admin backend is fully viewable without a live DB. */
 const rawDemo: (Omit<
   Reservation,
-  "invoice_date" | "invoice_items" | "cardo_only" | "refund_date" | "refund_channel"
+  | "invoice_date"
+  | "invoice_items"
+  | "cardo_only"
+  | "refund_date"
+  | "refund_channel"
+  | "refund_note"
 > & {
   cardo_only?: boolean;
   refund_date?: string | null;
   refund_channel?: string | null;
+  refund_note?: string | null;
 })[] = [
   {
     id: "demo-1",
@@ -266,6 +272,7 @@ export const demoReservations: Reservation[] = rawDemo.map((r) => ({
   cardo_only: r.cardo_only ?? false,
   refund_date: r.refund_date ?? null,
   refund_channel: r.refund_channel ?? null,
+  refund_note: r.refund_note ?? null,
   invoice_date: null,
   invoice_items: [],
 }));
