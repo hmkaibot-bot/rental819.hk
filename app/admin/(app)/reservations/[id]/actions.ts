@@ -53,6 +53,8 @@ const NULLABLE_TEXT = [
   "si_number",
   "customer_paid_date",
   "payment_channel",
+  "refund_date",
+  "refund_channel",
   "supplier_paid_date",
   "notes",
 ] as const;

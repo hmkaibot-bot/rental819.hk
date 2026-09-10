@@ -568,6 +568,39 @@ export default async function ReservationDetail({
               </fieldset>
             </form>
 
+            {/* Refund — for cancelled (or renegotiating) bookings. Hidden on a
+                live booking so nobody records a refund by mistake, but any
+                already-saved refund stays visible whatever the status. */}
+            {(TERMINAL_STATUS.some((ts) => ts.key === r.status) ||
+              r.refund_date ||
+              r.refund_channel) && (
+            <form action={patchReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+              <fieldset disabled={readOnly} className="contents">
+              <input type="hidden" name="id" value={r.id} />
+              <div className="text-xs font-bold text-brand-700">{t.detail.refundTitle}</div>
+              <label className="text-xs font-medium text-ink-soft" htmlFor="refund_date">
+                {t.detail.refundDate}
+              </label>
+              <input id="refund_date" name="refund_date" type="date" defaultValue={r.refund_date ?? ""} className={input} />
+              <label className="text-xs font-medium text-ink-soft" htmlFor="refund_channel">
+                {t.detail.refundChannel}
+              </label>
+              <select id="refund_channel" name="refund_channel" defaultValue={r.refund_channel ?? ""} className={input}>
+                <option value="">—</option>
+                {/* A legacy/hand-entered value stays selectable so saving the
+                    date never silently wipes it — same rule as 收款渠道. */}
+                {r.refund_channel && !(PAYMENT_CHANNELS as readonly string[]).includes(r.refund_channel) && (
+                  <option value={r.refund_channel}>{r.refund_channel}{t.detail.existingSuffix}</option>
+                )}
+                {PAYMENT_CHANNELS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <button className="btn-brand w-full text-xs">{t.common.save}</button>
+              </fieldset>
+            </form>
+            )}
+
             {/* Settlement moved to the accounting module */}
             <div className="border-t border-slate-100 pt-3 text-xs text-ink-muted">
               {t.detail.settlementMoved}{" "}
@@ -600,6 +633,12 @@ export default async function ReservationDetail({
               )}
               <Field label={t.detail.customerPaidOn} value={r.customer_paid_date} />
               <Field label={t.detail.paymentChannel} value={r.payment_channel} />
+              {(r.refund_date || r.refund_channel) && (
+                <>
+                  <Field label={t.detail.refundDate} value={r.refund_date} />
+                  <Field label={t.detail.refundChannel} value={r.refund_channel} />
+                </>
+              )}
               {!r.cardo_only && (
                 <>
                   <Field label={t.detail.supplierPaidOn} value={r.supplier_paid_date} />
