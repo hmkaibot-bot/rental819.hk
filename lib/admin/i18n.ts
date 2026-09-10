@@ -153,6 +153,10 @@ export interface AdminDict {
     saveSiCost: string;
     customerPaidDate: string;
     paymentChannel: string;
+    refundTitle: string;
+    refundDate: string;
+    refundChannel: string;
+    refundNote: string;
     settlementMoved: string;
     accountingModule: string;
     settlementMovedTail: string;
@@ -406,6 +410,10 @@ const zh: AdminDict = {
     saveSiCost: "儲存單號及成本",
     customerPaidDate: "客人付款日期",
     paymentChannel: "收款渠道",
+    refundTitle: "退款",
+    refundDate: "退款日期",
+    refundChannel: "退款渠道",
+    refundNote: "退款備註",
     settlementMoved: "月結（向日本供應商付款）已移至",
     accountingModule: "會計模組",
     settlementMovedTail: "，可一次過剔選多個預約記錄付款。",
@@ -658,6 +666,10 @@ const ja: AdminDict = {
     costHint: "合計とリベートは各項目から自動計算されるため、手入力は不要です。リベートは基本車両料金の 10% で固定です。",
     saveSiCost: "SI 番号と原価を保存",
     customerPaidDate: "お客様の入金日",
+    refundTitle: "返金",
+    refundDate: "返金日",
+    refundChannel: "返金チャネル",
+    refundNote: "返金メモ",
     paymentChannel: "入金経路",
     settlementMoved: "月次精算（日本の仕入先への支払）は",
     accountingModule: "会計モジュール",

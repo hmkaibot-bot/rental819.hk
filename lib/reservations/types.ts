@@ -112,6 +112,12 @@ export interface Reservation {
   customer_paid_date: string | null;
   // 收款渠道 the customer paid through (LIVI / AW / BOC MAC).
   payment_channel: string | null;
+  // Refund record for a cancelled booking — when it went back, through which
+  // channel (same dropdown as 收款渠道: money returns the way it came), and a
+  // free-text note (reason, amount, reference — operator's call).
+  refund_date: string | null;
+  refund_channel: string | null;
+  refund_note: string | null;
   paid_to_supplier: boolean;
   supplier_paid_date: string | null;
   cost_jpy: number | null; // gross supplier cost (¥), before the Japan rebate
