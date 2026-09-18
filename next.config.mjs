@@ -46,6 +46,8 @@ const legacyRedirects = [
   { source: "/reservation-and-pick-up-process", destination: "/en/guide/pickup", permanent: true },
   { source: "/etc", destination: "/en/guide/etc", permanent: true },
   { source: "/car-rental", destination: "/en/rental", permanent: true },
+  { source: "/booking_procedures", destination: "/en/guide/pickup", permanent: true },
+  { source: "/japanese-traffic-rules", destination: "/en/guide/traffic-rules", permanent: true },
 
   // --- The old English pages ALSO lived under /en/<slug> (WPML-style), and
   //     Google still holds those URLs. Mirror every English rule above so the
@@ -66,6 +68,8 @@ const legacyRedirects = [
   { source: "/en/insurance", destination: "/en/guide/insurance", permanent: true },
   { source: "/en/etc", destination: "/en/guide/etc", permanent: true },
   { source: "/en/reservation-and-pick-up-process", destination: "/en/guide/pickup", permanent: true },
+  { source: "/en/booking_procedures", destination: "/en/guide/pickup", permanent: true },
+  { source: "/en/japanese-traffic-rules", destination: "/en/guide/traffic-rules", permanent: true },
   { source: "/en/privacy-policy", destination: "/en/privacy", permanent: true },
   { source: "/en/st_activity/:slug*", destination: "/en/tours", permanent: true },
   { source: "/en/st_tour/:slug*", destination: "/en/tours", permanent: true },
