@@ -45,6 +45,42 @@ const legacyRedirects = [
   { source: "/insurance", destination: "/en/guide/insurance", permanent: true },
   { source: "/reservation-and-pick-up-process", destination: "/en/guide/pickup", permanent: true },
   { source: "/etc", destination: "/en/guide/etc", permanent: true },
+  { source: "/car-rental", destination: "/en/rental", permanent: true },
+  { source: "/booking_procedures", destination: "/en/guide/pickup", permanent: true },
+  { source: "/japanese-traffic-rules", destination: "/en/guide/traffic-rules", permanent: true },
+
+  // --- The old English pages ALSO lived under /en/<slug> (WPML-style), and
+  //     Google still holds those URLs. Mirror every English rule above so the
+  //     /en/-prefixed variants land on the same destinations instead of 404-ing
+  //     (verified live: /en/insurance, /en/about-us etc. all 404 today). ---
+  { source: "/en/helmet-king-x-rental819-japan-motorcycle-rental-self-driving-tour", destination: "/en", permanent: true },
+  { source: "/en/car-rental", destination: "/en/rental", permanent: true },
+  { source: "/en/motorcycle-rental", destination: "/en/rental", permanent: true },
+  { source: "/en/request-for-a-car-rental-reservation", destination: "/en/booking", permanent: true },
+  { source: "/en/self-driving-group", destination: "/en/tours", permanent: true },
+  { source: "/en/apply-for-a-self-driving-tour-reservation", destination: "/en/tours", permanent: true },
+  { source: "/en/about-us", destination: "/en/about", permanent: true },
+  { source: "/en/how-to-plan-your-trip", destination: "/en/guide/plan-trip", permanent: true },
+  { source: "/en/how-is-the-route-planned", destination: "/en/guide/route", permanent: true },
+  { source: "/en/planning-to-drive-for-a-few-days", destination: "/en/guide/how-many-days", permanent: true },
+  { source: "/en/how-is-the-budget-calculated", destination: "/en/guide/budget", permanent: true },
+  { source: "/en/rent-and-fees", destination: "/en/guide/fees", permanent: true },
+  { source: "/en/insurance", destination: "/en/guide/insurance", permanent: true },
+  { source: "/en/etc", destination: "/en/guide/etc", permanent: true },
+  { source: "/en/reservation-and-pick-up-process", destination: "/en/guide/pickup", permanent: true },
+  { source: "/en/booking_procedures", destination: "/en/guide/pickup", permanent: true },
+  { source: "/en/japanese-traffic-rules", destination: "/en/guide/traffic-rules", permanent: true },
+  { source: "/en/privacy-policy", destination: "/en/privacy", permanent: true },
+  { source: "/en/st_activity/:slug*", destination: "/en/tours", permanent: true },
+  { source: "/en/st_tour/:slug*", destination: "/en/tours", permanent: true },
+
+  // --- Old Yoast sitemap URLs: anything still requesting them (Google does,
+  //     for years) gets pointed at the live sitemap instead of a 404. ---
+  { source: "/sitemap_index.xml", destination: "/sitemap.xml", permanent: true },
+  { source: "/page-sitemap.xml", destination: "/sitemap.xml", permanent: true },
+  { source: "/post-sitemap.xml", destination: "/sitemap.xml", permanent: true },
+  { source: "/st_activity-sitemap.xml", destination: "/sitemap.xml", permanent: true },
+  { source: "/st_tour-sitemap.xml", destination: "/sitemap.xml", permanent: true },
 
   // --- Locale-neutral slugs → default locale ---
   { source: "/faq", destination: "/zh-hk/faq", permanent: true },
