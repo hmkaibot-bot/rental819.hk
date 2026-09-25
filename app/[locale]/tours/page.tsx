@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
-import { tours, providerNote, type Tour } from "@/lib/content/tours";
+import { tours, providerNote, REG_CLOSE_DAYS, type Tour } from "@/lib/content/tours";
 import { whatsappLink, site } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
@@ -12,6 +12,10 @@ import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
 import JsonLd from "@/components/JsonLd";
 import { ArrowRight, WhatsAppIcon } from "@/components/icons";
+
+// Re-derive each tour's listing state daily, so departures drop out of
+// 「現已接受報名」 without a deploy.
+export const revalidate = 86400;
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
@@ -30,8 +34,58 @@ function priceLabel(t: Tour, isEn: boolean) {
   return `${isEn ? "from " : "HK$"}${isEn ? "HK$" : ""}${t.priceFrom.toLocaleString("en-US")}${isEn ? "" : " 起"}`;
 }
 
-function TourCard({ tour, locale }: { tour: Tour; locale: Locale }) {
+/** Today's date in Hong Kong as YYYY-MM-DD. */
+function hkToday() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Hong_Kong" }).format(new Date());
+}
+
+function daysBefore(iso: string, days: number) {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+
+type TourState = "open" | "closed" | "tbc" | "past";
+
+/** Compared on the START date, so a tour already under way is no longer open. */
+function tourState(t: Tour, today: string): TourState {
+  if (t.date === "") return "open";
+  if ((t.closes ?? daysBefore(t.date, REG_CLOSE_DAYS)) >= today) return "open";
+  if (t.date >= today) return "closed";
+  return t.ran ? "past" : "tbc";
+}
+
+function whatsappCta(t: Tour, state: TourState, isEn: boolean): { message: string; label: string } {
+  switch (state) {
+    case "open":
+      return isEn
+        ? { message: "Hi, I'd like to ask about a private club / group / corporate tour.", label: "Ask on WhatsApp" }
+        : { message: "你好，我想查詢車會／團體／公司包團服務。", label: "WhatsApp 查詢" };
+    case "closed":
+      return isEn
+        ? { message: `Hi, are there any places left on "${t.title}"?`, label: "Ask about places" }
+        : { message: `你好，我想查詢「${t.title}」仲有冇餘位。`, label: "查詢餘位" };
+    case "tbc":
+      return isEn
+        ? { message: `Hi, when is the next departure of "${t.title}"?`, label: "Ask about next date" }
+        : { message: `你好，我想查詢「${t.title}」下一團的出發日期。`, label: "查詢下一團" };
+    case "past":
+      return isEn
+        ? { message: `Hi, I'd like to ask about running a trip like "${t.title}" for my group.`, label: "Ask about a similar trip" }
+        : { message: `你好，我想查詢類似「${t.title}」的包團行程。`, label: "查詢類似行程" };
+  }
+}
+
+function TourCard({ tour, state, locale }: { tour: Tour; state: TourState; locale: Locale }) {
   const isEn = locale === "en";
+  const badge = {
+    open: null,
+    closed: isEn ? "Registration closed" : "報名已截止",
+    tbc: isEn ? "Next date TBC" : "下一團日期待定",
+    past: isEn ? "Departed" : "已出發",
+  }[state];
+  const bookUrl = state === "open" ? tour.bookUrl : undefined;
+  const cta = bookUrl ? null : whatsappCta(tour, state, isEn);
   return (
     <article className="group card-hover flex flex-col overflow-hidden">
       <div className="relative aspect-[16/10] overflow-hidden">
@@ -51,47 +105,120 @@ function TourCard({ tour, locale }: { tour: Tour; locale: Locale }) {
         <span className="absolute left-3 top-3 rounded-full bg-brand-950/85 px-3 py-1 text-xs font-semibold text-white">
           {tour.region}
         </span>
-        {!tour.upcoming && (
+        {badge && (
           <span className="absolute right-3 top-3 rounded-full bg-ink/75 px-3 py-1 text-xs font-medium text-white">
-            {isEn ? "Departed" : "已出發"}
+            {badge}
           </span>
         )}
       </div>
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center justify-between text-xs font-medium text-ink-muted">
-          <span>{tour.dateLabel}</span>
+          <span>{state === "tbc" ? (isEn ? "Date TBC" : "出發日期待定") : tour.dateLabel}</span>
           <span>{tour.duration}</span>
         </div>
         <h3 className="mt-2 text-lg font-bold leading-snug">{tour.title}</h3>
         <p className="mt-2 line-clamp-3 flex-1 text-sm leading-6 text-ink-muted">
           {tour.description}
         </p>
-        <div className="mt-5 flex items-center justify-between">
-          <span className="text-lg font-black text-accent-600">
-            {priceLabel(tour, isEn)}
-          </span>
+        {/* Only open tours show a price: a closed tour can't be booked at it,
+            and the next run's price is unknown. */}
+        <div className="mt-5 flex items-center justify-between gap-4">
+          {state === "open" && (
+            <span className="text-lg font-black text-accent-600">
+              {priceLabel(tour, isEn)}
+            </span>
+          )}
           <a
-            href={site.adventureUrl}
+            href={bookUrl ?? whatsappLink(cta?.message)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
+            className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
           >
-            {isEn ? "Sign up" : "報名"}
-            <ArrowRight className="h-4 w-4" />
+            {cta && <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />}
+            {cta ? cta.label : isEn ? "Sign up" : "報名"}
+            {bookUrl && <ArrowRight className="h-4 w-4" />}
           </a>
         </div>
+        {state === "open" && tour.priceFrom != null && (
+          <p className="mt-2 text-xs leading-5 text-ink-muted">
+            {isEn
+              ? "Per person, twin share; excludes flights, fuel and tolls (meet and finish in Japan)"
+              : "每位・兩人一房・不含機票、油費及路費（日本當地集合及解散）"}
+          </p>
+        )}
       </div>
     </article>
   );
 }
 
+function TourSection({
+  title,
+  intro,
+  list,
+  state,
+  locale,
+  shaded,
+}: {
+  title: string;
+  intro?: string;
+  list: Tour[];
+  state: TourState;
+  locale: Locale;
+  shaded: boolean;
+}) {
+  return (
+    <section className={shaded ? "bg-slate-50" : undefined}>
+      <div className="container-x py-16 lg:py-20">
+        <h2 className={`${intro ? "mb-2" : "mb-8"} text-2xl font-bold sm:text-3xl`}>{title}</h2>
+        {intro && <p className="mb-8 max-w-2xl text-ink-muted">{intro}</p>}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((t) => (
+            <TourCard key={t.id} tour={t} state={state} locale={locale} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const soonestFirst = (a: Tour, b: Tour) =>
+  Number(a.date === "") - Number(b.date === "") || a.date.localeCompare(b.date);
+const latestFirst = (a: Tour, b: Tour) => b.date.localeCompare(a.date);
+
 export default function ToursPage({ params }: { params: { locale: string } }) {
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
   const dict = getDictionary(locale);
   const isEn = locale === "en";
-  const list = tours[locale];
-  const upcoming = list.filter((t) => t.upcoming);
-  const past = list.filter((t) => !t.upcoming);
+  const today = hkToday();
+  const inState = (s: TourState) => tours[locale].filter((t) => tourState(t, today) === s);
+  const sections = [
+    {
+      state: "open" as const,
+      list: inState("open").sort(soonestFirst),
+      title: isEn ? "Now accepting registration" : "現已接受報名",
+    },
+    {
+      state: "closed" as const,
+      list: inState("closed").sort(soonestFirst),
+      title: isEn ? "Departing soon (registration closed)" : "即將出發（報名已截止）",
+    },
+    {
+      state: "tbc" as const,
+      list: inState("tbc").sort(latestFirst),
+      title: isEn ? "Next departure to be confirmed" : "下一團日期待定",
+      intro: isEn
+        ? "Dates for the next run of these routes haven't been announced yet — ask us on WhatsApp."
+        : "以下路線的下一團日期尚待公布，歡迎 WhatsApp 查詢。",
+    },
+    {
+      state: "past" as const,
+      list: inState("past").sort(latestFirst),
+      title: isEn ? "Past departures" : "過往的自駕團",
+      intro: isEn
+        ? "A glimpse of routes we've already led — ask us to run a similar itinerary for your group."
+        : "以下是我們曾帶領的路線 — 歡迎查詢為你的團度身安排類似行程。",
+    },
+  ].filter((s) => s.list.length > 0);
 
   return (
     <>
@@ -133,36 +260,10 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
         </div>
       </PageHero>
 
-      <section className="container-x py-16 lg:py-20">
-        <h2 className="mb-8 text-2xl font-bold sm:text-3xl">
-          {isEn ? "Now accepting registration" : "現已接受報名"}
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {upcoming.map((t) => (
-            <TourCard key={t.id} tour={t} locale={locale} />
-          ))}
-        </div>
-      </section>
-
-      {past.length > 0 && (
-        <section className="bg-slate-50">
-          <div className="container-x py-16 lg:py-20">
-            <h2 className="mb-2 text-2xl font-bold sm:text-3xl">
-              {isEn ? "Past departures" : "過往的自駕團"}
-            </h2>
-            <p className="mb-8 max-w-2xl text-ink-muted">
-              {isEn
-                ? "A glimpse of routes we've already led — ask us to run a similar itinerary for your group."
-                : "以下是我們曾帶領的路線 — 歡迎查詢為你的團度身安排類似行程。"}
-            </p>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {past.map((t) => (
-                <TourCard key={t.id} tour={t} locale={locale} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Shading alternates over the sections actually shown, since any of them can be empty. */}
+      {sections.map((sec, i) => (
+        <TourSection key={sec.state} {...sec} locale={locale} shaded={i % 2 === 1} />
+      ))}
 
       <div className="py-20">
         <CTABand
@@ -172,9 +273,23 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
           primaryLabel={isEn ? "Book on 26 Adventure" : "到 26 Adventure 報名"}
           title={isEn ? "Ready to join a tour?" : "想參加自駕團？"}
           subtitle={
-            isEn
-              ? "Guided tours and self-drive packages are booked on 26adventure.com."
-              : "自駕團及自駕套票現於 26adventure.com 報名。"
+            isEn ? (
+              <>
+                Guided tours are booked on 26adventure.com; for{" "}
+                <Link href={localePath(locale, "/packages")} className="font-semibold text-white underline">
+                  self-drive packages
+                </Link>
+                , ask us on WhatsApp.
+              </>
+            ) : (
+              <>
+                自駕團於 26adventure.com 報名；
+                <Link href={localePath(locale, "/packages")} className="font-semibold text-white underline">
+                  自駕套票
+                </Link>
+                請 WhatsApp 查詢。
+              </>
+            )
           }
         />
         <p className="container-x mt-6 text-center text-xs text-ink-muted">

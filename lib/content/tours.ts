@@ -4,6 +4,8 @@ import { site } from "@/lib/site";
 export interface Tour {
   id: string;
   date: string; // ISO departure date, "" for on-request
+  /** ISO last day of registration, only when it isn't REG_CLOSE_DAYS before `date`. */
+  closes?: string;
   dateLabel: string;
   region: string;
   title: string;
@@ -11,8 +13,14 @@ export interface Tour {
   priceFrom: number | null; // HK$, null = enquire
   image: string;
   description: string;
-  upcoming: boolean;
+  /** Set ONLY for departures the owner has confirmed actually ran. */
+  ran?: boolean;
+  /** The tour's own page on 26adventure.com, where registration happens. */
+  bookUrl?: string;
 }
+
+/** 26adventure's published terms: 「報名截止日期為出發前 30 天」. */
+export const REG_CLOSE_DAYS = 30;
 
 export interface Package {
   id: string;
@@ -65,7 +73,8 @@ export const providerNote: Record<Locale, string> = {
   en: `These tours are organised by ${site.travelAgent.name} (HK Travel Agent Licence No. ${site.travelAgent.licence}) and booked on 26adventure.com. RENTAL819 Hong Kong arranges the motorcycles and supports Hong Kong and Macau riders.`,
 };
 
-// Departure dates relative to the site's reference date (2026-07-19).
+// Listing state (open / registration closed / date TBC / past) is derived from `date` (and `closes`)
+// at render time in app/[locale]/tours/page.tsx. Mark `ran: true` only once a departure is confirmed to have run.
 export const tours: Record<Locale, Tour[]> = {
   "zh-hk": [
     {
@@ -79,7 +88,7 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/hokkaido-2026-07-30.jpg",
       description:
         "為期 8 天的電單車行程，前往日本極北點，沿途欣賞壯麗海岸線。騎行至四季彩之丘的花田、以清澈水流聞名的白鬚瀑布、如畫的美瑛丘陵，以及神秘的摩周湖與知床峠展望台。",
-      upcoming: true,
+      bookUrl: "https://26adventure.com/tours/japan-hokkaido",
     },
     {
       id: "fuji-izu-2026-08-23",
@@ -93,7 +102,7 @@ export const tours: Record<Locale, Tour[]> = {
         "",
       description:
         "熱海海上花火大會自 1952 年起舉辦，是熱海的名物活動。銀色花火填滿夜空，如白晝般明亮，配合富士山與伊豆半島的壯麗景色，感動保證。",
-      upcoming: true,
+      bookUrl: "https://26adventure.com/tours/japan-fuji-izu-fireworks",
     },
     {
       id: "tohoku-2026-09-20",
@@ -106,7 +115,7 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/tohoku-2026-09-20.jpg",
       description:
         "行程包括四季皆美的十和田湖、擁有瀑布與蜿蜒小道的奧入瀨溪流、日本三大靈場之一的恐山，以及見證東日本大地震的奇蹟一本松。自然之美與深厚文化歷史並存。",
-      upcoming: true,
+      bookUrl: "https://26adventure.com/tours/japan-tohoku-sanriku",
     },
     {
       id: "kanto-koyo-2026-10-24",
@@ -119,7 +128,7 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/kanto-koyo-2026-10-24.jpg",
       description:
         "專為電單車愛好者設計的秋季旅程。於蘆之湖畔欣賞秀麗美景，騎行景觀山道維納斯公路，途中造訪古色古香的赤城神社與箱根神社，享受靜謐氛圍。",
-      upcoming: true,
+      bookUrl: "https://26adventure.com/tours/kanto-autumn",
     },
     {
       id: "custom-group",
@@ -132,7 +141,6 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/custom-group.jpg",
       description:
         "專為小組／團體／公司而設的獨立包團服務。多條參考路線靈活修訂、經驗豐富領航員專業解說、後勤車全程接載行李及緊急支援。憑自駕遊發票更可享頭盔王門市裝備低至 7 折。建議 6 人起。",
-      upcoming: true,
     },
     {
       id: "kansai-sakura-2026-04-08",
@@ -146,7 +154,8 @@ export const tours: Record<Locale, Tour[]> = {
         "/images/tours/kansai-sakura-2026-04-08.jpg",
       description:
         "前往比叡山與伊吹山蜿蜒山道，沿琵琶湖、海津大崎與千里濱凪沙道路在沙灘上馳騁，於白川鄉體驗古色古香，再到兼六園欣賞日本庭園之雅緻。",
-      upcoming: false,
+      ran: true,
+      bookUrl: "https://26adventure.com/tours/japan-kansai-shirakawa",
     },
     {
       id: "shikoku-2026-07-01",
@@ -159,7 +168,8 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/shikoku-2026-07-01.jpg",
       description:
         "深入四國壯麗風光：大步危峽谷、四萬十川河畔、足摺 skyline 景觀山道，以及古色古香的祖谷藤蔓橋，海岸線美景完美收官。",
-      upcoming: false,
+      ran: true,
+      bookUrl: "https://26adventure.com/tours/japan-shikoku",
     },
     {
       id: "kyushu-aso-2026-04-30",
@@ -172,7 +182,8 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/kyushu-aso-2026-04-30.jpg",
       description:
         "結合自然景觀與文化體驗的旅程。由福岡出發，穿越祐德稻荷神社、雲仙地獄與阿蘇牛奶之路，並到訪太宰府天滿宮感受傳統日本文化。",
-      upcoming: false,
+      ran: true,
+      bookUrl: "https://26adventure.com/tours/japan-kyushu",
     },
   ],
   en: [
@@ -187,7 +198,7 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/hokkaido-2026-07-30.jpg",
       description:
         "An 8-day ride to Japan's northernmost point along magnificent coastlines — the flower fields of Shikisai-no-oka, Shirahige Falls, the painterly Biei hills, mysterious Lake Mashu and the Shiretoko Pass lookout.",
-      upcoming: true,
+      bookUrl: "https://26adventure.com/tours/japan-hokkaido",
     },
     {
       id: "fuji-izu-2026-08-23",
@@ -201,7 +212,7 @@ export const tours: Record<Locale, Tour[]> = {
         "",
       description:
         "The Atami seaside fireworks festival, running since 1952, lights the night sky as bright as day — paired with the sweeping scenery of Mt. Fuji and the Izu Peninsula.",
-      upcoming: true,
+      bookUrl: "https://26adventure.com/tours/japan-fuji-izu-fireworks",
     },
     {
       id: "tohoku-2026-09-20",
@@ -214,7 +225,7 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/tohoku-2026-09-20.jpg",
       description:
         "Lake Towada in every season, the waterfalls and trails of the Oirase stream, Mt. Osore — one of Japan's three great sacred sites — and the 'miracle lone pine' that survived the 2011 earthquake.",
-      upcoming: true,
+      bookUrl: "https://26adventure.com/tours/japan-tohoku-sanriku",
     },
     {
       id: "kanto-koyo-2026-10-24",
@@ -227,7 +238,7 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/kanto-koyo-2026-10-24.jpg",
       description:
         "An autumn ride built for enthusiasts — lakeside views at Lake Ashi, the scenic Venus Line, and the tranquil Akagi and Hakone shrines amid peak foliage.",
-      upcoming: true,
+      bookUrl: "https://26adventure.com/tours/kanto-autumn",
     },
     {
       id: "custom-group",
@@ -240,7 +251,6 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/custom-group.jpg",
       description:
         "Private group tours for clubs, groups and companies. Flexible routes, experienced lead riders, a support vehicle carrying luggage and providing assistance throughout — plus up to 30% off gear at Helmet King with your tour invoice. Minimum 6 riders.",
-      upcoming: true,
     },
     {
       id: "kansai-sakura-2026-04-08",
@@ -254,7 +264,8 @@ export const tours: Record<Locale, Tour[]> = {
         "/images/tours/kansai-sakura-2026-04-08.jpg",
       description:
         "Winding roads over Mt. Hiei and Mt. Ibuki, sand-riding along the Chirihama coast by Lake Biwa, the historic charm of Shirakawa-go and the elegant gardens of Kenroku-en.",
-      upcoming: false,
+      ran: true,
+      bookUrl: "https://26adventure.com/tours/japan-kansai-shirakawa",
     },
     {
       id: "shikoku-2026-07-01",
@@ -267,7 +278,8 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/shikoku-2026-07-01.jpg",
       description:
         "Deep into Shikoku's scenery — the Oboke gorge, the Shimanto river, the Ashizuri Skyline mountain road and the traditional Iya vine bridge, finishing along a dramatic coastline.",
-      upcoming: false,
+      ran: true,
+      bookUrl: "https://26adventure.com/tours/japan-shikoku",
     },
     {
       id: "kyushu-aso-2026-04-30",
@@ -280,7 +292,8 @@ export const tours: Record<Locale, Tour[]> = {
       image: "/images/tours/kyushu-aso-2026-04-30.jpg",
       description:
         "Nature and culture from Fukuoka — Yutoku Inari Shrine, Unzen Jigoku, the Aso Milk Road and Dazaifu Tenmangu, all on freewheeling open roads.",
-      upcoming: false,
+      ran: true,
+      bookUrl: "https://26adventure.com/tours/japan-kyushu",
     },
   ],
 };

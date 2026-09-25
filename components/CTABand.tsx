@@ -17,7 +17,7 @@ export default function CTABand({
   locale: Locale;
   dict: Dictionary;
   title: string;
-  subtitle: string;
+  subtitle: React.ReactNode;
   /** External URL (e.g. 26adventure.com) — overrides the default /booking link. */
   primaryHref?: string;
   primaryLabel?: string;
