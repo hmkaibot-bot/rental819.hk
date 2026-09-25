@@ -64,7 +64,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
               {c.hero.badge}
             </span>
             <h1 className="mt-6 text-4xl font-black leading-[1.1] sm:text-5xl lg:text-6xl">
-              {c.hero.title}
+              {locale === "en" ? `${c.hero.title} ` : c.hero.title}
               <span className="mt-2 block text-accent-500">{c.hero.highlight}</span>
             </h1>
             <p className="mt-5 max-w-2xl text-xl font-medium text-white/95 sm:text-2xl">

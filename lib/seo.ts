@@ -30,17 +30,26 @@ export function pageAlternates(
   };
 }
 
+const DEFAULT_OG = {
+  url: "/opengraph-image",
+  width: 1200,
+  height: 630,
+  alt: "RENTAL819 — Japan motorcycle self-drive rentals & tours, booked from Hong Kong",
+};
+
 /**
  * Full per-page metadata: canonical + hreflang, plus its own Open Graph and
  * Twitter block. Without the OG block a page silently inherits the root
  * layout's Chinese home-page defaults — wrong title, wrong url, wrong locale
- * on every /en page.
+ * on every /en page. It also replaces the root layout's file-based og:image,
+ * so the image has to be set here explicitly.
  */
 export function pageMeta(
   locale: string,
   path: string,
   title: string,
   description: string,
+  image: { url: string; width?: number; height?: number; alt?: string } = DEFAULT_OG,
 ): Metadata {
   const clean = normalisePath(path);
   const isEn = locale === "en";
@@ -50,17 +59,19 @@ export function pageMeta(
     alternates: pageAlternates(locale, path),
     openGraph: {
       type: "website",
-      siteName: "RENTAL819 HK",
+      siteName: isEn ? "RENTAL819 Hong Kong" : "RENTAL819 香港",
       title,
       description,
       url: `${site.url}/${isEn ? "en" : "zh-hk"}${clean}`,
       locale: isEn ? "en_US" : "zh_HK",
       alternateLocale: isEn ? ["zh_HK"] : ["en_US"],
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [image.url],
     },
   };
 }

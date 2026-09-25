@@ -15,10 +15,10 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return pageMeta(
     params.locale,
     "/contact",
-    isEn ? "Contact" : "聯絡我們",
+    isEn ? `Contact Us | WhatsApp ${site.phone}` : `聯絡我們｜WhatsApp ${site.phone}`,
     isEn
-      ? "Reach the RENTAL819 Hong Kong team by WhatsApp, email or social media."
-      : "透過 WhatsApp、電郵或社交媒體聯絡 RENTAL819 香港團隊。",
+      ? `Contact the RENTAL819 Hong Kong team on WhatsApp ${site.phone} or ${site.email} — enquiries, quotes and route advice for renting a motorcycle in Japan, in Cantonese, Mandarin or English.`
+      : `WhatsApp ${site.phone} 或電郵 ${site.email} 聯絡 RENTAL819 香港團隊，以廣東話、普通話或英語查詢日本租電單車、報價及路線建議。`,
   );
 }
 
@@ -103,27 +103,33 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
           ))}
         </div>
 
-        <div className="mt-10 grid gap-6 rounded-3xl border border-slate-100 bg-slate-50 p-8 sm:grid-cols-2">
+        <div
+          className={`mt-10 grid gap-6 rounded-3xl border border-slate-100 bg-slate-50 p-8 ${
+            site.maps ? "sm:grid-cols-2" : ""
+          }`}
+        >
           <div>
             <h2 className="text-sm font-bold uppercase tracking-wide text-brand-700">
               {dict.footer.hours}
             </h2>
             <p className="mt-2 text-sm text-ink-soft">{dict.footer.hoursValue}</p>
           </div>
-          <div>
-            <h2 className="text-sm font-bold uppercase tracking-wide text-brand-700">
-              {isEn ? "Find us" : "地址"}
-            </h2>
-            <a
-              href={site.maps}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-800"
-            >
-              {isEn ? "Open in Google Maps" : "於 Google Maps 開啟"}
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
+          {site.maps && (
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wide text-brand-700">
+                {isEn ? "Find us" : "地址"}
+              </h2>
+              <a
+                href={site.maps}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-800"
+              >
+                {isEn ? "Open in Google Maps" : "於 Google Maps 開啟"}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 text-center">

@@ -17,6 +17,8 @@ export function generateStaticParams() {
   return guideDocs["zh-hk"].map((d) => ({ slug: d.slug }));
 }
 
+export const dynamicParams = false;
+
 export function generateMetadata({
   params,
 }: {
@@ -78,6 +80,19 @@ export default function GuideDocPage({
       </PageHero>
 
       <section className="container-x py-14 lg:py-16">
+        {doc.updated && (
+          <p className="mb-6 text-sm text-ink-muted">
+            {isEn ? "Last updated " : "最後更新："}
+            {/* A date-only string parses as UTC midnight, so format it in UTC too. */}
+            <time dateTime={doc.updated}>
+              {new Intl.DateTimeFormat(isEn ? "en-GB" : "zh-HK", {
+                dateStyle: "long",
+                timeZone: "UTC",
+              }).format(new Date(doc.updated))}
+            </time>
+            {isEn ? " · RENTAL819 Hong Kong team" : "・RENTAL819 香港團隊"}
+          </p>
+        )}
         <GuideArticle blocks={doc.blocks} />
 
         {/* Prev / next */}

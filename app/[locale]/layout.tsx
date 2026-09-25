@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { locales, isLocale, htmlLang, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
@@ -10,6 +11,18 @@ import JsonLd from "@/components/JsonLd";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
+}
+
+export const dynamicParams = false;
+
+export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+  const en = params.locale === "en";
+  return {
+    title: {
+      template: en ? "%s | RENTAL819 Hong Kong" : "%s｜RENTAL819 香港",
+      default: en ? "RENTAL819 Hong Kong — Japan motorcycle rental" : "RENTAL819 香港 — 日本電單車自駕遊",
+    },
+  };
 }
 
 export default function LocaleLayout({

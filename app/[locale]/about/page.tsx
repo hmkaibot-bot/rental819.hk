@@ -13,14 +13,21 @@ import JsonLd from "@/components/JsonLd";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return pageMeta(
-    params.locale,
-    "/about",
-    isEn ? "About RENTAL819 Hong Kong" : "關於 RENTAL819 香港｜日本電單車租賃港澳代理",
-    isEn
-      ? "RENTAL819 Hong Kong — the official HK & Macau agent for Rental819 Japan, part of the Helmet King group."
-      : "RENTAL819 香港 — 日本 Rental819 指定港澳代理，隸屬頭盔王集團。",
-  );
+  // Already carries the brand, so it bypasses the locale layout's title template.
+  const title = isEn
+    ? "About RENTAL819 Hong Kong | Rental819's HK & Macau agent"
+    : "關於 RENTAL819 香港｜日本電單車租賃港澳代理";
+  return {
+    ...pageMeta(
+      params.locale,
+      "/about",
+      title,
+      isEn
+        ? "RENTAL819 Hong Kong — the official HK & Macau agent for Rental819 Japan, part of the Helmet King group."
+        : "RENTAL819 香港 — 日本 Rental819 指定港澳代理，隸屬頭盔王集團。",
+    ),
+    title: { absolute: title },
+  };
 }
 
 export default function AboutPage({ params }: { params: { locale: string } }) {

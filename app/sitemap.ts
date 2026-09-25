@@ -4,7 +4,7 @@ import { site } from "@/lib/site";
 import { guideDocs } from "@/lib/content/guide";
 
 /** Last content sweep over the static pages. Bump when copy actually changes. */
-const SITE_UPDATED = new Date("2026-08-06");
+const SITE_UPDATED = new Date("2026-09-25");
 
 /** Fallback for guide docs with no explicit `updated`. */
 const GUIDE_UPDATED = "2026-08-06";

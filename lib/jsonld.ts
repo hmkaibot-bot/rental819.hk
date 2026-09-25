@@ -18,11 +18,17 @@ const LANGUAGES = ["zh-Hant", "yue", "cmn", "en"] as const;
 /** E.164 form of the WhatsApp / hotline number, for structured data only. */
 const TEL = `+${site.phoneRaw}`;
 
+/** The other names the brand is known by: the other locale's name, the domain and the og siteName. */
+function alternateNames(isEn: boolean): string[] {
+  return [isEn ? "RENTAL819 香港" : "RENTAL819 Hong Kong", "RENTAL819.HK", "RENTAL819 HK"];
+}
+
 /**
  * Organization structured data (site-wide).
  *
- * Deliberately *not* LocalBusiness: no street address is published anywhere on
- * the site, so the extra LocalBusiness properties would be unsubstantiated.
+ * Deliberately *not* LocalBusiness yet: the walk-in address and opening hours
+ * are pending owner confirmation, so LocalBusiness / a street address would be
+ * unsubstantiated until then.
  * The corporate shape follows lib/content/about.ts — 頭盔王 (est. 2014) is the
  * parent group; Rental819 Japan is the principal we represent as the 指定香港
  * 及澳門區代理 since 2017, i.e. a brand we carry and a network we belong to,
@@ -38,20 +44,19 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
     "@type": "Organization",
     "@id": ORG_ID,
     name: isEn ? "RENTAL819 Hong Kong" : "RENTAL819 香港",
-    alternateName: isEn ? "RENTAL819 香港" : "RENTAL819 Hong Kong",
+    alternateName: alternateNames(isEn),
     description: about.hero.intro,
     url: site.url,
     foundingDate: "2017",
     logo: {
       "@type": "ImageObject",
       url: `${site.url}/logo-lg.png`,
-      width: 768,
-      height: 488,
+      width: 450,
+      height: 285,
     },
     image: [`${site.url}/images/about/shop.jpg`, `${site.url}/opengraph-image`],
     telephone: TEL,
     email: site.email,
-    hasMap: site.maps,
     address: {
       "@type": "PostalAddress",
       addressCountry: "HK",
@@ -61,7 +66,6 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
       { "@type": "Country", name: "Hong Kong" },
       { "@type": "Country", name: "Macau" },
     ],
-    serviceArea: { "@type": "Country", name: "Japan" },
     knowsLanguage: [...LANGUAGES],
     contactPoint: {
       "@type": "ContactPoint",
@@ -84,6 +88,7 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
     },
     parentOrganization: {
       "@type": "Organization",
+      "@id": "https://www.helmetking.com/#organization",
       name: group.name,
       url: group.url,
       foundingDate: "2014",
@@ -98,12 +103,14 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
 
 /** WebSite structured data (site-wide). No SearchAction — there is no search route. */
 export function websiteLd(locale: Locale): Record<string, unknown> {
+  const isEn = locale === "en";
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     url: `${site.url}/`,
-    name: locale === "en" ? "RENTAL819 Hong Kong" : "RENTAL819 香港",
+    name: isEn ? "RENTAL819 Hong Kong" : "RENTAL819 香港",
+    alternateName: alternateNames(isEn),
     inLanguage: htmlLang[locale],
     publisher: { "@id": ORG_ID },
   };
@@ -166,7 +173,7 @@ export function breadcrumbLd(
  */
 export function articleLd(doc: GuideDoc, locale: Locale): Record<string, unknown> {
   const url = `${site.url}/${locale}/guide/${doc.slug}`;
-  const updated = (doc as GuideDoc & { updated?: string }).updated;
+  const updated = doc.updated;
   return {
     "@context": "https://schema.org",
     "@type": "Article",

@@ -16,6 +16,7 @@ const legacyRedirects = [
   { source: "/%E9%A0%AD%E7%9B%94%E7%8E%8B-x-rental819-%E6%97%A5%E6%9C%AC%E9%9B%BB%E5%96%AE%E8%BB%8A%E5%87%BA%E7%A7%9F%E8%87%AA%E9%A7%95%E9%81%8A", destination: "/zh-hk", permanent: true },
   { source: "/%E6%97%A5%E6%9C%AC%E9%9B%BB%E5%96%AE%E8%BB%8A%E8%87%AA%E9%A7%95%E9%81%8A-2", destination: "/zh-hk/rental", permanent: true },
   { source: "/%E7%A7%9F%E8%BB%8A%E9%A0%90%E7%B4%84%E9%A0%81", destination: "/zh-hk/booking", permanent: true },
+  { source: "/%E7%A7%9F%E8%BB%8A%E9%A0%90%E7%B4%84%E7%94%B3%E8%AB%8B", destination: "/zh-hk/booking", permanent: true },
   { source: "/%E9%9B%BB%E5%96%AE%E8%BB%8A%E6%97%85%E8%A1%8C%E5%9C%98", destination: "/zh-hk/tours", permanent: true },
   { source: "/%E8%87%AA%E9%A7%95%E5%9C%98%E5%A0%B1%E5%90%8D%E9%A0%81", destination: "/zh-hk/tours", permanent: true },
   { source: "/%E8%87%AA%E9%A7%95%E5%A5%97%E7%A5%A8", destination: "/zh-hk/packages", permanent: true },

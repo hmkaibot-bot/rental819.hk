@@ -7,7 +7,7 @@ export const site = {
   phoneRaw: "85298686569",
   whatsapp: "https://wa.me/85298686569",
   email: "info@helmetking.com",
-  maps: "https://maps.app.goo.gl/w9DNWSusHhF5W6RB9",
+  maps: null as string | null, // restore once the owner confirms the Google Maps place link (see needsUser)
   /** Guided tours & self-drive packages are handled on 26adventure.com. */
   adventureUrl: "https://26adventure.com",
   social: {
@@ -21,7 +21,7 @@ export const site = {
   },
   /** Sister brands under the Helmet King group. */
   sisters: [
-    { name: "Helmet King 頭盔王", url: "https://helmetking.com" },
+    { name: "Helmet King 頭盔王", url: "https://www.helmetking.com" },
     { name: "RentalBike.hk", url: "https://rentalbike.hk" },
     { name: "26King 二碌王", url: "https://26king.hk" },
   ],
