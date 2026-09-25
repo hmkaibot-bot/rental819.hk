@@ -1,5 +1,63 @@
 import type { Locale } from "@/lib/i18n";
-import type { GuideDoc } from "./blocks";
+import type { Block, GuideDoc } from "./blocks";
+import { RENT_TABLE_ROWS } from "./prices";
+
+/** Gear price tables quoted by both the fees and gear docs, so the two pages can never disagree. */
+const GEAR_RESERVABLE: Record<Locale, Block> = {
+  "zh-hk": {
+    type: "table",
+    head: ["裝備項目", "1 天（24 小時）", "第 2 天以後每天"],
+    rows: [
+      ["頭盔", "$60", "$10"],
+      ["尾箱", "$90", "$20"],
+      ["側袋", "$60", "$10"],
+      ["側箱", "$90", "$20"],
+      ["手機架", "免費", "免費"],
+    ],
+  },
+  en: {
+    type: "table",
+    head: ["Item", "1 day (24 hrs)", "Each day from day 2"],
+    rows: [
+      ["Helmet", "$60", "$10"],
+      ["Tail box", "$90", "$20"],
+      ["Side bag", "$60", "$10"],
+      ["Side box (pannier)", "$90", "$20"],
+      ["Phone mount", "Free", "Free"],
+    ],
+  },
+};
+
+const GEAR_DAY_OF: Record<Locale, Block> = {
+  "zh-hk": {
+    type: "table",
+    head: ["裝備項目", "1 天（24 小時）", "第 2 天以後每天"],
+    rows: [
+      ["尾座收納包", "¥500", "¥100"],
+      ["行李網", "¥200", "¥100"],
+      ["油缸收納包", "¥200", "¥100"],
+      ["防盜鎖", "¥200", "¥200"],
+      ["ETC 卡", "¥220", "¥110"],
+      ["手套", "¥330", "¥110"],
+      ["防摔外套", "¥550", "¥330"],
+      ["胸板", "¥330", "¥110"],
+    ],
+  },
+  en: {
+    type: "table",
+    head: ["Item", "1 day (24 hrs)", "Each day from day 2"],
+    rows: [
+      ["Rear-seat bag", "¥500", "¥100"],
+      ["Cargo net", "¥200", "¥100"],
+      ["Tank bag", "¥200", "¥100"],
+      ["Anti-theft lock", "¥200", "¥200"],
+      ["ETC card", "¥220", "¥110"],
+      ["Gloves", "¥330", "¥110"],
+      ["Anti-fall jacket", "¥550", "¥330"],
+      ["Chest protector", "¥330", "¥110"],
+    ],
+  },
+};
 
 export const guideDocs: Record<Locale, GuideDoc[]> = {
   "zh-hk": [
@@ -11,7 +69,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "香港車牌可以在日本租電單車嗎？｜國際駕駛執照 IDP 須知",
       seoDescription:
         "可以。持香港或澳門的正式電單車駕駛執照，連同國際駕駛執照（IDP）及護照三者齊備，即可在日本租電單車；暫準執照（P 牌）恕不受理，租車人須年滿 18 歲，IDP 亦須清楚顯示可駕駛電單車。",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "三份證件，缺一不可" },
         {
@@ -38,7 +96,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         { type: "h", text: "年齡限制" },
         {
           type: "p",
-          text: "Rental819 只向 18 歲以上的成年人提供服務，未滿 18 歲恕無法提供電單車出租服務。18 歲或以上並持有有效國際駕駛執照者，均可租賃 RENTAL819 的電單車。",
+          text: "Rental819 只向 18 歲以上的成年人提供服務，未滿 18 歲恕無法提供電單車出租服務。18 歲或以上，並同時持有香港／澳門正式駕駛執照、有效國際駕駛執照（IDP）及護照者，均可租賃 RENTAL819 的電單車。",
         },
         { type: "h", text: "在香港／澳門以外簽發的駕駛執照" },
         {
@@ -52,8 +110,9 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "本頁只說明在日本租車時所需的證件。國際駕駛執照的申請手續請向發證機關查詢；如不肯定手上的證件是否合用，歡迎 WhatsApp 我們的團隊：wa.me/85298686569。",
+          text: "本頁只說明在日本租車時所需的證件。國際駕駛執照的申請手續請向發證機關查詢。",
         },
+        { type: "cta", text: "不肯定手上的證件是否合用？WhatsApp 我們的團隊，或直接填表預約。" },
         {
           type: "link",
           items: [
@@ -79,7 +138,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "日本電單車自駕遊行程規劃",
       seoDescription:
         "日本電單車自駕遊行程規劃只需回答三條問題：打算開幾多日車、預算怎樣計、路線如何串連。走一般道路每日約 100 至 150 公里較舒適，天數直接影響預算，普通汽油約每公升 160 日圓。",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "安排行程很簡單！" },
         {
@@ -98,12 +157,28 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             {
               href: "/zh-hk/guide/budget",
               label: "預算怎樣計？",
-              text: "租金、油費（普通汽油約 160 日圓一公升）、高速公路費、飲食、住宿及泊車逐項計算。",
+              text: "電單車租金、油費（普通汽油約每公升 160 日圓）、高速公路費、飲食、住宿及泊車，逐項計算。",
             },
             {
               href: "/zh-hk/guide/route",
               label: "路線如何規劃？",
-              text: "先揀定必到的景觀道路、溫泉鄉或世界文化遺產，再串連成順路而不走回頭路的行程。",
+              text: "先定下必到的景觀道路、溫泉鄉或世界遺產，再串連成不走回頭路的行程。",
+            },
+          ],
+        },
+        { type: "p", text: "想參考我們過往的行程範例，可以看看：" },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/zh-hk/tours",
+              label: "電單車旅行團",
+              text: "我們帶領過的路線及最新團期。",
+            },
+            {
+              href: "/zh-hk/packages",
+              label: "自駕套票",
+              text: "附建議路線單張的機票＋電單車套票。",
             },
           ],
         },
@@ -167,7 +242,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           ],
         },
         {
-          type: "p",
+          type: "cta",
           text: "自己編排行程有自己的樂趣。如果人數多、日程趕，又或者想有人幫手睇一睇行程行唔行得通，WhatsApp 香港團隊即可，我們會按你的日數與想去的景點提供意見。",
         },
       ],
@@ -193,6 +268,16 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             "日本國家旅遊局：比較大路的景點都有記載，而且是用中文介紹。",
             "GOOBIKE、Bikebros：日本各縣有名的出車路線推薦。",
             "紅葉、櫻花開花情報：Weathernews 在每年春天或秋天都會刊登日本各地賞楓賞櫻地點的狀況，並列出最佳觀賞期。",
+          ],
+        },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/zh-hk/roads",
+              label: "日本名道圖鑑",
+              text: "我們整理的 38 條日本電單車名道，按地區分類。",
+            },
           ],
         },
         { type: "h", text: "大概這樣就完成了！" },
@@ -250,6 +335,16 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           type: "p",
           text: "這個是最能在事前確實的。請參考我們的租金計算表（見「租金及費用」）。",
         },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/zh-hk/guide/fees",
+              label: "租金及費用",
+              text: "P-1 至 P-7 一天租金由 HK$295 至 HK$1,765，已包強制及任意保險。",
+            },
+          ],
+        },
         { type: "h", text: "油費" },
         {
           type: "p",
@@ -287,13 +382,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
     },
     {
       slug: "fees",
-      title: "租金及費用",
+      title: "日本租電單車租金及費用",
       intro:
         "日本租電單車幾錢？實際租金會因車輛等級、租期及所選配件而有所不同，以下是完整價目表。",
       seoTitle: "日本租電單車價錢｜租金、保險及裝備收費表",
       seoDescription:
         "日本租電單車幾錢？P-1 至 P-7 一天租金由 HK$295 至 HK$1,765，已包強制及任意保險，但不包括燃油、高速公路費及泊車。另附車輛損傷補償、MamoRide 補償，以及頭盔、尾箱、ETC 卡等裝備的收費表。",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         {
           type: "p",
@@ -303,20 +398,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         {
           type: "table",
           head: ["等級", "4 小時", "8 小時", "1 天（24 小時）", "第 2 天以後每天", "延遲費用／小時"],
-          rows: [
-            ["P-1", "$220", "$245", "$295", "$195", "$50"],
-            ["P-2", "$330", "$365", "$440", "$295", "$75"],
-            ["P-3", "$605", "$675", "$810", "$540", "$135"],
-            ["P-4", "$770", "$855", "$1,030", "$685", "$170"],
-            ["P-5", "$880", "$980", "$1,175", "$785", "$195"],
-            ["P-6", "$990", "$1,100", "$1,320", "$880", "$220"],
-            ["P-7", "$1,320", "$1,470", "$1,765", "$1,175", "$295"],
-          ],
+          rows: RENT_TABLE_ROWS,
         },
         {
           type: "note",
           text: "上表已包含強制及任意保險，但不包含燃油、高速公路費及泊車。租金收費時段分為 4 小時、8 小時、1 天，及第 2 天以後按每 24 小時計算。",
         },
+        { type: "cta", text: "以上為參考價。填寫租車預約表格，香港團隊會按你的車款及日期以中文確認報價。" },
         { type: "h", text: "強制保險（已包含在租車費用內）" },
         {
           type: "table",
@@ -360,30 +448,17 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           text: "MamoRide 只可加購於 15 日以內的預約，且只在停車、上下車、牽車等「原地倒車」（非行駛狀態）造成損傷時，令車輛補償自付額減半；行駛中造成的損壞不在補償範圍內。",
         },
         { type: "h", text: "可預約租用之配備（供應因車款而異）（港元）" },
-        {
-          type: "table",
-          head: ["裝備項目", "1 天（24 小時）", "第 2 天以後每天"],
-          rows: [
-            ["頭盔", "$60", "$10"],
-            ["尾箱", "$90", "$20"],
-            ["側袋", "$60", "$10"],
-            ["側箱", "$90", "$20"],
-            ["手機架", "免費", "免費"],
-          ],
-        },
+        GEAR_RESERVABLE["zh-hk"],
         { type: "h", text: "只供出發日當天租用（費用於還車時以日元結算）" },
+        GEAR_DAY_OF["zh-hk"],
         {
-          type: "table",
-          head: ["裝備項目", "1 天（24 小時）", "第 2 天以後每天"],
-          rows: [
-            ["尾座收納包", "¥500", "¥100"],
-            ["行李網", "¥200", "¥100"],
-            ["油缸收納包", "¥200", "¥100"],
-            ["防盜鎖", "¥200", "¥200"],
-            ["ETC 卡", "¥220", "¥110"],
-            ["手套", "¥330", "¥110"],
-            ["防摔外套", "¥550", "¥330"],
-            ["胸板", "¥330", "¥110"],
+          type: "link",
+          items: [
+            {
+              href: "/zh-hk/guide/gear",
+              label: "日本電單車自駕遊裝備清單",
+              text: "取車當日要穿甚麼、頭盔自備定租，以及可租裝備的收費。",
+            },
           ],
         },
         { type: "h", text: "費用組成" },
@@ -393,26 +468,89 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             "車輛租金：按車輛等級及租用時段（4 小時、8 小時、1 天，及第 2 天起按 24 小時）計算。",
             "燃油：油費需自行負責，還車時須注滿油。",
             "高速公路費（ETC）：ETC 卡租金為每天 220 日圓，過路費於還車時一併結算。",
-            "保險：基本費用已含強制及任意保險，另可加購車輛補償及 MamoRide 補償。",
+            "保險：基本費用已含強制及任意保險，車輛補償及 MamoRide 補償另計。",
             "頭盔／裝備：可自備，或按尺碼租用頭盔等裝備。",
             "泊車：泊車費用按停車場而定，請盡量使用停車場。",
           ],
         },
         {
           type: "note",
-          text: "溫馨提示：租賃者須於租車單據發出後三個工作天內以銀行匯款／轉數快繳付予頭盔王。僅限 18 歲以上、持有效港／澳駕照、國際駕照及護照人士，並只接受租賃者本人之實體信用卡或扣帳卡付款。如需報價，請使用租車預約表格，或 WhatsApp 我們的團隊：wa.me/85298686569。",
+          text: "溫馨提示：租金本身須於租車單據發出後三個工作天內，以銀行匯款／轉數快繳付予頭盔王。僅限 18 歲以上、持有效港／澳正式駕照、國際駕照及護照人士，並只接受租賃者本人之實體信用卡或扣帳卡付款。",
+        },
+        {
+          type: "note",
+          text: "本站列明的港幣租車價目、付款方式（轉數快／銀行匯款予頭盔王）及租車取消條款，只適用於經 RENTAL819 香港預約的租車；直接於 rental819.com 預約者，以日本 Rental819 的條款為準。",
+        },
+        { type: "cta", text: "想知道實際報價？填寫租車預約表格，或 WhatsApp 我們的香港團隊。" },
+      ],
+    },
+    {
+      slug: "gear",
+      title: "日本電單車自駕遊裝備清單",
+      intro:
+        "在日本租電單車，頭盔可以自備，亦可以按尺碼預約租用；取車當日必須穿著合適的電單車衣著。以下整理了要帶甚麼、可以租甚麼，以及各項收費。",
+      seoTitle: "日本電單車自駕遊裝備｜頭盔自備定租？收費一覽",
+      seoDescription:
+        "取車當日須穿著頭盔、防摔衣、防摔長褲及電單車靴。頭盔可預約租用，首天 HK$60、其後每天 HK$10；尾箱、側袋、側箱亦可預約，手機架免費；手套、防摔外套等只限出發日在分店租用，以日圓結算。",
+      updated: "2026-09-25",
+      blocks: [
+        { type: "h", text: "取車當日必須穿著" },
+        {
+          type: "p",
+          text: "租車當日，除護照及駕駛執照外，你須穿著合適的駕駛電單車衣著，包括但不限於：頭盔、防摔衣、防摔長褲及電單車靴。",
+        },
+        { type: "h", text: "頭盔：自備定租？" },
+        {
+          type: "p",
+          text: "兩者皆可。自備頭盔最合頭型；如需租用，可在租車預約表格選擇全罩或開面頭盔並填寫尺碼。",
+        },
+        {
+          type: "note",
+          text: "騎乘時必須配戴安全帽；不配戴安全帽駕駛而發生事故，保險將不予理賠。",
+        },
+        { type: "h", text: "可預約租用的裝備（供應因車款而異）（港元）" },
+        GEAR_RESERVABLE["zh-hk"],
+        { type: "h", text: "只限出發日當天在分店租用（日圓，還車時結算）" },
+        GEAR_DAY_OF["zh-hk"],
+        { type: "h", text: "長途旅程建議自備" },
+        {
+          type: "p",
+          text: "自 2025 年 6 月起，任意保險附帶的道路救援不再提供補胎及電瓶沒電時的救援，一律以拖吊車將車輛運往附近車行；長途或長期旅行者建議自行攜帶補胎工具及行動電源型救車啟動器。",
+        },
+        { type: "h", text: "對講機" },
+        { type: "p", text: "可於租車預約表格加購 CARDO 對講機，詳情請 WhatsApp 查詢。" },
+        { type: "cta", text: "想預先訂好頭盔及裝備？填寫租車預約表格時一併選擇即可。" },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/zh-hk/guide/fees",
+              label: "租金及費用",
+              text: "各車輛等級的租金、保險及裝備收費表。",
+            },
+            {
+              href: "/zh-hk/guide/insurance",
+              label: "日本租電單車保險",
+              text: "強制及任意保險的保障範圍、自負額，以及營業損失賠償（NOC）。",
+            },
+            {
+              href: "/zh-hk/guide/pickup",
+              label: "預約及取車流程",
+              text: "由確認證件、選擇分店到取車還車的完整步驟。",
+            },
+          ],
         },
       ],
     },
     {
       slug: "insurance",
-      title: "保險",
+      title: "日本租電單車保險",
       intro:
         "基本費用已包含日本國內的強制險及任意保險，另有車輛補償及 MamoRide 補償。",
       seoTitle: "日本租電單車保險｜強制險、車輛補償及 MamoRide",
       seoDescription:
-        "基本費用已包強制險、任意保險及竊盜險：對人賠償無上限，對物每件事故最高 1,000 萬日圓。另可加購車輛補償及 MamoRide。營業損失賠償為能騎回店家 20,000 日圓、需拖吊 50,000 日圓。",
-      updated: "2026-08-06",
+        "基本費用已包強制險、任意保險及竊盜險：對人賠償無上限，對物每件事故最高 1,000 萬日圓。車輛補償及 MamoRide 另計。營業損失賠償為能騎回店家 20,000 日圓、需拖吊 50,000 日圓。",
+      updated: "2026-08-24",
       blocks: [
         { type: "h", text: "包含在基本費用中的保險" },
         { type: "h3", text: "任意保險" },
@@ -595,12 +733,12 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
     },
     {
       slug: "etc",
-      title: "ETC",
+      title: "日本高速公路 ETC 卡",
       intro: "ETC 是日本高速公路的無線自動繳費系統，讓你不用停車即可通過收費閘。",
       seoTitle: "日本高速公路 ETC｜電單車 ETC 卡租用",
       seoDescription:
-        "ETC 是日本高速公路的無線自動繳費系統，插卡即可不停車過閘。Rental819 大部分車輛已裝設 ETC 機，ETC 卡租金每天 220 日圓，過路費於還車時一併結算；125cc 以下的電單車不能在高速公路行駛。",
-      updated: "2026-08-06",
+        "ETC 是日本高速公路的無線自動繳費系統，插卡即可不停車過閘。Rental819 大部分車輛已裝設 ETC 機，ETC 卡於分店租用，過路費於還車時一併結算；125cc 以下的電單車不能在高速公路行駛。",
+      updated: "2026-08-26",
       blocks: [
         { type: "h", text: "甚麼是 ETC？" },
         {
@@ -650,8 +788,8 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro: "以下是在日本駕駛需要遵守的主要交通規則。",
       seoTitle: "日本電單車交通規則",
       seoDescription:
-        "日本與港澳同樣靠左行駛；無標示時國道時速上限 100 公里、其他道路 50 公里。停止標誌必須完全停車、腳板觸地，平交道亦要停。違例泊車須自行到警署繳款，否則我們會另收 20,000 日圓。",
-      updated: "2026-08-06",
+        "日本與港澳同樣靠左行駛；停止標誌必須完全停車、腳板觸地，平交道亦要停。違例泊車須自行到警署辦理及繳款，否則我們會另收 20,000 日圓。",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "靠左行駛" },
         {
@@ -677,7 +815,17 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         { type: "h", text: "時速限制" },
         {
           type: "p",
-          text: "如果道路上沒有時速標示，日本的時速上限為國道 100km/h、其他道路 50km/h。但大部分快速公路的時速為 90km/h，有些更會是 80km/h。時速限制有時亦會按天氣狀況調整，請留意當時的時速標示。",
+          text: "時速限制以道路標誌為準；如無標誌，須遵守日本法定速度。時速限制有時亦會按天氣狀況調整，請留意當時的時速標示。",
+        },
+        {
+          type: "link",
+          items: [
+            {
+              href: "https://www.npa.go.jp/bureau/traffic/seikatsudouro/seikatsudoro.html",
+              label: "日本警察廳：生活道路的法定速度（日文）",
+              text: "日本法定速度的官方資料。",
+            },
+          ],
         },
         { type: "h", text: "超車" },
         {
@@ -735,7 +883,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro: "為了提供最佳服務，請花幾分鐘了解在日本租用電單車的詳情及限制。",
       seoTitle: "日本租電單車流程｜預約及取車須知",
       seoDescription:
-        "在日本租電單車須出示護照、香港／澳門駕駛執照及國際駕駛執照，並須年滿 18 歲。最遲一星期前預約、先到先得，租還車必須於同一分店；取車手續約需 15 分鐘，還車前請注滿指定汽油。",
+        "在日本租電單車須出示護照、香港／澳門正式駕駛執照及國際駕駛執照，並須年滿 18 歲。最遲一星期前預約、先到先得，租還車必須於同一分店；取車手續約需 15 分鐘，還車前請注滿指定汽油。",
       updated: "2026-08-06",
       blocks: [
         { type: "h", text: "出發前" },
@@ -803,6 +951,16 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           ],
         },
         {
+          type: "link",
+          items: [
+            {
+              href: "/zh-hk/guide/gear",
+              label: "日本電單車自駕遊裝備清單",
+              text: "取車當日要穿甚麼、頭盔自備定租，以及可租裝備的收費。",
+            },
+          ],
+        },
+        {
           type: "p",
           text: "取車需時大概 15 分鐘，屆時職員會說明租車條款、檢查車況及說明保險內容，請預早到店。簽署租車合約後，我們會影印你的護照及駕駛執照；出發前檢查好車況後就可出發。",
         },
@@ -825,7 +983,9 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro:
         "Yes. If you hold a full Hong Kong or Macau motorcycle licence and bring your International Driving Permit (IDP) and passport, you can rent a RENTAL819 motorcycle in Japan. Probationary (P) licences cannot be accepted.",
       seoTitle: "Can I rent a motorcycle in Japan with a Hong Kong licence?",
-      updated: "2026-08-06",
+      seoDescription:
+        "Yes, with a full Hong Kong or Macau motorcycle licence, an IDP and your passport. Riders must be 18+; probationary (P) licences are not accepted.",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "Three documents — all of them required" },
         {
@@ -852,7 +1012,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         { type: "h", text: "Age limit" },
         {
           type: "p",
-          text: "Rental819 serves only adults aged 18 or older; if you are under 18, we are unable to provide motorcycle rental services. Anyone 18 or older holding a valid International Driving Permit may rent a RENTAL819 motorcycle.",
+          text: "Rental819 serves only adults aged 18 or older; if you are under 18, we are unable to provide motorcycle rental services. Anyone 18 or older who holds a full Hong Kong or Macau licence, a valid International Driving Permit and a passport may rent a RENTAL819 motorcycle.",
         },
         { type: "h", text: "Licences issued outside Hong Kong or Macau" },
         {
@@ -866,8 +1026,9 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "This page covers only the documents needed to rent in Japan. For how to apply for an International Driving Permit, ask the issuing authority. If you are unsure whether your documents qualify, WhatsApp our team: wa.me/85298686569.",
+          text: "This page covers only the documents needed to rent in Japan. For how to apply for an International Driving Permit, ask the issuing authority.",
         },
+        { type: "cta", text: "Not sure your documents qualify? WhatsApp our team, or send the booking form." },
         {
           type: "link",
           items: [
@@ -891,7 +1052,9 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro:
         "Planning a Japan motorcycle trip comes down to three questions: how many days you'll ride, how the budget adds up, and how to link your must-see spots into a route. Here is each one, plus the timeline from booking to departure.",
       seoTitle: "Planning a Japan motorcycle trip",
-      updated: "2026-08-06",
+      seoDescription:
+        "Planning a Japan motorcycle trip comes down to three questions: how many days to ride, how to budget and how to link the route. About 100–150 km a day is comfortable on ordinary roads, and regular petrol is around 160 yen a litre.",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "Scheduling is easy!" },
         {
@@ -916,6 +1079,22 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
               href: "/en/guide/route",
               label: "How is the route planned?",
               text: "Pick the scenic roads, hot-spring towns or World Heritage Sites you must see, then link them without doubling back.",
+            },
+          ],
+        },
+        { type: "p", text: "For examples of our past itineraries, see:" },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/en/tours",
+              label: "Guided motorcycle tours",
+              text: "Routes we've led and upcoming dates.",
+            },
+            {
+              href: "/en/packages",
+              label: "Self-drive packages",
+              text: "Flight + bike packages with a suggested-route leaflet.",
             },
           ],
         },
@@ -979,7 +1158,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           ],
         },
         {
-          type: "p",
+          type: "cta",
           text: "Planning it yourself is half the fun. If the group is large, the schedule is tight, or you simply want someone to sanity-check the plan, WhatsApp our Hong Kong team — we'll give you feedback based on your day count and the places you want to reach.",
         },
       ],
@@ -990,6 +1169,8 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro:
         "Decide the must-see spots first, then link them into a route that flows without doubling back, choosing where to stay each night from the number of sights, the time spent seeing them and the riding distance.",
       seoTitle: "Japan motorcycle route planning",
+      seoDescription:
+        "Start your route with the must-sees — a famous scenic road, an onsen town or a World Heritage Site — then link them without doubling back and choose where to stay by daily sights, time and distance.",
       updated: "2026-08-06",
       blocks: [
         {
@@ -1006,6 +1187,16 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             "Japan National Tourism Organization: the larger spots are recorded, and they are introduced in Chinese.",
             "GOOBIKE and Bikebros: recommended riding routes for each prefecture in Japan.",
             "Autumn leaves and cherry blossom information: every spring or autumn, Weathernews publishes the status of each viewing spot in Japan and lists the best time to see them.",
+          ],
+        },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/en/roads",
+              label: "Japan's Legendary Roads",
+              text: "Our field guide to 38 of Japan's best riding roads, by region.",
+            },
           ],
         },
         { type: "h", text: "That's probably it!" },
@@ -1025,6 +1216,8 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro:
         "On general roads, eating and sightseeing as you go, about 100 to 150 kilometres a day is comfortable — and the number of days directly shapes both the pace and the budget of your trip.",
       seoTitle: "How many days to ride in Japan?",
+      seoDescription:
+        "On ordinary roads, riding about 100–150 km a day with stops to eat and look around is most comfortable. Autumn and winter days are short, and the number of days drives your budget.",
       updated: "2026-08-06",
       blocks: [
         {
@@ -1052,12 +1245,24 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro:
         "The budget basically consists of motorcycle rent, fuel — regular petrol in Japan hovers around 160 yen a litre — plus highway tolls, food, accommodation and parking.",
       seoTitle: "Japan motorcycle trip budget",
+      seoDescription:
+        "A Japan motorcycle trip budget covers rent, fuel (regular petrol about 160 yen a litre), expressway tolls, food, accommodation and parking — business hotels run about HK$300–500 a night.",
       updated: "2026-08-06",
       blocks: [
         { type: "h", text: "Rent" },
         {
           type: "p",
           text: "This is the most accurate to work out in advance. Take a look at our rental calculation table (see Rent and fees).",
+        },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/en/guide/fees",
+              label: "Rent and fees",
+              text: "Classes P-1 to P-7 cost HK$295 to HK$1,765 for one day, with compulsory and voluntary insurance included.",
+            },
+          ],
         },
         { type: "h", text: "Fuel costs" },
         {
@@ -1096,11 +1301,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
     },
     {
       slug: "fees",
-      title: "Rent and fees",
+      title: "Japan motorcycle rental prices & fees",
       intro:
         "How much does it cost to rent a motorcycle in Japan? The actual rent depends on the vehicle class, rental period and the accessories you choose — here is the full price list.",
       seoTitle: "Japan motorcycle rental prices & fees",
-      updated: "2026-08-06",
+      seoDescription:
+        "Classes P-1 to P-7 cost HK$295 to HK$1,765 for one day, with compulsory and voluntary insurance included; fuel, tolls and parking are extra.",
+      updated: "2026-09-25",
       blocks: [
         {
           type: "p",
@@ -1110,20 +1317,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         {
           type: "table",
           head: ["Class", "4 hrs", "8 hrs", "1 day (24 hrs)", "Each day from day 2", "Overtime / hour"],
-          rows: [
-            ["P-1", "$220", "$245", "$295", "$195", "$50"],
-            ["P-2", "$330", "$365", "$440", "$295", "$75"],
-            ["P-3", "$605", "$675", "$810", "$540", "$135"],
-            ["P-4", "$770", "$855", "$1,030", "$685", "$170"],
-            ["P-5", "$880", "$980", "$1,175", "$785", "$195"],
-            ["P-6", "$990", "$1,100", "$1,320", "$880", "$220"],
-            ["P-7", "$1,320", "$1,470", "$1,765", "$1,175", "$295"],
-          ],
+          rows: RENT_TABLE_ROWS,
         },
         {
           type: "note",
           text: "The table above already includes compulsory and voluntary insurance, but not fuel, expressway tolls or parking. Rental bands are 4 hours, 8 hours, 1 day, and per 24 hours from the 2nd day onward.",
         },
+        { type: "cta", text: "These are reference prices. Send the booking form and our Hong Kong team will confirm a quote for your bike and dates." },
         { type: "h", text: "Compulsory insurance (already included in the rental fee)" },
         {
           type: "table",
@@ -1167,30 +1367,17 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           text: "MamoRide can only be added to reservations of 15 days or less, and only halves the vehicle-compensation deductible for on-the-spot tip-overs (non-riding state) while parking, mounting/dismounting or pushing the bike. Damage caused while riding is not covered.",
         },
         { type: "h", text: "Accessories available to reserve (availability varies by bike) (HK$)" },
-        {
-          type: "table",
-          head: ["Item", "1 day (24 hrs)", "Each day from day 2"],
-          rows: [
-            ["Helmet", "$60", "$10"],
-            ["Tail box", "$90", "$20"],
-            ["Side bag", "$60", "$10"],
-            ["Side box (pannier)", "$90", "$20"],
-            ["Phone mount", "Free", "Free"],
-          ],
-        },
+        GEAR_RESERVABLE.en,
         { type: "h", text: "Available on the departure day only (settled in yen on return)" },
+        GEAR_DAY_OF.en,
         {
-          type: "table",
-          head: ["Item", "1 day (24 hrs)", "Each day from day 2"],
-          rows: [
-            ["Rear-seat bag", "¥500", "¥100"],
-            ["Cargo net", "¥200", "¥100"],
-            ["Tank bag", "¥200", "¥100"],
-            ["Anti-theft lock", "¥200", "¥200"],
-            ["ETC card", "¥220", "¥110"],
-            ["Gloves", "¥330", "¥110"],
-            ["Anti-fall jacket", "¥550", "¥330"],
-            ["Chest protector", "¥330", "¥110"],
+          type: "link",
+          items: [
+            {
+              href: "/en/guide/gear",
+              label: "Japan motorcycle trip gear checklist",
+              text: "What to wear at pick-up, whether to bring or rent a helmet, and what gear hire costs.",
+            },
           ],
         },
         { type: "h", text: "Fee components" },
@@ -1200,24 +1387,89 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             "Vehicle rent: charged by vehicle class and rental band (4 hours, 8 hours, 1 day, and per 24 hours from the 2nd day).",
             "Fuel: you pay for your own fuel and must return the bike with a full tank.",
             "Expressway tolls (ETC): the ETC card rental is 220 yen per day, and tolls are settled when you return the bike.",
-            "Insurance: the basic fee already includes compulsory and voluntary insurance; vehicle compensation and MamoRide compensation can be added.",
+            "Insurance: the basic fee already includes compulsory and voluntary insurance; vehicle compensation and MamoRide compensation are charged separately.",
             "Helmet / gear: bring your own, or rent a helmet and gear by size.",
             "Parking: parking fees depend on the car park; please use parking lots where possible.",
           ],
         },
         {
           type: "note",
-          text: "Note: payment is made to Helmet King by bank transfer / FPS within three working days after the rental invoice is issued. Rentals are for those aged 18+ holding a valid HK/Macau licence, International Driving Permit and passport, and only the renter's own physical credit or debit card is accepted. For a quote, use the rental booking form or WhatsApp our team: wa.me/85298686569.",
+          text: "Note: the rent itself is paid to Helmet King by bank transfer / FPS within three working days after the rental invoice is issued. Rentals are for those aged 18+ holding a valid full HK/Macau licence, International Driving Permit and passport, and only the renter's own physical credit or debit card is accepted.",
+        },
+        {
+          type: "note",
+          text: "The HK$ rental prices, payment method (FPS / bank transfer to Helmet King) and rental cancellation terms on this site apply to rentals booked through RENTAL819 Hong Kong; bookings made directly on rental819.com follow Rental819 Japan's own terms.",
+        },
+        { type: "cta", text: "Want an exact quote? Send the rental booking form or WhatsApp our Hong Kong team." },
+      ],
+    },
+    {
+      slug: "gear",
+      title: "Japan motorcycle trip gear checklist",
+      intro:
+        "When you rent a motorcycle in Japan you can bring your own helmet or reserve one in your size, and you must wear proper riding gear on pick-up day. Here is what to bring, what you can rent, and what each item costs.",
+      seoTitle: "Japan Motorcycle Gear: Bring or Rent a Helmet?",
+      seoDescription:
+        "At pick-up wear a helmet, protective jacket and trousers, and riding boots. Helmets can be reserved at HK$60 for the first day and HK$10 a day after.",
+      updated: "2026-09-25",
+      blocks: [
+        { type: "h", text: "What you must wear at pick-up" },
+        {
+          type: "p",
+          text: "On the day of rental, besides your passport and driving licences, you must wear appropriate motorcycling gear, including but not limited to a helmet, anti-fall jacket, anti-fall trousers and motorcycle boots.",
+        },
+        { type: "h", text: "Helmet: bring your own or rent?" },
+        {
+          type: "p",
+          text: "Either works. Your own helmet fits you best; to rent one, choose a full-face or open-face helmet on the rental booking form and enter your size.",
+        },
+        {
+          type: "note",
+          text: "You must wear a helmet when riding; if an accident happens while riding without a helmet, insurance will not pay out.",
+        },
+        { type: "h", text: "Gear you can reserve (availability varies by bike) (HK$)" },
+        GEAR_RESERVABLE.en,
+        { type: "h", text: "Rented at the branch on departure day only (yen, settled on return)" },
+        GEAR_DAY_OF.en,
+        { type: "h", text: "Worth bringing on a long trip" },
+        {
+          type: "p",
+          text: "From June 2025, the roadside assistance included with voluntary insurance no longer covers tyre repair or a dead battery — the bike is towed to a nearby repair shop instead. For long or long-term trips, we recommend carrying your own tyre repair kit and a portable jump starter.",
+        },
+        { type: "h", text: "Intercom" },
+        { type: "p", text: "A CARDO intercom can be added on the rental booking form — WhatsApp us for details." },
+        { type: "cta", text: "Want your helmet and gear reserved in advance? Just choose them when you fill in the rental booking form." },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/en/guide/fees",
+              label: "Rent and fees",
+              text: "Rental rates by vehicle class, plus insurance and gear pricing.",
+            },
+            {
+              href: "/en/guide/insurance",
+              label: "Japan motorcycle rental insurance",
+              text: "What compulsory and voluntary insurance cover, the deductible, and business loss compensation (NOC).",
+            },
+            {
+              href: "/en/guide/pickup",
+              label: "Reservation and pick-up process",
+              text: "Every step from checking documents and choosing a branch to returning the bike.",
+            },
+          ],
         },
       ],
     },
     {
       slug: "insurance",
-      title: "Insurance",
+      title: "Japan motorcycle rental insurance",
       intro:
         "The basic fee already includes Japan's compulsory and voluntary insurance, with vehicle compensation and MamoRide compensation also available.",
       seoTitle: "Japan motorcycle rental insurance explained",
-      updated: "2026-08-06",
+      seoDescription:
+        "Compulsory, voluntary and theft insurance are included; vehicle compensation and MamoRide cost extra. Non-operation charge (NOC): 20,000 or 50,000 yen.",
+      updated: "2026-08-24",
       blocks: [
         { type: "h", text: "Insurance included in the basic fee" },
         { type: "h3", text: "Compulsory and voluntary insurance" },
@@ -1420,11 +1672,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
     },
     {
       slug: "etc",
-      title: "ETC",
+      title: "ETC on Japan expressways",
       intro:
         "ETC is Japan's wireless electronic toll system, letting you pass toll gates on the expressway without stopping.",
       seoTitle: "ETC on Japan expressways for motorcycles",
-      updated: "2026-08-06",
+      seoDescription:
+        "ETC is Japan's electronic toll system: insert the card and pass the gate without stopping. Most Rental819 bikes have an ETC unit, the card is rented at the branch, and tolls are settled on return. Bikes under 125cc can't use expressways.",
+      updated: "2026-08-26",
       blocks: [
         { type: "h", text: "What is ETC?" },
         {
@@ -1473,7 +1727,9 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       title: "Japanese traffic rules",
       intro: "Here are the main traffic rules you need to follow when driving in Japan.",
       seoTitle: "Japan traffic rules for riders",
-      updated: "2026-08-06",
+      seoDescription:
+        "Japan drives on the left like Hong Kong and Macau. At stop signs you must stop completely with a foot down, stop at every level crossing, and settle any parking ticket at the police station before returning the bike or pay an extra 20,000 yen.",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "Keep left" },
         {
@@ -1499,7 +1755,17 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         { type: "h", text: "Speed limits" },
         {
           type: "p",
-          text: "If there is no speed sign on the road, the maximum in Japan is 100 km/h on national highways and 50 km/h on other roads. But most expressways are 90 km/h, and some are 80 km/h. Speed limits may also be adjusted for weather, so watch the current speed signs.",
+          text: "Speed limits follow the road signs; where there is no sign, Japan's statutory speed limits apply. Speed limits may also be adjusted for weather, so watch the current speed signs.",
+        },
+        {
+          type: "link",
+          items: [
+            {
+              href: "https://www.npa.go.jp/bureau/traffic/seikatsudouro/seikatsudoro.html",
+              label: "National Police Agency: statutory speeds on residential roads (Japanese)",
+              text: "Official information on Japan's statutory speed limits.",
+            },
+          ],
         },
         { type: "h", text: "Overtaking" },
         {
@@ -1557,6 +1823,8 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro:
         "To give you the best service, please take a few minutes to learn the details and restrictions of renting a motorcycle in Japan.",
       seoTitle: "How to book & collect a rental motorcycle in Japan",
+      seoDescription:
+        "Bring your passport, full Hong Kong/Macau licence and IDP; riders must be 18+. Book at least a week ahead and return the bike to the same branch.",
       updated: "2026-08-06",
       blocks: [
         { type: "h", text: "Before departure" },
@@ -1621,6 +1889,16 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             "Passport",
             "International and national driving permits",
             "Appropriate motorcycling gear (including but not limited to a helmet, anti-fall jacket, anti-fall trousers and motorcycle boots)",
+          ],
+        },
+        {
+          type: "link",
+          items: [
+            {
+              href: "/en/guide/gear",
+              label: "Japan motorcycle trip gear checklist",
+              text: "What to wear at pick-up, whether to bring or rent a helmet, and what gear hire costs.",
+            },
           ],
         },
         {

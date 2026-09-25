@@ -26,6 +26,7 @@ export function buildNav(d: Dictionary): NavItem[] {
         { href: "/guide/how-many-days", label: d.guideMenu.howManyDays },
         { href: "/guide/budget", label: d.guideMenu.budget },
         { href: "/guide/fees", label: d.guideMenu.fees },
+        { href: "/guide/gear", label: d.guideMenu.gear },
         { href: "/guide/insurance", label: d.guideMenu.insurance },
         { href: "/guide/etc", label: d.guideMenu.etc },
         { href: "/guide/traffic-rules", label: d.guideMenu.trafficRules },

@@ -4,6 +4,7 @@ import { aboutContent } from "@/lib/content/about";
 import type { GuideDoc } from "@/lib/content/blocks";
 import type { Package } from "@/lib/content/tours";
 import type { RoadRegion } from "@/lib/content/roads";
+import { RENT_TABLE } from "@/lib/content/prices";
 
 /** Stable node ids so every page's graph points at one organization / one site. */
 export const ORG_ID = `${site.url}/#organization`;
@@ -18,11 +19,17 @@ const LANGUAGES = ["zh-Hant", "yue", "cmn", "en"] as const;
 /** E.164 form of the WhatsApp / hotline number, for structured data only. */
 const TEL = `+${site.phoneRaw}`;
 
+/** The other names the brand is known by: the other locale's name, the domain and the og siteName. */
+function alternateNames(isEn: boolean): string[] {
+  return [isEn ? "RENTAL819 香港" : "RENTAL819 Hong Kong", "RENTAL819.HK", "RENTAL819 HK"];
+}
+
 /**
  * Organization structured data (site-wide).
  *
- * Deliberately *not* LocalBusiness: no street address is published anywhere on
- * the site, so the extra LocalBusiness properties would be unsubstantiated.
+ * Deliberately *not* LocalBusiness yet: the walk-in address and opening hours
+ * are pending owner confirmation, so LocalBusiness / a street address would be
+ * unsubstantiated until then.
  * The corporate shape follows lib/content/about.ts — 頭盔王 (est. 2014) is the
  * parent group; Rental819 Japan is the principal we represent as the 指定香港
  * 及澳門區代理 since 2017, i.e. a brand we carry and a network we belong to,
@@ -38,20 +45,19 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
     "@type": "Organization",
     "@id": ORG_ID,
     name: isEn ? "RENTAL819 Hong Kong" : "RENTAL819 香港",
-    alternateName: isEn ? "RENTAL819 香港" : "RENTAL819 Hong Kong",
+    alternateName: alternateNames(isEn),
     description: about.hero.intro,
     url: site.url,
     foundingDate: "2017",
     logo: {
       "@type": "ImageObject",
       url: `${site.url}/logo-lg.png`,
-      width: 768,
-      height: 488,
+      width: 450,
+      height: 285,
     },
     image: [`${site.url}/images/about/shop.jpg`, `${site.url}/opengraph-image`],
     telephone: TEL,
     email: site.email,
-    hasMap: site.maps,
     address: {
       "@type": "PostalAddress",
       addressCountry: "HK",
@@ -61,7 +67,6 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
       { "@type": "Country", name: "Hong Kong" },
       { "@type": "Country", name: "Macau" },
     ],
-    serviceArea: { "@type": "Country", name: "Japan" },
     knowsLanguage: [...LANGUAGES],
     contactPoint: {
       "@type": "ContactPoint",
@@ -84,6 +89,7 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
     },
     parentOrganization: {
       "@type": "Organization",
+      "@id": "https://www.helmetking.com/#organization",
       name: group.name,
       url: group.url,
       foundingDate: "2014",
@@ -98,12 +104,14 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
 
 /** WebSite structured data (site-wide). No SearchAction — there is no search route. */
 export function websiteLd(locale: Locale): Record<string, unknown> {
+  const isEn = locale === "en";
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     url: `${site.url}/`,
-    name: locale === "en" ? "RENTAL819 Hong Kong" : "RENTAL819 香港",
+    name: isEn ? "RENTAL819 Hong Kong" : "RENTAL819 香港",
+    alternateName: alternateNames(isEn),
     inLanguage: htmlLang[locale],
     publisher: { "@id": ORG_ID },
   };
@@ -166,7 +174,7 @@ export function breadcrumbLd(
  */
 export function articleLd(doc: GuideDoc, locale: Locale): Record<string, unknown> {
   const url = `${site.url}/${locale}/guide/${doc.slug}`;
-  const updated = (doc as GuideDoc & { updated?: string }).updated;
+  const updated = doc.updated;
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -187,11 +195,17 @@ export function articleLd(doc: GuideDoc, locale: Locale): Record<string, unknown
 /**
  * Service structured data for /rental. The offer catalog mirrors the bike
  * categories actually rendered on the page, so each locale describes its own
- * cards. No price is shown on /rental, so none is emitted.
+ * cards. Prices are the 1-day (24 h) reference rents shown in the rate table
+ * on /rental.
  */
 export function serviceLd(
   locale: Locale,
-  c: { name: string; description: string; categories: { title: string }[] },
+  c: {
+    name: string;
+    description: string;
+    categories: { title: string }[];
+    offers?: { low: number; high: number };
+  },
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
@@ -219,12 +233,23 @@ export function serviceLd(
         provider: { "@id": ORG_ID },
       })),
     },
+    ...(c.offers
+      ? {
+          offers: {
+            "@type": "AggregateOffer",
+            priceCurrency: "HKD",
+            lowPrice: c.offers.low,
+            highPrice: c.offers.high,
+            offerCount: RENT_TABLE.length,
+          },
+        }
+      : {}),
   };
 }
 
 /**
  * How many purchasable variants a package card actually offers: the duration
- * tiers printed on it ("3日 / 4日 / 5日" -> 3). Derived from the very string the
+ * tiers printed on it ("3日2夜 / 4日3夜 / 5日4夜" -> 3). Derived from the very string the
  * card renders, so the count can never drift from what a visitor is shown.
  */
 function tierCount(tiers: string): number {
@@ -232,17 +257,21 @@ function tierCount(tiers: string): number {
 }
 
 /**
- * Product list for /packages. Prices are the HK$ "from" figures printed on the
- * cards. The seller is the licensed travel agent named in the disclosure line
- * on the same page — not this organization, which only arranges the bikes.
+ * Product list for /packages. `lowPrice` is the cheapest HK$ figure printed on
+ * each card: the no-hotel flight + bike price (P3 bike, 3日2夜). `offerCount`
+ * is the no-hotel duration tiers plus the one flight + hotel + bike version.
+ * The seller is the licensed travel agent named in the disclosure line on the
+ * same page — not this organization, which only arranges the bikes.
  *
  * Search Console flags `highPrice`, `aggregateRating` and `review` as missing
  * recommended fields here. Three deliberate positions, so nobody "fixes" them
  * by inventing data:
  *
  *  - `highPrice` is emitted only from `priceTo`, i.e. only once a top-tier
- *    price is actually published on the card. Deriving one from `priceFrom`
- *    would put a number in the search result that appears nowhere on the page.
+ *    price is actually published on the card. Every leaflet figure, including
+ *    `hotelFrom`, is a "+" from-price, so none of them is a top price. Deriving
+ *    one from `priceFrom` would put a number in the search result that appears
+ *    nowhere on the page.
  *  - `aggregateRating` and `review` are NOT emitted. The site displays no
  *    customer reviews at all, and Google's structured-data policy requires
  *    review markup to reflect genuine reviews visible on that page; marking up
@@ -273,7 +302,7 @@ export function packagesLd(
           "@type": "AggregateOffer",
           lowPrice: p.priceFrom,
           ...(p.priceTo ? { highPrice: p.priceTo } : {}),
-          offerCount: tierCount(p.tiers),
+          offerCount: tierCount(p.tiers) + 1,
           priceCurrency: "HKD",
           url,
           seller: {

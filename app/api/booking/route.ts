@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createReservation } from "@/lib/reservations/store";
 import { notifyNewBooking } from "@/lib/reservations/notify";
-import { bookingReceivedEmail } from "@/lib/reservations/emails";
+import { bookingReceivedEmail, SOURCE_NOTE_PREFIX } from "@/lib/reservations/emails";
 import { INTERNAL_COPY } from "@/lib/reservations/recipients";
 import { isGmailConfigured, sendGmailMessage } from "@/lib/gmail";
 import type { ReservationAddons } from "@/lib/reservations/types";
@@ -56,28 +56,55 @@ interface BookingPayload {
   consent_pay?: boolean;
   consent_cancel?: boolean;
   consent_privacy?: boolean;
+  // first-touch attribution from ConversionTracker (untrusted: sanitised below)
+  attribution?: unknown;
 }
 
-const clean = (v?: string) => (v && v.trim() ? v.trim() : null);
+const clean = (v: unknown) =>
+  typeof v === "string" && v.trim() ? v.trim() : null;
 const count = (v?: string) => {
   const n = Number(v);
   return Number.isFinite(n) && n > 0 ? n : undefined;
 };
+
+/** Known attribution keys only; strings clipped and flattened to one line, flags strictly boolean. */
+function cleanAttribution(v: unknown) {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Record<string, unknown>;
+  const str = (x: unknown) => {
+    if (typeof x !== "string") return null;
+    const s = x.replace(/[\u0000-\u001f\u007f]+/g, " ").trim().slice(0, 100);
+    return s || null;
+  };
+  return {
+    landing: str(o.landing),
+    ref: str(o.ref),
+    utm_source: str(o.utm_source),
+    utm_medium: str(o.utm_medium),
+    utm_campaign: str(o.utm_campaign),
+    gclid: o.gclid === true,
+    fbclid: o.fbclid === true,
+  };
+}
 
 /**
  * Rental booking-request endpoint.
  *
  * Persists a structured reservation record (the rental pipeline picks it up in
  * the admin backend). Fields without a dedicated column (IDP declaration,
- * consents, helmet sizes) are recorded in the notes so nothing is lost. In demo
- * mode this validates and acknowledges; a BOOKING_WEBHOOK_URL can additionally
- * forward the raw payload to email/Slack.
+ * consents, helmet sizes, first-touch attribution) are recorded in the notes so
+ * nothing is lost. In demo mode this validates and acknowledges; a
+ * BOOKING_WEBHOOK_URL can additionally forward the raw payload to email/Slack.
  */
 export async function POST(request: Request) {
   let body: BookingPayload;
   try {
     body = await request.json();
   } catch {
+    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  }
+  // Valid JSON that is not an object (e.g. the literal `null`) would crash below.
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
   }
 
@@ -110,11 +137,17 @@ export async function POST(request: Request) {
     open_face: count(body.helmet_open),
   };
 
+  const a = cleanAttribution(body.attribution);
+  const sourceLine =
+    a &&
+    `${SOURCE_NOTE_PREFIX}${a.landing ?? "-"} | ref=${a.ref ?? "direct"}${a.utm_campaign ? ` | utm=${a.utm_source ?? ""}/${a.utm_medium ?? ""}/${a.utm_campaign}` : ""}${a.gclid ? " | gclid" : ""}${a.fbclid ? " | fbclid" : ""}`;
+
   const notes = [
-    body.helmet_size?.trim() && `頭盔尺碼：${body.helmet_size.trim()}`,
-    "已確認持有效國際駕駛執照（IDP）",
+    clean(body.helmet_size) && `頭盔尺碼：${clean(body.helmet_size)}`,
+    "已確認年滿 18 歲並持正式駕照、IDP 及護照",
     "已同意繳費詳情、取消政策及私隱聲明",
-    body.notes?.trim() && `備註：${body.notes.trim()}`,
+    clean(body.notes) && `備註：${clean(body.notes)}`,
+    sourceLine,
   ]
     .filter(Boolean)
     .join("\n");
@@ -146,6 +179,7 @@ export async function POST(request: Request) {
       addons,
       promo: clean(body.promo),
       notes: notes || null,
+      // Staff edit this column by hand in the admin; attribution goes in notes.
       source: "website",
     });
   } catch (err) {
@@ -206,6 +240,7 @@ export async function POST(request: Request) {
     addons,
     promo: clean(body.promo),
     ackEmailSent,
+    attribution: sourceLine || null,
   });
 
   const webhook = process.env.BOOKING_WEBHOOK_URL;
@@ -214,12 +249,12 @@ export async function POST(request: Request) {
       await fetch(webhook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source: "rental819.hk booking form", ...body }),
+        body: JSON.stringify({ source: "rental819.hk booking form", ...body, attribution: a }),
       });
     } catch (err) {
       console.error("booking webhook failed", err);
     }
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, booking_ref: created.booking_ref, ack_email: ackEmailSent });
 }

@@ -8,7 +8,7 @@ import type { Locale } from "@/lib/i18n";
 import { localePath } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import type { NavItem } from "@/lib/nav";
-import { site, whatsappLink } from "@/lib/site";
+import { site, waEnquiryForPath } from "@/lib/site";
 import LocaleSwitcher from "./LocaleSwitcher";
 import { ChevronDown, WhatsAppIcon, MenuIcon, CloseIcon } from "./icons";
 
@@ -117,16 +117,21 @@ export default function Header({
         {/* Right actions */}
         <div className="flex items-center gap-2">
           <a
-            href={whatsappLink()}
+            href={waEnquiryForPath(locale, pathname)}
             target="_blank"
             rel="noopener noreferrer"
+            data-cta="header-wa"
             className="hidden h-9 w-9 items-center justify-center rounded-full bg-[#25D366] text-white transition hover:brightness-95 sm:inline-flex"
             aria-label="WhatsApp"
           >
             <WhatsAppIcon className="h-5 w-5" />
           </a>
           <LocaleSwitcher locale={locale} />
-          <Link href={lp("/booking")} className="btn-primary hidden sm:inline-flex">
+          <Link
+            href={lp("/booking")}
+            className="btn-primary px-4 py-2 text-sm sm:px-6 sm:py-3"
+            data-cta="header-book"
+          >
             {dict.nav.book}
           </Link>
           <button
@@ -222,6 +227,7 @@ export default function Header({
                 href={lp("/booking")}
                 onClick={() => setMobileOpen(false)}
                 className="btn-primary w-full"
+                data-cta="menu-book"
               >
                 {dict.nav.book}
               </Link>

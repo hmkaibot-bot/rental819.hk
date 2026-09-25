@@ -4,12 +4,13 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { rentalContent } from "@/lib/content/rental";
-import { site } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import BookingForm from "@/components/BookingForm";
 import JsonLd from "@/components/JsonLd";
+import TrustLine from "@/components/TrustLine";
 import { WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
@@ -17,10 +18,10 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return pageMeta(
     params.locale,
     "/booking",
-    isEn ? "Book / Enquire" : "預約查詢",
+    isEn ? "Japan Motorcycle Rental Booking Form" : "日本租電單車預約表格",
     isEn
-      ? "Send a booking enquiry for a Japan motorcycle rental, guided tour or self-drive package."
-      : "填表提交日本電單車租車、自駕團或自駕套票的預約查詢：須年滿 18 歲並持國際駕駛執照，建議提前 1 星期至 1 個月預約，香港團隊 3–5 個工作天內以中文或英文回覆。",
+      ? "Japan motorcycle rental booking enquiry: 18+ with a full licence, IDP and passport. Book 1 week to 1 month ahead; our Hong Kong team replies in 3–5 working days."
+      : "填表預約日本電單車租車：須年滿 18 歲並持正式駕駛執照、國際駕駛執照及護照，建議提前 1 星期至 1 個月預約，香港團隊 3–5 個工作天內回覆。",
   );
 }
 
@@ -31,7 +32,7 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
 
   const points = isEn
     ? [
-        "18 or older with a valid International Driving Permit (IDP)",
+        "18 or older, with a full licence, a valid International Driving Permit (IDP) and a passport",
         "Pick-up and return must be at the same branch",
         "Book 1 week to 1 month ahead (first-come, first-served)",
         "We reply within 3–5 working days in Chinese or English",
@@ -39,7 +40,7 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
         "Cancellation: 20% 6 days before · 30% 2 days before · 50% same day · no-show non-refundable",
       ]
     : [
-        "須年滿 18 歲並持有效國際駕駛執照（IDP）",
+        "須年滿 18 歲，並持正式駕駛執照、國際駕駛執照（IDP）及護照",
         "租車及還車必須於同一分店",
         "建議提前 1 星期至 1 個月預約（先到先得）",
         "我們會於 3–5 個工作天內以中文或英文回覆",
@@ -73,13 +74,28 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
 
       <section className="container-x py-16 lg:py-20">
         <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr]">
-          <div className="order-2 lg:order-1">
+          <div className="order-1 lg:order-1">
             <div className="card p-6 sm:p-8">
+              {/* The aside (requirements, WhatsApp) sits below the form on phones. */}
+              <p className="mb-5 text-sm text-ink-muted lg:hidden">
+                {isEn
+                  ? "18+ with a full licence, an IDP and a passport · Prefer to chat? "
+                  : "須年滿 18 歲，並持正式駕駛執照、國際駕駛執照（IDP）及護照・想直接傾？"}
+                <a
+                  href={waEnquiry(locale, "rental", dict.nav.book)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-cta="booking-mobile-wa"
+                  className="font-semibold text-brand-700"
+                >
+                  WhatsApp {site.phone}
+                </a>
+              </p>
               <BookingForm locale={locale} />
             </div>
           </div>
 
-          <aside className="order-1 space-y-6 lg:order-2">
+          <aside className="order-2 space-y-6 lg:order-2">
             <div className="rounded-2xl bg-brand-950 p-6 text-white">
               <h2 className="text-lg font-bold">
                 {isEn ? "Prefer to chat?" : "想直接傾？"}
@@ -90,15 +106,18 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
                   : "WhatsApp 我們的團隊，回覆最快。"}
               </p>
               <a
-                href={site.whatsapp}
+                href={waEnquiry(locale, "rental", dict.nav.book)}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-cta="booking-aside-wa"
                 className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-semibold text-white hover:brightness-95"
               >
                 <WhatsAppIcon className="h-5 w-5" />
                 {site.phone}
               </a>
             </div>
+
+            <TrustLine locale={locale} dict={dict} tone="light" />
 
             <ul className="space-y-3">
               {points.map((p) => (
@@ -107,6 +126,12 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
                   {p}
                 </li>
               ))}
+              <li className="flex gap-2.5 text-sm text-ink-muted">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" />
+                {isEn
+                  ? "The HK$ rental prices, payment method (FPS / bank transfer to Helmet King) and rental cancellation terms on this site apply to rentals booked through RENTAL819 Hong Kong; bookings made directly on rental819.com follow Rental819 Japan's own terms."
+                  : "本站列明的港幣租車價目、付款方式（轉數快／銀行匯款予頭盔王）及租車取消條款，只適用於經 RENTAL819 香港預約的租車；直接於 rental819.com 預約者，以日本 Rental819 的條款為準。"}
+              </li>
             </ul>
 
             {/* Riders land here before they've picked a bike or checked the

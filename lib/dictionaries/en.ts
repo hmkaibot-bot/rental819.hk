@@ -25,6 +25,7 @@ const dict: Dictionary = {
     howManyDays: "How many days to ride?",
     budget: "How the budget works",
     fees: "Rent & fees",
+    gear: "Gear checklist",
     insurance: "Insurance",
     etc: "ETC expressway",
     trafficRules: "Japan traffic rules",
@@ -40,6 +41,11 @@ const dict: Dictionary = {
     backHome: "Back to home",
     getStarted: "Start planning",
     enquire: "Free enquiry",
+  },
+  trust: {
+    price: "From {price} a day (reference price, compulsory & voluntary insurance included)",
+    same: "Same rent as Rental819 Japan — no extra charge for booking via Hong Kong",
+    lead: "Book at least a week ahead; first come, first served",
   },
   footer: {
     about:

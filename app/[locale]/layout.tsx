@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Analytics } from "@vercel/analytics/next";
 import { locales, isLocale, htmlLang, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { buildNav } from "@/lib/nav";
@@ -7,9 +9,24 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import JsonLd from "@/components/JsonLd";
+import ConversionTracker from "@/components/ConversionTracker";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
+}
+
+export const dynamicParams = false;
+
+export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+  const en = params.locale === "en";
+  return {
+    title: {
+      template: en ? "%s | RENTAL819 Hong Kong" : "%s｜RENTAL819 香港",
+      // `absolute`, not `default`: a default would still get the root layout's
+      // "%s — RENTAL819" template and carry the brand twice.
+      absolute: en ? "RENTAL819 Hong Kong — Japan motorcycle rental" : "RENTAL819 香港 — 日本電單車自駕遊",
+    },
+  };
 }
 
 export default function LocaleLayout({
@@ -32,7 +49,9 @@ export default function LocaleLayout({
         <Header locale={locale} dict={dict} nav={nav} />
         <main className="flex-1">{children}</main>
         <Footer locale={locale} dict={dict} />
-        <WhatsAppFloat label={dict.common.whatsapp} />
+        <WhatsAppFloat locale={locale} label={dict.common.whatsapp} />
+        <Analytics />
+        <ConversionTracker />
       </body>
     </html>
   );

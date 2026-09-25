@@ -24,6 +24,7 @@ export interface Dictionary {
     howManyDays: string;
     budget: string;
     fees: string;
+    gear: string;
     insurance: string;
     etc: string;
     trafficRules: string;
@@ -39,6 +40,12 @@ export interface Dictionary {
     backHome: string;
     getStarted: string;
     enquire: string;
+  };
+  /** Reassurance line shown beside the main rental CTAs; `price` contains "{price}". */
+  trust: {
+    price: string;
+    same: string;
+    lead: string;
   };
   footer: {
     about: string;

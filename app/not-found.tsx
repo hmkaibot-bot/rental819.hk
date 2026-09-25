@@ -25,6 +25,20 @@ export default function NotFound() {
               Back to home
             </Link>
           </div>
+          <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
+            <Link href="/zh-hk/rental" className="font-medium text-brand-700 hover:text-brand-800">
+              日本租電單車
+            </Link>
+            <Link href="/zh-hk/guide" className="font-medium text-brand-700 hover:text-brand-800">
+              自駕攻略
+            </Link>
+            <Link href="/zh-hk/booking" className="font-medium text-brand-700 hover:text-brand-800">
+              預約查詢
+            </Link>
+            <Link href="/en/rental" className="font-medium text-brand-700 hover:text-brand-800">
+              Rent in Japan (EN)
+            </Link>
+          </nav>
         </div>
       </body>
     </html>

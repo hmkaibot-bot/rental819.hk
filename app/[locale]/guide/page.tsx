@@ -4,6 +4,7 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { guideDocs } from "@/lib/content/guide";
+import { waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -16,10 +17,12 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return pageMeta(
     params.locale,
     "/guide",
-    isEn ? "Japan Motorcycle Ride Guide" : "日本電單車自駕攻略",
     isEn
-      ? "Everything you need to plan and ride a motorcycle self-drive trip in Japan."
-      : "由證件、交通規則、保險到行程規劃，日本電單車自駕遊你需要知道的一切。",
+      ? "Japan Motorcycle Ride Guide"
+      : "日本電單車自駕攻略｜證件、租金、保險及交通規則",
+    isEn
+      ? "What Hong Kong and Macau riders need before renting a motorcycle in Japan: licence and IDP rules, prices from HK$295 a day, insurance, ETC, traffic rules, trip and budget planning, and the pick-up process."
+      : "日本電單車自駕遊攻略：香港車牌租車要帶甚麼證件、1 天租金 HK$295 起、保險及 ETC、交通規則、行程及預算規劃，以及預約取車流程。",
   );
 }
 
@@ -40,7 +43,7 @@ export default function GuideIndex({ params }: { params: { locale: string } }) {
       <PageHero
         image="/images/tours/kansai-sakura-2026-04-08.jpg"
         eyebrow={dict.nav.guide}
-        title={isEn ? "The Japan ride guide" : "日本自駕攻略"}
+        title={isEn ? "The Japan motorcycle ride guide" : "日本電單車自駕攻略"}
         intro={
           isEn
             ? "From licences and traffic rules to insurance, ETC and itinerary planning — read up before you ride."
@@ -87,6 +90,7 @@ export default function GuideIndex({ params }: { params: { locale: string } }) {
               ? "Our Hong Kong team is here to help you plan every detail."
               : "香港團隊樂意為你解答並規劃行程每個細節。"
           }
+          waMessageHref={waEnquiry(locale, "rental", dict.nav.guide)}
         />
       </div>
     </>

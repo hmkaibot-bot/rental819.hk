@@ -1,23 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { localePath, type Locale } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/site";
+import { ATTR_KEY, trackEvent } from "@/lib/track";
+import {
+  bookingDraftKey,
+  bookingPersonalKey,
+  readStored,
+  removeStored,
+  writeStored,
+} from "@/lib/storage";
 import {
   SHOP_AREAS,
   JP_ABILITY_OPTIONS,
   EN_ABILITY_OPTIONS,
 } from "@/lib/reservations/types";
-import { WhatsAppIcon, CheckIcon, ArrowRight } from "./icons";
+import { WhatsAppIcon, CheckIcon } from "./icons";
 
 type Status = "idle" | "submitting" | "done" | "error";
 
 const t = {
   "zh-hk": {
-    // choose-a-bike shortcut (above the form)
+    // choose-a-bike link (goes to /rental; its category cards link back here)
     chooseBike: "選擇車款",
-    chooseBikeHint: "想先睇下有咩車？瀏覽「在日本租電單車自駕遊」再返嚟填表。",
+    chooseBikeHint: "想先睇下有咩車？",
     // section headings
     secRental: "租車詳情",
     secBike: "車款偏好",
@@ -83,7 +91,7 @@ const t = {
     promo: "優惠碼（如有）",
     promoPh: "例如 CARDO88",
     // consent
-    idp: "本人持有效國際駕駛執照（IDP），並已滿 18 歲。",
+    idp: "本人已滿 18 歲，並持有正式電單車駕駛執照、有效國際駕駛執照（IDP）及護照。",
     idpHint: "沒有有效 IDP 恕無法租車。",
     consentPay:
       "本人已明白繳費詳情：須於租車發票發出後三個工作天內以銀行匯款／轉數快繳付。",
@@ -99,7 +107,12 @@ const t = {
     submitting: "提交中…",
     orWhatsapp: "或直接 WhatsApp 我們",
     done: "已收到你的租車預約！我們的香港團隊會於 3–5 個工作天內向你確認報價及可租車款。",
+    refLabel: "預約編號：",
+    ackPre: "我們已將收件通知電郵寄往 ",
+    ackPost: "（如未收到，請檢查垃圾郵件）。",
     errRequired: "請填寫所有必填欄位（標示 * 者）。",
+    missingPre: "請填寫：",
+    listSep: "、",
     errEmail: "兩個電郵欄位不相符，請檢查。",
     errAge: "租車人須年滿 18 歲。",
     errDates: "還車日期／時間必須在取車之後。",
@@ -111,7 +124,7 @@ const t = {
   },
   en: {
     chooseBike: "Choose a bike",
-    chooseBikeHint: "Want to see the bikes first? Browse the rental page, then come back to fill in the form.",
+    chooseBikeHint: "Want to see the bikes first?",
     secRental: "Rental details",
     secBike: "Bike preference",
     secRider: "Rider details",
@@ -169,7 +182,7 @@ const t = {
     mamoride: "Add MamoRide compensation (reservations of 15 days or less)",
     promo: "Promo code (if any)",
     promoPh: "e.g. CARDO88",
-    idp: "I hold a valid International Driving Permit (IDP) and am 18 or older.",
+    idp: "I am 18 or older and hold a full motorcycle licence, a valid International Driving Permit (IDP) and a passport.",
     idpHint: "We cannot rent without a valid IDP.",
     consentPay:
       "I understand payment is due to Helmet King within three working days of the rental invoice, by bank transfer / FPS.",
@@ -183,7 +196,12 @@ const t = {
     submitting: "Submitting…",
     orWhatsapp: "or WhatsApp us directly",
     done: "Got your rental booking! Our Hong Kong team will confirm your quote and available bikes within 3–5 working days.",
+    refLabel: "Reference: ",
+    ackPre: "We've emailed an acknowledgement to ",
+    ackPost: " (check your spam folder if it isn't there).",
     errRequired: "Please fill in all required fields (marked *).",
+    missingPre: " Please complete: ",
+    listSep: ", ",
     errEmail: "The two email fields don't match — please check.",
     errAge: "The renter must be 18 or older.",
     errDates: "Return date/time must be after pick-up.",
@@ -238,9 +256,75 @@ const emptyForm = {
 };
 
 type Form = typeof emptyForm;
+type Copy = (typeof t)[Locale];
+type Problem = { key: keyof Copy; fields: (keyof Form)[] };
 
-const field =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-ink shadow-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
+const REQUIRED = [
+  "shop",
+  "pickup_date",
+  "pickup_time",
+  "return_date",
+  "return_time",
+  "bike_pref_1",
+  "name_zh",
+  "name_en",
+  "dob",
+  "email",
+  "hk_phone",
+  "emergency_contact",
+  "emergency_phone",
+] as const;
+const CONSENTS = ["consent_pay", "consent_cancel", "consent_privacy"] as const;
+
+// Never stored: the IDP declaration and the consents must be ticked afresh.
+const NEVER_STORED: readonly (keyof Form)[] = ["idp", ...CONSENTS];
+// Personal details, the free-text notes included, go to sessionStorage only:
+// they survive a same-tab trip to /rental and back but are gone once the tab
+// closes, so a shared computer does not show them to the next person.
+const PERSONAL: readonly (keyof Form)[] = [
+  "name_zh",
+  "name_en",
+  "gender",
+  "dob",
+  "email",
+  "email_confirm",
+  "hk_phone",
+  "hk_address",
+  "japanese_ability",
+  "english_ability",
+  "jp_address",
+  "jp_phone",
+  "emergency_contact",
+  "emergency_phone",
+  "notes",
+];
+// Everything else is the trip draft in localStorage (24 hours): branch, dates,
+// bikes, helmets, add-ons and promo code.
+const TRIP = (Object.keys(emptyForm) as (keyof Form)[]).filter(
+  (k) => !NEVER_STORED.includes(k) && !PERSONAL.includes(k),
+);
+
+/** The `keys` fields of `src`, keeping only values of the expected type. */
+function pick(src: unknown, keys: readonly (keyof Form)[]): Partial<Form> {
+  const out: Record<string, unknown> = {};
+  if (src && typeof src === "object") {
+    for (const k of keys) {
+      const v = (src as Record<string, unknown>)[k];
+      if (typeof v === typeof emptyForm[k]) out[k] = v;
+    }
+  }
+  return out as Partial<Form>;
+}
+
+function hkToday(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Hong_Kong" }).format(new Date());
+}
+
+const fieldBase =
+  "w-full rounded-xl border bg-white px-4 py-3 text-sm text-ink shadow-sm outline-none transition";
+const field = `${fieldBase} border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20`;
+const fieldBad = `${fieldBase} border-accent-500 ring-2 ring-accent-500`;
+const checkCls = "h-4 w-4 rounded border-slate-300 text-brand-600";
 const labelCls = "mb-1.5 block text-sm font-medium text-ink-soft";
 
 // Defined at module scope so it isn't recreated each render (which would remount
@@ -270,44 +354,148 @@ function ageFrom(dob: string): number | null {
 export default function BookingForm({ locale }: { locale: Locale }) {
   const c = t[locale];
   const isEn = locale === "en";
+  const draftKey = bookingDraftKey(locale);
+  const personalKey = bookingPersonalKey(locale);
   const [status, setStatus] = useState<Status>("idle");
   const [errKey, setErrKey] = useState<keyof typeof c | null>(null);
+  const [badFields, setBadFields] = useState<(keyof Form)[]>([]);
   const [form, setForm] = useState<Form>(emptyForm);
+  const [bookingRef, setBookingRef] = useState<string | null>(null);
+  const [ack, setAck] = useState(false);
+  // Set after mount: this page is prerendered, so a server-side "today" would
+  // be the build date.
+  const [todayISO, setTodayISO] = useState<string>();
+  // The form as restored on mount. It is not saved back, so reopening the
+  // page does not restart the draft's 24-hour expiry.
+  const restoredForm = useRef<Form | null>(null);
+  const doneRef = useRef<HTMLDivElement>(null);
 
+  // Restore the trip draft and this tab's personal details, then merge
+  // /rental's ?bike=… into them. Read from window rather than useSearchParams,
+  // which would need a Suspense boundary on this static page.
+  useEffect(() => {
+    setTodayISO(hkToday());
+    const restored: Partial<Form> = {
+      ...pick(readStored(draftKey), TRIP),
+      ...pick(readStored(personalKey, "session"), PERSONAL),
+    };
+    let bike: string | null = null;
+    let strip: number | undefined;
+    try {
+      const url = new URL(window.location.href);
+      bike = url.searchParams.get("bike")?.slice(0, 80) || null;
+      if (bike) {
+        // Every pick on /rental wins, and ?bike= is then dropped from the URL
+        // so a reload keeps what the rider types afterwards. Deferred because
+        // on a first load this effect runs before the App Router's own, which
+        // patches history.replaceState to keep Next's history state and
+        // update its router URL.
+        url.searchParams.delete("bike");
+        strip = window.setTimeout(
+          () => window.history.replaceState(null, "", url.pathname + url.search + url.hash),
+          0,
+        );
+      }
+    } catch {
+      // Unparseable URL — leave the field as it is.
+    }
+    if (bike) restored.bike_pref_1 = bike;
+    if (Object.keys(restored).length)
+      setForm((f) => {
+        const next = { ...f, ...restored };
+        // A newly applied ?bike= is saved, since the URL no longer carries it.
+        if (!bike) restoredForm.current = next;
+        return next;
+      });
+    return () => window.clearTimeout(strip);
+  }, [draftKey, personalKey]);
+
+  useEffect(() => {
+    // `form` is still the emptyForm object until something is typed or restored.
+    if (form === emptyForm || form === restoredForm.current || status === "done") return;
+    const id = window.setTimeout(() => {
+      writeStored(draftKey, pick(form, TRIP));
+      writeStored(personalKey, pick(form, PERSONAL), "session");
+    }, 500);
+    return () => window.clearTimeout(id);
+  }, [form, status, draftKey, personalKey]);
+
+  useEffect(() => {
+    if (status !== "done") return;
+    // Cleared here rather than in onSubmit so a pending draft save has already
+    // been cancelled and cannot write the draft back.
+    removeStored(draftKey);
+    removeStored(personalKey, "session");
+    removeStored(ATTR_KEY);
+    // The focused submit button is gone; move focus to the confirmation so
+    // screen readers announce it.
+    doneRef.current?.focus({ preventScroll: true });
+    doneRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [status, draftKey, personalKey]);
+
+  const clearBad = (k: keyof Form) =>
+    setBadFields((b) => (b.includes(k) ? b.filter((x) => x !== k) : b));
   const setText =
     (k: keyof Form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-      setForm((f) => ({ ...f, [k]: e.target.value }));
-  const setCheck =
-    (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-      setForm((f) => ({ ...f, [k]: e.target.checked }));
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const v = e.target.value;
+      setForm((f) => ({ ...f, [k]: v }));
+      clearBad(k);
+    };
+  const setCheck = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.checked;
+    setForm((f) => ({ ...f, [k]: v }));
+    clearBad(k);
+  };
 
-  function validate(): keyof typeof c | null {
-    const req = [
-      form.shop,
-      form.pickup_date,
-      form.pickup_time,
-      form.return_date,
-      form.return_time,
-      form.bike_pref_1,
-      form.name_zh,
-      form.name_en,
-      form.dob,
-      form.email,
-      form.hk_phone,
-      form.emergency_contact,
-      form.emergency_phone,
-    ];
-    if (req.some((v) => !String(v).trim())) return "errRequired";
-    if (form.email.trim() !== form.email_confirm.trim()) return "errEmail";
+  // id and name are the Form key, so each <label htmlFor> and the error focus
+  // can find the control.
+  const ctl = (k: keyof Form) => ({
+    id: k,
+    name: k,
+    "aria-invalid": badFields.includes(k) || undefined,
+    className: badFields.includes(k) ? fieldBad : field,
+  });
+  const box = (k: keyof Form, extra = "") => ({
+    id: k,
+    name: k,
+    type: "checkbox",
+    "aria-invalid": badFields.includes(k) || undefined,
+    className: `${checkCls} ${extra} ${badFields.includes(k) ? "ring-2 ring-accent-500" : "focus:ring-brand-500"}`,
+    checked: form[k] as boolean,
+    onChange: setCheck(k),
+  });
+
+  const requiredLabel: Record<(typeof REQUIRED)[number], string> = {
+    shop: c.shop,
+    pickup_date: c.pickupDate,
+    pickup_time: c.pickupTime,
+    return_date: c.returnDate,
+    return_time: c.returnTime,
+    bike_pref_1: c.bikePref,
+    name_zh: c.nameZh,
+    name_en: c.nameEn,
+    dob: c.dob,
+    email: c.email,
+    hk_phone: c.hkPhone,
+    emergency_contact: c.emName,
+    emergency_phone: c.emPhone,
+  };
+
+  function validate(): Problem | null {
+    const missing = REQUIRED.filter((k) => !form[k].trim());
+    if (missing.length) return { key: "errRequired", fields: [...missing] };
+    if (form.email.trim() !== form.email_confirm.trim())
+      return { key: "errEmail", fields: ["email_confirm"] };
     const age = ageFrom(form.dob);
-    if (age === null || age < 18) return "errAge";
+    if (age === null || age < 18) return { key: "errAge", fields: ["dob"] };
     const pickup = `${form.pickup_date}T${form.pickup_time}`;
     const ret = `${form.return_date}T${form.return_time}`;
-    if (new Date(ret) <= new Date(pickup)) return "errDates";
-    if (!form.idp) return "errIdp";
-    if (!form.consent_pay || !form.consent_cancel || !form.consent_privacy)
-      return "errConsent";
+    if (new Date(ret) <= new Date(pickup))
+      return { key: "errDates", fields: ["return_date", "return_time"] };
+    if (!form.idp) return { key: "errIdp", fields: ["idp"] };
+    const unticked = CONSENTS.filter((k) => !form[k]);
+    if (unticked.length) return { key: "errConsent", fields: [...unticked] };
     return null;
   }
 
@@ -326,40 +514,83 @@ export default function BookingForm({ locale }: { locale: Locale }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    trackEvent("booking_submit_attempt");
     const problem = validate();
     if (problem) {
-      setErrKey(problem);
+      trackEvent("booking_validation_error", { reason: problem.key });
+      setErrKey(problem.key);
+      setBadFields(problem.fields);
       setStatus("error");
+      const el = document.getElementById(problem.fields[0]);
+      el?.focus({ preventScroll: true });
+      el?.scrollIntoView({ block: "center" });
       return;
     }
     setErrKey(null);
+    setBadFields([]);
     setStatus("submitting");
     try {
       const res = await fetch("/api/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, locale }),
+        body: JSON.stringify({ ...form, locale, attribution: readStored(ATTR_KEY) }),
       });
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setBookingRef(typeof data.booking_ref === "string" ? data.booking_ref : null);
+        setAck(Boolean(data.ack_email));
+        trackEvent("booking_submitted", { locale });
         setStatus("done");
       } else {
+        trackEvent("booking_submit_failed");
         setErrKey("errSubmit");
         setStatus("error");
       }
     } catch {
+      trackEvent("booking_submit_failed");
       setErrKey("errSubmit");
       setStatus("error");
     }
   }
 
   if (status === "done") {
+    const waText = isEn
+      ? bookingRef
+        ? `Hi, I've just submitted rental booking #${bookingRef} (${form.name_en}).`
+        : `Hi, I've just submitted a rental booking (${form.name_en}).`
+      : bookingRef
+        ? `你好，我啱啱提交咗租車預約 #${bookingRef}（${form.name_en}）`
+        : `你好，我啱啱提交咗租車預約（${form.name_en}）`;
     return (
-      <div className="rounded-2xl border border-brand-100 bg-brand-50 p-8 text-center">
+      <div
+        ref={doneRef}
+        tabIndex={-1}
+        role="status"
+        className="scroll-mt-24 rounded-2xl border border-brand-100 bg-brand-50 p-8 text-center outline-none"
+      >
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white">
           <CheckIcon className="h-7 w-7" />
         </div>
         <p className="mt-4 text-lg font-semibold text-ink">{c.done}</p>
-        <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="btn-primary mt-6">
+        {bookingRef && (
+          <p className="mt-2 text-sm">
+            {c.refLabel}#{bookingRef}
+          </p>
+        )}
+        {ack && (
+          <p className="mt-2 text-sm text-ink-soft">
+            {c.ackPre}
+            <span className="font-semibold">{form.email.trim()}</span>
+            {c.ackPost}
+          </p>
+        )}
+        <a
+          href={whatsappLink(waText)}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-cta="booking-done-wa"
+          className="btn-primary mt-6"
+        >
           <WhatsAppIcon className="h-5 w-5" />
           WhatsApp
         </a>
@@ -368,26 +599,19 @@ export default function BookingForm({ locale }: { locale: Locale }) {
   }
 
   const star = <span className="text-accent-600">*</span>;
+  const sp = isEn ? " " : "";
+  const missingLabels =
+    errKey === "errRequired"
+      ? REQUIRED.filter((k) => badFields.includes(k)).map((k) => requiredLabel[k])
+      : [];
 
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
-      {/* Choose-a-bike shortcut — jump to the rental page to browse the fleet */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-brand-100 bg-brand-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-6 text-ink-soft">{c.chooseBikeHint}</p>
-        <Link
-          href={localePath(locale, "/rental")}
-          className="btn-brand shrink-0 whitespace-nowrap text-sm"
-        >
-          {c.chooseBike}
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-
       {/* Rental details */}
       <Section title={c.secRental}>
         <div>
-          <label className={labelCls}>{c.shop} {star}</label>
-          <select className={field} value={form.shop} onChange={setText("shop")}>
+          <label htmlFor="shop" className={labelCls}>{c.shop} {star}</label>
+          <select {...ctl("shop")} value={form.shop} onChange={setText("shop")}>
             <option value="">{c.shopPlaceholder}</option>
             {SHOP_AREAS.map((a) => (
               <optgroup key={a.area} label={a.area}>
@@ -401,39 +625,50 @@ export default function BookingForm({ locale }: { locale: Locale }) {
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <label className={labelCls}>{c.pickupDate} {star}</label>
-            <input type="date" className={field} value={form.pickup_date} onChange={setText("pickup_date")} />
+            <label htmlFor="pickup_date" className={labelCls}>{c.pickupDate} {star}</label>
+            <input {...ctl("pickup_date")} type="date" min={todayISO} value={form.pickup_date} onChange={setText("pickup_date")} />
           </div>
           <div>
-            <label className={labelCls}>{c.pickupTime} {star}</label>
-            <input type="time" className={field} value={form.pickup_time} onChange={setText("pickup_time")} />
+            <label htmlFor="pickup_time" className={labelCls}>{c.pickupTime} {star}</label>
+            <input {...ctl("pickup_time")} type="time" value={form.pickup_time} onChange={setText("pickup_time")} />
           </div>
           <div>
-            <label className={labelCls}>{c.returnDate} {star}</label>
-            <input type="date" className={field} value={form.return_date} onChange={setText("return_date")} />
+            <label htmlFor="return_date" className={labelCls}>{c.returnDate} {star}</label>
+            <input {...ctl("return_date")} type="date" min={form.pickup_date || todayISO} value={form.return_date} onChange={setText("return_date")} />
           </div>
           <div>
-            <label className={labelCls}>{c.returnTime} {star}</label>
-            <input type="time" className={field} value={form.return_time} onChange={setText("return_time")} />
+            <label htmlFor="return_time" className={labelCls}>{c.returnTime} {star}</label>
+            <input {...ctl("return_time")} type="time" value={form.return_time} onChange={setText("return_time")} />
           </div>
         </div>
       </Section>
 
       {/* Bike preference */}
       <Section title={c.secBike}>
-        <p className="text-xs text-ink-muted">{c.bikeHint}</p>
+        <p className="text-xs text-ink-muted">
+          {c.bikeHint}
+          {sp}
+          {c.chooseBikeHint}
+          {sp}
+          {/* Same tab: the trip draft (localStorage) and this tab's personal
+              details (sessionStorage) are restored when a /rental category
+              links back to /booking?bike=…. */}
+          <Link href={localePath(locale, "/rental")} className="font-semibold text-brand-700">
+            {c.chooseBike} →
+          </Link>
+        </p>
         <div className="grid gap-5 sm:grid-cols-3">
           <div>
-            <label className={labelCls}>{c.bikePref} {star}</label>
-            <input className={field} value={form.bike_pref_1} onChange={setText("bike_pref_1")} placeholder={c.bikePh} />
+            <label htmlFor="bike_pref_1" className={labelCls}>{c.bikePref} {star}</label>
+            <input {...ctl("bike_pref_1")} value={form.bike_pref_1} onChange={setText("bike_pref_1")} placeholder={c.bikePh} />
           </div>
           <div>
-            <label className={labelCls}>{c.bikePref2}</label>
-            <input className={field} value={form.bike_pref_2} onChange={setText("bike_pref_2")} placeholder={c.bikePh} />
+            <label htmlFor="bike_pref_2" className={labelCls}>{c.bikePref2}</label>
+            <input {...ctl("bike_pref_2")} value={form.bike_pref_2} onChange={setText("bike_pref_2")} placeholder={c.bikePh} />
           </div>
           <div>
-            <label className={labelCls}>{c.bikePref3}</label>
-            <input className={field} value={form.bike_pref_3} onChange={setText("bike_pref_3")} placeholder={c.bikePh} />
+            <label htmlFor="bike_pref_3" className={labelCls}>{c.bikePref3}</label>
+            <input {...ctl("bike_pref_3")} value={form.bike_pref_3} onChange={setText("bike_pref_3")} placeholder={c.bikePh} />
           </div>
         </div>
       </Section>
@@ -442,49 +677,49 @@ export default function BookingForm({ locale }: { locale: Locale }) {
       <Section title={c.secRider}>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <label className={labelCls}>{c.nameZh} {star}</label>
-            <input className={field} value={form.name_zh} onChange={setText("name_zh")} />
+            <label htmlFor="name_zh" className={labelCls}>{c.nameZh} {star}</label>
+            <input {...ctl("name_zh")} autoComplete="off" value={form.name_zh} onChange={setText("name_zh")} />
           </div>
           <div>
-            <label className={labelCls}>{c.nameEn} {star}</label>
-            <input className={field} value={form.name_en} onChange={setText("name_en")} />
+            <label htmlFor="name_en" className={labelCls}>{c.nameEn} {star}</label>
+            <input {...ctl("name_en")} autoComplete="name" value={form.name_en} onChange={setText("name_en")} />
             <p className="mt-1 text-xs text-ink-muted">{c.nameEnHint}</p>
           </div>
           <div>
-            <label className={labelCls}>{c.gender}</label>
-            <select className={field} value={form.gender} onChange={setText("gender")}>
+            <label htmlFor="gender" className={labelCls}>{c.gender}</label>
+            <select {...ctl("gender")} value={form.gender} onChange={setText("gender")}>
               {c.genders.map((g, i) => (
                 <option key={i} value={g}>{g || "—"}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className={labelCls}>{c.dob} {star}</label>
-            <input type="date" className={field} value={form.dob} onChange={setText("dob")} />
+            <label htmlFor="dob" className={labelCls}>{c.dob} {star}</label>
+            <input {...ctl("dob")} type="date" autoComplete="bday" value={form.dob} onChange={setText("dob")} />
             <p className="mt-1 text-xs text-ink-muted">{c.dobHint}</p>
           </div>
           <div>
-            <label className={labelCls}>{c.email} {star}</label>
-            <input type="email" className={field} value={form.email} onChange={setText("email")} placeholder="you@example.com" />
+            <label htmlFor="email" className={labelCls}>{c.email} {star}</label>
+            <input {...ctl("email")} type="email" autoComplete="email" value={form.email} onChange={setText("email")} placeholder="you@example.com" />
           </div>
           <div>
-            <label className={labelCls}>{c.emailConfirm} {star}</label>
-            <input type="email" className={field} value={form.email_confirm} onChange={setText("email_confirm")} placeholder="you@example.com" />
+            <label htmlFor="email_confirm" className={labelCls}>{c.emailConfirm} {star}</label>
+            <input {...ctl("email_confirm")} type="email" autoComplete="email" value={form.email_confirm} onChange={setText("email_confirm")} placeholder="you@example.com" />
           </div>
           <div>
-            <label className={labelCls}>{c.hkPhone} {star}</label>
-            <input className={field} value={form.hk_phone} onChange={setText("hk_phone")} placeholder="+852 9xxx xxxx" />
+            <label htmlFor="hk_phone" className={labelCls}>{c.hkPhone} {star}</label>
+            <input {...ctl("hk_phone")} type="tel" inputMode="tel" autoComplete="tel" value={form.hk_phone} onChange={setText("hk_phone")} placeholder="+852 9xxx xxxx" />
           </div>
           <div>
-            <label className={labelCls}>{c.hkAddress}</label>
-            <input className={field} value={form.hk_address} onChange={setText("hk_address")} />
+            <label htmlFor="hk_address" className={labelCls}>{c.hkAddress}</label>
+            <input {...ctl("hk_address")} autoComplete="street-address" value={form.hk_address} onChange={setText("hk_address")} />
           </div>
           {/* Japanese and English are asked separately and answered from their
               own fixed lists — the shop reads these to decide how to brief the
               rider, so the wording has to be one they recognise. */}
           <div>
-            <label className={labelCls}>{c.jpAbility}</label>
-            <select className={field} value={form.japanese_ability} onChange={setText("japanese_ability")}>
+            <label htmlFor="japanese_ability" className={labelCls}>{c.jpAbility}</label>
+            <select {...ctl("japanese_ability")} value={form.japanese_ability} onChange={setText("japanese_ability")}>
               <option value="">{c.abilityPlaceholder}</option>
               {JP_ABILITY_OPTIONS.map((a) => (
                 <option key={a.value} value={a.value}>{isEn ? a.en : a.zh}</option>
@@ -492,8 +727,8 @@ export default function BookingForm({ locale }: { locale: Locale }) {
             </select>
           </div>
           <div>
-            <label className={labelCls}>{c.enAbility}</label>
-            <select className={field} value={form.english_ability} onChange={setText("english_ability")}>
+            <label htmlFor="english_ability" className={labelCls}>{c.enAbility}</label>
+            <select {...ctl("english_ability")} value={form.english_ability} onChange={setText("english_ability")}>
               <option value="">{c.abilityPlaceholder}</option>
               {EN_ABILITY_OPTIONS.map((a) => (
                 <option key={a.value} value={a.value}>{isEn ? a.en : a.zh}</option>
@@ -507,13 +742,13 @@ export default function BookingForm({ locale }: { locale: Locale }) {
       <Section title={c.secJapan}>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <label className={labelCls}>{c.jpAddress}</label>
-            <input className={field} value={form.jp_address} onChange={setText("jp_address")} />
+            <label htmlFor="jp_address" className={labelCls}>{c.jpAddress}</label>
+            <input {...ctl("jp_address")} value={form.jp_address} onChange={setText("jp_address")} />
             <p className="mt-1 text-xs text-ink-muted">{c.jpAddressHint}</p>
           </div>
           <div>
-            <label className={labelCls}>{c.jpPhone}</label>
-            <input className={field} value={form.jp_phone} onChange={setText("jp_phone")} />
+            <label htmlFor="jp_phone" className={labelCls}>{c.jpPhone}</label>
+            <input {...ctl("jp_phone")} type="tel" inputMode="tel" value={form.jp_phone} onChange={setText("jp_phone")} />
           </div>
         </div>
       </Section>
@@ -522,12 +757,12 @@ export default function BookingForm({ locale }: { locale: Locale }) {
       <Section title={c.secEmergency}>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <label className={labelCls}>{c.emName} {star}</label>
-            <input className={field} value={form.emergency_contact} onChange={setText("emergency_contact")} />
+            <label htmlFor="emergency_contact" className={labelCls}>{c.emName} {star}</label>
+            <input {...ctl("emergency_contact")} value={form.emergency_contact} onChange={setText("emergency_contact")} />
           </div>
           <div>
-            <label className={labelCls}>{c.emPhone} {star}</label>
-            <input className={field} value={form.emergency_phone} onChange={setText("emergency_phone")} />
+            <label htmlFor="emergency_phone" className={labelCls}>{c.emPhone} {star}</label>
+            <input {...ctl("emergency_phone")} type="tel" inputMode="tel" value={form.emergency_phone} onChange={setText("emergency_phone")} />
           </div>
         </div>
       </Section>
@@ -536,28 +771,28 @@ export default function BookingForm({ locale }: { locale: Locale }) {
       <Section title={c.secAddons}>
         <div className="grid gap-5 sm:grid-cols-3">
           <div>
-            <label className={labelCls}>{c.helmetFull}</label>
-            <select className={field} value={form.helmet_full} onChange={setText("helmet_full")}>
+            <label htmlFor="helmet_full" className={labelCls}>{c.helmetFull}</label>
+            <select {...ctl("helmet_full")} value={form.helmet_full} onChange={setText("helmet_full")}>
               {[0, 1, 2, 3].map((n) => (
                 <option key={n} value={String(n)}>{n}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className={labelCls}>{c.helmetOpen}</label>
-            <select className={field} value={form.helmet_open} onChange={setText("helmet_open")}>
+            <label htmlFor="helmet_open" className={labelCls}>{c.helmetOpen}</label>
+            <select {...ctl("helmet_open")} value={form.helmet_open} onChange={setText("helmet_open")}>
               {[0, 1, 2, 3].map((n) => (
                 <option key={n} value={String(n)}>{n}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className={labelCls}>{c.helmetSize}</label>
-            <input className={field} value={form.helmet_size} onChange={setText("helmet_size")} placeholder={c.helmetSizePh} />
+            <label htmlFor="helmet_size" className={labelCls}>{c.helmetSize}</label>
+            <input {...ctl("helmet_size")} value={form.helmet_size} onChange={setText("helmet_size")} placeholder={c.helmetSizePh} />
           </div>
         </div>
         <div>
-          <label className={labelCls}>{c.addonsLabel}</label>
+          <p className={labelCls}>{c.addonsLabel}</p>
           <div className="grid gap-2.5 sm:grid-cols-2">
             {([
               ["addon_topcase", c.addons.topcase],
@@ -567,13 +802,8 @@ export default function BookingForm({ locale }: { locale: Locale }) {
               ["addon_shuttle_bus", c.addons.shuttle_bus],
               ["addon_luggage_storage", c.addons.luggage_storage],
             ] as const).map(([key, label]) => (
-              <label key={key} className="flex items-center gap-2.5 text-sm text-ink-soft">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-                  checked={form[key] as boolean}
-                  onChange={setCheck(key)}
-                />
+              <label key={key} htmlFor={key} className="flex items-center gap-2.5 text-sm text-ink-soft">
+                <input {...box(key)} />
                 {label}
                 {key === "addon_shuttle_bus" && (
                   <span className="text-xs text-ink-muted">（{c.shuttleNote}）</span>
@@ -587,55 +817,52 @@ export default function BookingForm({ locale }: { locale: Locale }) {
             {c.etcNote}
           </p>
         </div>
-        <label className="flex items-center gap-2.5 text-sm text-ink-soft">
-          <input
-            type="checkbox"
-            className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-            checked={form.addon_mamoride}
-            onChange={setCheck("addon_mamoride")}
-          />
+        <label htmlFor="addon_mamoride" className="flex items-center gap-2.5 text-sm text-ink-soft">
+          <input {...box("addon_mamoride")} />
           {c.mamoride}
         </label>
         <div className="sm:max-w-xs">
-          <label className={labelCls}>{c.promo}</label>
-          <input className={field} value={form.promo} onChange={setText("promo")} placeholder={c.promoPh} />
+          <label htmlFor="promo" className={labelCls}>{c.promo}</label>
+          <input {...ctl("promo")} value={form.promo} onChange={setText("promo")} placeholder={c.promoPh} />
         </div>
       </Section>
 
       {/* Notes */}
       <Section title={c.secNotes}>
-        <textarea className={field} rows={4} value={form.notes} onChange={setText("notes")} placeholder={c.notesPh} />
+        <label htmlFor="notes" className="sr-only">{c.notes}</label>
+        <textarea {...ctl("notes")} rows={4} value={form.notes} onChange={setText("notes")} placeholder={c.notesPh} />
       </Section>
 
       {/* Eligibility & consent */}
       <Section title={c.secConsent}>
-        <label className="flex items-start gap-2.5 text-sm text-ink-soft">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" checked={form.idp} onChange={setCheck("idp")} />
+        <label htmlFor="idp" className="flex items-start gap-2.5 text-sm text-ink-soft">
+          <input {...box("idp", "mt-0.5")} />
           <span>{c.idp} {star}<br /><span className="text-xs text-ink-muted">{c.idpHint}</span></span>
         </label>
-        <label className="flex items-start gap-2.5 text-sm text-ink-soft">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" checked={form.consent_pay} onChange={setCheck("consent_pay")} />
+        <label htmlFor="consent_pay" className="flex items-start gap-2.5 text-sm text-ink-soft">
+          <input {...box("consent_pay", "mt-0.5")} />
           <span>{c.consentPay} {star}</span>
         </label>
-        <label className="flex items-start gap-2.5 text-sm text-ink-soft">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" checked={form.consent_cancel} onChange={setCheck("consent_cancel")} />
+        <label htmlFor="consent_cancel" className="flex items-start gap-2.5 text-sm text-ink-soft">
+          <input {...box("consent_cancel", "mt-0.5")} />
           <span>{c.consentCancel} {star}</span>
         </label>
-        <label className="flex items-start gap-2.5 text-sm text-ink-soft">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" checked={form.consent_privacy} onChange={setCheck("consent_privacy")} />
+        <label htmlFor="consent_privacy" className="flex items-start gap-2.5 text-sm text-ink-soft">
+          <input {...box("consent_privacy", "mt-0.5")} />
           <span>
             {c.consentPrivacy}{" "}
             <Link href={localePath(locale, "/privacy")} className="text-brand-700 underline" target="_blank">
               {c.privacyLink}
             </Link>
-            。 {star}
+            {isEn ? "." : "。"} {star}
           </span>
         </label>
       </Section>
 
       {status === "error" && errKey && (
-        <p className="rounded-lg bg-accent-50 px-4 py-3 text-sm text-accent-700">
+        <p role="alert" className="rounded-lg bg-accent-50 px-4 py-3 text-sm text-accent-700">
           {c[errKey] as string}
+          {missingLabels.length > 0 && `${c.missingPre}${missingLabels.join(c.listSep)}`}
         </p>
       )}
 
@@ -648,6 +875,7 @@ export default function BookingForm({ locale }: { locale: Locale }) {
           href={whatsappLink(waMessage())}
           target="_blank"
           rel="noopener noreferrer"
+          data-cta="booking-form-wa"
           className="btn bg-[#25D366] text-white hover:brightness-95"
         >
           <WhatsAppIcon className="h-5 w-5" />

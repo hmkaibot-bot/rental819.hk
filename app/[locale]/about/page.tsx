@@ -1,10 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { aboutContent } from "@/lib/content/about";
-import { site } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -13,14 +14,21 @@ import JsonLd from "@/components/JsonLd";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return pageMeta(
-    params.locale,
-    "/about",
-    isEn ? "About RENTAL819 Hong Kong" : "關於 RENTAL819 香港｜日本電單車租賃港澳代理",
-    isEn
-      ? "RENTAL819 Hong Kong — the official HK & Macau agent for Rental819 Japan, part of the Helmet King group."
-      : "RENTAL819 香港 — 日本 Rental819 指定港澳代理，隸屬頭盔王集團。",
-  );
+  // Already carries the brand, so it bypasses the locale layout's title template.
+  const title = isEn
+    ? "About RENTAL819 Hong Kong | Rental819's HK & Macau agent"
+    : "關於 RENTAL819 香港｜日本電單車租賃港澳代理";
+  return {
+    ...pageMeta(
+      params.locale,
+      "/about",
+      title,
+      isEn
+        ? "RENTAL819 Hong Kong — the official HK & Macau agent for Rental819 Japan, part of the Helmet King group."
+        : "RENTAL819 香港 — 日本 Rental819 指定港澳代理，隸屬頭盔王集團。",
+    ),
+    title: { absolute: title },
+  };
 }
 
 export default function AboutPage({ params }: { params: { locale: string } }) {
@@ -93,7 +101,15 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
                     {i + 1}
                   </div>
                   <div>
-                    <h3 className="font-bold text-ink">{r.title}</h3>
+                    <h3 className="font-bold text-ink">
+                      {r.href ? (
+                        <Link href={localePath(locale, r.href)} className="hover:text-brand-700">
+                          {r.title}
+                        </Link>
+                      ) : (
+                        r.title
+                      )}
+                    </h3>
                     <p className="mt-1.5 text-sm leading-6 text-ink-muted">{r.body}</p>
                   </div>
                 </div>
@@ -130,6 +146,7 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
               ? "Rent a bike, join a tour, or ask us anything."
               : "租車、參團，或有任何問題，歡迎聯絡我們。"
           }
+          waMessageHref={waEnquiry(locale, "rental", dict.nav.about)}
         />
       </div>
     </>

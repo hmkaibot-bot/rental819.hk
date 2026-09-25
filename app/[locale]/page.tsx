@@ -6,24 +6,31 @@ import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { homeContent } from "@/lib/content/home";
 import { guidePages } from "@/lib/nav";
-import { whatsappLink } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { Section, SectionHeader } from "@/components/Section";
 import FeatureIcon from "@/components/FeatureIcon";
 import CTABand from "@/components/CTABand";
+import TrustLine from "@/components/TrustLine";
 import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return pageMeta(
-    params.locale,
-    "",
-    isEn
-      ? "Japan Motorcycle Rental & Self-Drive Tours"
-      : "日本電單車租賃・自駕遊團",
-    isEn
-      ? "Rent a motorcycle in Japan and ride self-drive tours, booked from Hong Kong. 99 branches, full insurance, ETC and gear included."
-      : "由香港預約日本電單車租賃及自駕遊，全日本 99 間分店，包保險、ETC 及裝備。",
-  );
+  const title = isEn
+    ? "Japan Motorcycle Rental, Tours & Packages"
+    : "日本電單車自駕遊｜租車・旅行團・自駕套票";
+  return {
+    ...pageMeta(
+      params.locale,
+      "",
+      title,
+      isEn
+        ? `Rent a motorcycle in Japan, booked from Hong Kong in Chinese or English: ${site.parent.branches} branches, from HK$295 a day with Japan's compulsory and voluntary insurance included, plus Cantonese-led guided tours and self-drive packages.`
+        : `由香港以中文預約日本電單車租賃及自駕遊：全日本 ${site.parent.branches} 間分店取車，1 天參考租金 HK$295 起（已包強制及任意保險），另有廣東話領隊電單車旅行團及自駕套票，WhatsApp 即可查詢。`,
+    ),
+    // A layout's title template skips the page in its own segment, so the home
+    // page writes out its brand suffix instead of relying on one.
+    title: { absolute: isEn ? `${title} | RENTAL819 Hong Kong` : `${title}｜RENTAL819 香港` },
+  };
 }
 
 export default function HomePage({ params }: { params: { locale: string } }) {
@@ -58,7 +65,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
               {c.hero.badge}
             </span>
             <h1 className="mt-6 text-4xl font-black leading-[1.1] sm:text-5xl lg:text-6xl">
-              {c.hero.title}
+              {locale === "en" ? `${c.hero.title} ` : c.hero.title}
               <span className="mt-2 block text-accent-500">{c.hero.highlight}</span>
             </h1>
             <p className="mt-5 max-w-2xl text-xl font-medium text-white/95 sm:text-2xl">
@@ -68,20 +75,26 @@ export default function HomePage({ params }: { params: { locale: string } }) {
               {c.hero.subtitle}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href={localePath(locale, "/booking")} className="btn-primary text-base">
+              <Link
+                href={localePath(locale, "/booking")}
+                className="btn-primary text-base"
+                data-cta="hero-book"
+              >
                 {c.hero.primaryCta}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href={whatsappLink()}
+                href={waEnquiry(locale, "rental", dict.nav.home)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn bg-white/10 text-white ring-1 ring-inset ring-white/20 hover:bg-white/20"
+                data-cta="hero-wa"
               >
                 <WhatsAppIcon className="h-5 w-5 text-[#25D366]" />
                 {c.hero.secondaryCta}
               </a>
             </div>
+            <TrustLine locale={locale} dict={dict} tone="dark" />
             <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-8">
               {c.hero.stats.map((s) => (
                 <div key={s.label}>
@@ -247,6 +260,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
           dict={dict}
           title={c.ctaBand.title}
           subtitle={c.ctaBand.subtitle}
+          waMessageHref={waEnquiry(locale, "rental", dict.nav.home)}
         />
       </div>
     </>

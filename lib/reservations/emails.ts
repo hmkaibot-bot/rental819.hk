@@ -2,6 +2,19 @@ import { ADDON_LABELS, type Reservation, type ReservationAddons } from "./types"
 import { rentalDays } from "./duration";
 import { site } from "@/lib/site";
 
+/** Starts the staff-only attribution line that the public booking route adds to notes. */
+export const SOURCE_NOTE_PREFIX = "來源：landing=";
+
+/** Notes as the customer may see them, without the staff-only attribution line. */
+function customerNotes(notes: string | null): string {
+  const kept = (notes ?? "")
+    .split("\n")
+    .filter((line) => !line.startsWith(SOURCE_NOTE_PREFIX))
+    .join("\n")
+    .trim();
+  return kept || "—";
+}
+
 /** Add-ons as a one-line summary, for the customer's confirmation email. */
 function addonList(r: Reservation): string {
   const on: string[] = [];
@@ -307,7 +320,7 @@ ${t.duration}: ${t.days(days)}
 ${t.shop}: ${r.shop ?? "—"}
 ${t.vehicle}: ${vehicle}
 ${t.addons}: ${addonList(r)}
-${t.notes}: ${r.notes ?? "—"}
+${t.notes}: ${customerNotes(r.notes)}
 ${t.payment}: ${pay}
 
 ${t.docsH} — ${t.docsLead}
@@ -370,7 +383,7 @@ ${site.email}`;
           ${row(`▼ ${t.shop}`, r.shop ?? "—")}
           ${row(`▼ ${t.vehicle}`, vehicle)}
           ${row(`▼ ${t.addons}`, addonList(r))}
-          ${row(`▼ ${t.notes}`, r.notes ?? "—")}
+          ${row(`▼ ${t.notes}`, customerNotes(r.notes))}
           ${row(`▼ ${t.payment}`, pay)}
         </tbody>
       </table>

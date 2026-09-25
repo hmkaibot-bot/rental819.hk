@@ -11,15 +11,20 @@ import CTABand from "@/components/CTABand";
 import JsonLd from "@/components/JsonLd";
 import { CheckIcon, WhatsAppIcon, PdfIcon } from "@/components/icons";
 
+const fmt = (n: number) => n.toLocaleString("en-US");
+
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
+  const list = packages[isLocale(params.locale) ? params.locale : "zh-hk"];
+  const noHotelMin = Math.min(...list.map((p) => p.priceFrom));
+  const hotelMin = Math.min(...list.map((p) => p.hotelFrom));
   return pageMeta(
     params.locale,
     "/packages",
-    isEn ? "Japan Self-Drive Motorcycle Packages" : "日本電單車自駕套票｜租車連住宿",
+    isEn ? "Japan Motorcycle Packages: Flight + Bike" : "日本電單車自駕套票｜機票連電單車，可加住宿",
     isEn
-      ? "Motorcycle rental + accommodation bundles for popular Japan routes, in 3/4/5-day tiers."
-      : "日本電單車自駕套票：租車連住宿一次過搞掂，設 3／4／5 日選擇，另附建議路線行程、保險及 ETC 指引，全程有香港團隊跟進，WhatsApp 即可查詢預約。",
+      ? `Japan self-drive motorcycle packages from Hong Kong: return flight + bike from HK$${fmt(noHotelMin)} (3 days / 2 nights), or flight + hotel with breakfast + bike from HK$${fmt(hotelMin)}. Osaka, Kyushu, Okinawa and Tokyo routes, each with a suggested-route leaflet.`
+      : `日本電單車自駕套票：香港來回機票＋電單車 3日2夜 HK$${fmt(noHotelMin)} 起；另有機票＋住宿連早餐＋電單車套票 HK$${fmt(hotelMin)} 起。大阪、九州、沖繩、東京四條路線，附建議路線單張，WhatsApp 即可查詢。`,
   );
 }
 
@@ -30,8 +35,14 @@ export default function PackagesPage({ params }: { params: { locale: string } })
   const list = packages[locale];
 
   const includes = isEn
-    ? ["Motorcycle rental", "Accommodation", "Suggested route & itinerary", "Insurance & ETC guidance", "Hong Kong team support"]
-    : ["電單車租金", "住宿安排", "建議路線及行程", "保險及 ETC 指引", "香港團隊支援"];
+    ? [
+        "Return economy flight from Hong Kong",
+        "Motorcycle rental (from P3 class)",
+        "Suggested route (see leaflet)",
+        "Insurance & ETC guidance",
+        "Hong Kong team support",
+      ]
+    : ["香港來回經濟客位機票", "電單車租賃（P3 級起）", "建議路線（見套票單張）", "保險及 ETC 指引", "香港團隊支援"];
 
   return (
     <>
@@ -48,8 +59,8 @@ export default function PackagesPage({ params }: { params: { locale: string } })
         title={isEn ? "Self-drive packages" : "電單車自駕套票"}
         intro={
           isEn
-            ? "Bike and accommodation bundled for popular routes — the easy-value way to go independent, at your own pace."
-            : "熱門路線的租車＋住宿套票，最抵、最方便的自由行組合，行程自己話事。"
+            ? "Flight + bike bundles for popular routes, with an optional version that adds hotels — the easy way to ride Japan independently, at your own pace."
+            : "熱門路線的機票＋電單車套票，亦可選連住宿版本，最方便的日本電單車自由行組合，行程自己話事。"
         }
       >
         <Breadcrumb
@@ -72,6 +83,11 @@ export default function PackagesPage({ params }: { params: { locale: string } })
               </li>
             ))}
           </ul>
+          <p className="mt-4 text-xs text-ink-muted">
+            {isEn
+              ? "Hotel with breakfast is included only in the flight + hotel + bike version. Prices are before taxes; peak-date supplements apply on some departures; prices vary with airline and bike class; book at least 21 days before departure or a surcharge may apply. Prices exclude HK and Japanese departure taxes, HK airport security charge, travel insurance and fuel surcharges. All prices are confirmed at the time of booking."
+              : "住宿連早餐只包括於「機票＋住宿連早餐＋電單車」版本。套票價格為稅前票價；個別出發日子設旺季附加費；價格隨所選航空公司及電單車級別調整；請於出發前最少 21 天購票，否則或需支付附加費。套票價格不包括香港及當地離境稅、香港機場保安稅、旅遊保險及燃油附加費。所有價格以預訂時最後答覆為準。"}
+          </p>
         </div>
       </section>
 
@@ -81,7 +97,7 @@ export default function PackagesPage({ params }: { params: { locale: string } })
           {list.map((p) => {
             const leaflet = packageLeaflets[p.id];
             return (
-            <article key={p.id} className="card-hover flex flex-col p-7">
+            <article key={p.id} id={p.id} className="card-hover flex scroll-mt-24 flex-col p-7">
               <span className="text-xs font-semibold uppercase tracking-wide text-brand-600">
                 {p.region}
               </span>
@@ -112,16 +128,38 @@ export default function PackagesPage({ params }: { params: { locale: string } })
                 </a>
               )}
 
-              <div className="mt-5 flex items-end justify-between border-t border-slate-100 pt-5">
-                <div>
-                  <p className="text-xs text-ink-muted">{p.tiers}</p>
-                  <p className="text-2xl font-black text-accent-600">
-                    HK${p.priceFrom.toLocaleString("en-US")}
-                    <span className="ml-1 text-sm font-medium text-ink-muted">
-                      {isEn ? "from" : "起"}
-                    </span>
-                  </p>
-                </div>
+              <dl className="mt-5 space-y-4 border-t border-slate-100 pt-5">
+                {[
+                  {
+                    label: isEn ? "Flight + bike (no hotel)" : "機票＋電單車（不含住宿）",
+                    duration: p.tiers,
+                    price: p.priceFrom,
+                  },
+                  {
+                    label: isEn ? "Flight + hotel with breakfast + bike" : "機票＋住宿連早餐＋電單車",
+                    duration: p.hotelDuration,
+                    price: p.hotelFrom,
+                  },
+                ].map((row) => (
+                  <div key={row.label}>
+                    <dt className="text-sm font-semibold text-ink-soft">{row.label}</dt>
+                    <dd className="flex flex-wrap items-baseline justify-between gap-x-3">
+                      <span className="text-xs text-ink-muted">{row.duration}</span>
+                      <span className="text-2xl font-black text-accent-600">
+                        HK${fmt(row.price)}
+                        <span className="ml-1 text-sm font-medium text-ink-muted">
+                          {isEn ? "from" : "起"}
+                        </span>
+                      </span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-3 text-xs text-ink-muted">
+                {p.airline} · {isEn ? "from a P3-class bike" : "P3 級電單車起"}
+              </p>
+
+              <div className="mt-5 flex justify-end">
                 <a
                   href={whatsappLink(
                     isEn
@@ -131,6 +169,7 @@ export default function PackagesPage({ params }: { params: { locale: string } })
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-outline"
+                  data-cta="package-wa"
                 >
                   <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
                   {isEn ? "Ask on WhatsApp" : "WhatsApp 查詢"}

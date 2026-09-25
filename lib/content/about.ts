@@ -6,7 +6,8 @@ export interface AboutContent {
   storyTitle: string;
   brands: { name: string; year: string; body: string }[];
   roleTitle: string;
-  roles: { title: string; body: string }[];
+  /** `href` is a locale-less internal path the role title links to. */
+  roles: { title: string; body: string; href?: string }[];
   stats: { value: string; label: string }[];
   wordTitle: string;
   word: string;
@@ -18,7 +19,7 @@ export const aboutContent: Record<Locale, AboutContent> = {
       eyebrow: "關於我們",
       title: "你最可靠的電單車旅行代理人",
       intro:
-        "RENTAL819 香港是日本最大電單車租賃公司 Rental819 的指定香港及澳門區代理，隸屬頭盔王集團。我們為港澳車友提供一條龍式租車自駕遊旅行團、租車住宿自由行套票等服務。",
+        "RENTAL819 香港是日本最大電單車租賃公司 Rental819 的指定香港及澳門區代理，隸屬頭盔王集團。我們為港澳車友提供一條龍式租車自駕遊旅行團、機票＋電單車自駕套票（可加住宿）等服務。",
     },
     storyEyebrow: "OUR STORY",
     storyTitle: "品牌故事",
@@ -31,7 +32,7 @@ export const aboutContent: Record<Locale, AboutContent> = {
       {
         name: "RENTAL819 香港",
         year: "2017 年成立",
-        body: "日本最大電單車租賃公司 Rental819 的指定香港及澳門區代理。我們為香港 / 澳門車友提供一條龍式租車、自駕遊旅行團、租車住宿自由行套票等服務。",
+        body: "日本最大電單車租賃公司 Rental819 的指定香港及澳門區代理。我們為香港 / 澳門車友提供一條龍式租車、自駕遊旅行團、機票＋電單車自駕套票（可加住宿）等服務。",
       },
       {
         name: "26KING",
@@ -48,14 +49,17 @@ export const aboutContent: Record<Locale, AboutContent> = {
     roles: [
       {
         title: "日本電單車旅行團",
+        href: "/tours",
         body: "2017 年起已舉辦逾 20 次日本自駕遊旅行團，參與港澳團友達 500 人。所有旅行團設資深廣東話領隊、後勤車全程隨團支援，為你編排大小事務，讓你無憂無慮享受電單車旅行樂趣。",
       },
       {
         title: "電單車自駕遊套票",
-        body: "Rental819 香港區指定代理、日本酒店集團協作伙伴。為港澳車友提供最優惠的自駕遊租車／住宿套票，同時提供最新、最齊全的自駕遊路線編排、建議及緊急支援服務。",
+        href: "/packages",
+        body: "Rental819 香港區指定代理、日本酒店集團協作伙伴。為港澳車友提供最優惠的機票＋電單車自駕套票（可加住宿），同時提供最新、最齊全的自駕遊路線編排、建議及緊急支援服務。",
       },
       {
         title: "租車獨家優惠",
+        href: "/rental",
         body: "Rental819 獨家優惠；頭盔王會員獎分或禮劵回贈、同行優惠等不能盡錄，以最抵價錢享受最完滿旅程。",
       },
     ],
@@ -73,7 +77,7 @@ export const aboutContent: Record<Locale, AboutContent> = {
       eyebrow: "About us",
       title: "Your most trusted motorcycle travel agent",
       intro:
-        "RENTAL819 Hong Kong is the official Hong Kong & Macau agent for Rental819, Japan's largest motorcycle rental company, and part of the Helmet King group. We offer end-to-end rental self-drive tours and rental-plus-accommodation packages for riders from Hong Kong and Macau.",
+        "RENTAL819 Hong Kong is the official Hong Kong & Macau agent for Rental819, Japan's largest motorcycle rental company, and part of the Helmet King group. We offer end-to-end rental self-drive tours and flight + bike self-drive packages (optional hotel) for riders from Hong Kong and Macau.",
     },
     storyEyebrow: "OUR STORY",
     storyTitle: "Our story",
@@ -86,7 +90,7 @@ export const aboutContent: Record<Locale, AboutContent> = {
       {
         name: "RENTAL819 Hong Kong",
         year: "Est. 2017",
-        body: "The official Hong Kong & Macau agent for Rental819, Japan's largest motorcycle rental company. We offer HK/Macau riders end-to-end rentals, self-drive tours and rental-plus-accommodation packages.",
+        body: "The official Hong Kong & Macau agent for Rental819, Japan's largest motorcycle rental company. We offer HK/Macau riders end-to-end rentals, self-drive tours and flight + bike self-drive packages (optional hotel).",
       },
       {
         name: "26KING",
@@ -103,14 +107,17 @@ export const aboutContent: Record<Locale, AboutContent> = {
     roles: [
       {
         title: "Japan motorcycle tours",
+        href: "/tours",
         body: "Since 2017 we've run 20+ self-drive tours for 500+ Hong Kong & Macau riders. Every tour has an experienced Cantonese-speaking leader and a support vehicle throughout, handling the details so you can simply enjoy the ride.",
       },
       {
         title: "Self-drive packages",
-        body: "As Rental819's HK agent and a partner of Japanese hotel groups, we offer the best-value rental/accommodation packages, plus up-to-date route planning, advice and emergency support.",
+        href: "/packages",
+        body: "As Rental819's HK agent and a partner of Japanese hotel groups, we offer the best-value flight + bike self-drive packages (optional hotel), plus up-to-date route planning, advice and emergency support.",
       },
       {
         title: "Exclusive rental deals",
+        href: "/rental",
         body: "Exclusive Rental819 offers, Helmet King member points and voucher rebates, group discounts and more — the best value for the most complete trip.",
       },
     ],

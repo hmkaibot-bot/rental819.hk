@@ -95,7 +95,9 @@
   .prose-r819 h3 {
     @apply mt-8 mb-2 text-lg text-ink;
   }
-  .prose-r819 p {
+  /* p and a skip anything inside .not-prose (e.g. the guide CTA box), whose
+     buttons would otherwise lose to these more specific selectors. */
+  .prose-r819 p:not(.not-prose *) {
     @apply my-5;
   }
   .prose-r819 ul {
@@ -104,7 +106,7 @@
   .prose-r819 ol {
     @apply my-4 list-decimal space-y-2 pl-5 marker:font-semibold marker:text-brand-600;
   }
-  .prose-r819 a {
+  .prose-r819 a:not(.not-prose *) {
     @apply font-medium text-brand-700 underline decoration-brand-300
       underline-offset-2 hover:text-brand-800;
   }

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
-import { site, whatsappLink } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -15,10 +15,10 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return pageMeta(
     params.locale,
     "/contact",
-    isEn ? "Contact" : "聯絡我們",
+    isEn ? `Contact Us | WhatsApp ${site.phone}` : `聯絡我們｜WhatsApp ${site.phone}`,
     isEn
-      ? "Reach the RENTAL819 Hong Kong team by WhatsApp, email or social media."
-      : "透過 WhatsApp、電郵或社交媒體聯絡 RENTAL819 香港團隊。",
+      ? `Contact the RENTAL819 Hong Kong team on WhatsApp ${site.phone} or ${site.email} — enquiries, quotes and route advice for renting a motorcycle in Japan, in Cantonese, Mandarin or English.`
+      : `WhatsApp ${site.phone} 或電郵 ${site.email} 聯絡 RENTAL819 香港團隊，以廣東話、普通話或英語查詢日本租電單車、報價及路線建議。`,
   );
 }
 
@@ -31,9 +31,10 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
     {
       label: "WhatsApp",
       value: site.phone,
-      href: whatsappLink(),
+      href: waEnquiry(locale, "general", dict.nav.contact),
       icon: <WhatsAppIcon className="h-6 w-6" />,
       accent: "bg-[#25D366]",
+      cta: "contact-wa",
     },
     {
       label: isEn ? "Email" : "電郵",
@@ -91,6 +92,7 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
               target="_blank"
               rel="noopener noreferrer"
               className="card-hover flex items-center gap-4 p-6"
+              data-cta={m.cta}
             >
               <span className={`flex h-12 w-12 items-center justify-center rounded-xl text-white ${m.accent}`}>
                 {m.icon}
@@ -103,34 +105,44 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
           ))}
         </div>
 
-        <div className="mt-10 grid gap-6 rounded-3xl border border-slate-100 bg-slate-50 p-8 sm:grid-cols-2">
+        <div
+          className={`mt-10 grid gap-6 rounded-3xl border border-slate-100 bg-slate-50 p-8 ${
+            site.maps ? "sm:grid-cols-2" : ""
+          }`}
+        >
           <div>
             <h2 className="text-sm font-bold uppercase tracking-wide text-brand-700">
               {dict.footer.hours}
             </h2>
             <p className="mt-2 text-sm text-ink-soft">{dict.footer.hoursValue}</p>
           </div>
-          <div>
-            <h2 className="text-sm font-bold uppercase tracking-wide text-brand-700">
-              {isEn ? "Find us" : "地址"}
-            </h2>
-            <a
-              href={site.maps}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-800"
-            >
-              {isEn ? "Open in Google Maps" : "於 Google Maps 開啟"}
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
+          {site.maps && (
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wide text-brand-700">
+                {isEn ? "Find us" : "地址"}
+              </h2>
+              <a
+                href={site.maps}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-800"
+              >
+                {isEn ? "Open in Google Maps" : "於 Google Maps 開啟"}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 text-center">
           <p className="text-ink-muted">
             {isEn ? "Ready to book?" : "準備好預約？"}
           </p>
-          <Link href={localePath(locale, "/booking")} className="btn-primary mt-3">
+          <Link
+            href={localePath(locale, "/booking")}
+            className="btn-primary mt-3"
+            data-cta="contact-book"
+          >
             {dict.common.bookNow}
             <ArrowRight className="h-4 w-4" />
           </Link>

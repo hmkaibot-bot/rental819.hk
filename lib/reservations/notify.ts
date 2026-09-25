@@ -30,6 +30,8 @@ export interface BookingNotice {
   /** Whether the automatic customer acknowledgement went out, so the channel
    *  knows when a manual follow-up is needed. */
   ackEmailSent?: boolean;
+  /** The 來源 line (landing page, referrer, UTM) recorded in the booking's notes. */
+  attribution?: string | null;
 }
 
 function addonList(a?: ReservationAddons): string {
@@ -72,6 +74,7 @@ export function buildBookingNotice(b: BookingNotice): {
     `車款志願：${bikes}`,
     `加購項目：${addonList(b.addons)}`,
     b.promo && `優惠代碼：${b.promo}`,
+    b.attribution,
     "",
     b.ackEmailSent
       ? "系統已自動向客人發出「已收到申請」通知電郵。"
