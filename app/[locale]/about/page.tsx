@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
@@ -100,7 +101,15 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
                     {i + 1}
                   </div>
                   <div>
-                    <h3 className="font-bold text-ink">{r.title}</h3>
+                    <h3 className="font-bold text-ink">
+                      {r.href ? (
+                        <Link href={localePath(locale, r.href)} className="hover:text-brand-700">
+                          {r.title}
+                        </Link>
+                      ) : (
+                        r.title
+                      )}
+                    </h3>
                     <p className="mt-1.5 text-sm leading-6 text-ink-muted">{r.body}</p>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
@@ -68,6 +69,11 @@ export default function FaqPage({ params }: { params: { locale: string } }) {
                     </summary>
                     <div className="px-5 pb-5 text-sm leading-7 text-ink-muted">
                       {item.a}
+                      {item.href && (
+                        <Link href={localePath(locale, item.href)} className="ml-1 font-semibold text-brand-700">
+                          {isEn ? "More →" : "詳情 →"}
+                        </Link>
+                      )}
                     </div>
                   </details>
                 ))}

@@ -18,7 +18,7 @@ export default function Footer({
   const primary = buildNav(dict).filter(
     (i) => !["/", "/guide"].includes(i.href),
   );
-  const guides = guidePages(dict).slice(0, 6);
+  const guides = guidePages(dict);
   const year = 2026;
   const isEn = locale === "en";
   const licenceLine = isEn

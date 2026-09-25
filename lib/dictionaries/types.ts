@@ -24,6 +24,7 @@ export interface Dictionary {
     howManyDays: string;
     budget: string;
     fees: string;
+    gear: string;
     insurance: string;
     etc: string;
     trafficRules: string;

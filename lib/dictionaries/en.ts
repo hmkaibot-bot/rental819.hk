@@ -25,6 +25,7 @@ const dict: Dictionary = {
     howManyDays: "How many days to ride?",
     budget: "How the budget works",
     fees: "Rent & fees",
+    gear: "Gear checklist",
     insurance: "Insurance",
     etc: "ETC expressway",
     trafficRules: "Japan traffic rules",

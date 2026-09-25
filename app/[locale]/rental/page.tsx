@@ -4,6 +4,7 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { rentalContent } from "@/lib/content/rental";
+import { RENT_FROM_HKD, RENT_TABLE, RENT_TO_HKD, hkd } from "@/lib/content/prices";
 import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd, serviceLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
@@ -40,13 +41,14 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
           { name: dict.nav.rental, url: localePath(locale, "/rental") },
         ])}
       />
-      {/* The bike categories rendered below are the offer catalog — no price is
-          shown on this page, so the Service node carries none. */}
+      {/* The bike categories rendered below are the offer catalog; the price
+          range is the 1-day column of the rate table on this page. */}
       <JsonLd
         data={serviceLd(locale, {
           name: c.hero.title,
           description: c.hero.intro,
           categories: c.categories.map((cat) => ({ title: cat.name })),
+          offers: { low: RENT_FROM_HKD, high: RENT_TO_HKD },
         })}
       />
       <PageHero image="/images/tours/shikoku-2026-07-01.jpg" eyebrow={c.hero.eyebrow} title={c.hero.title} intro={c.hero.intro}>
@@ -92,6 +94,54 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
         </div>
       </section>
 
+      {/* Reference rates */}
+      <section className="bg-slate-50">
+        <div className="container-x py-16 lg:py-20">
+          <h2 className="text-2xl font-bold sm:text-3xl">{c.priceHead}</h2>
+          <div className="prose-r819 max-w-3xl overflow-x-auto">
+            <table className="bg-white">
+              <thead>
+                <tr>
+                  {c.priceCols.map((h) => (
+                    <th key={h}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {RENT_TABLE.map((r) => (
+                  <tr key={r.cls}>
+                    <td>{r.cls}</td>
+                    <td>{hkd(r.d1)}</td>
+                    <td>{hkd(r.dayN)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="max-w-3xl text-sm leading-6 text-ink-muted">{c.priceNote}</p>
+          <Link
+            href={localePath(locale, "/guide/fees")}
+            className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800"
+          >
+            {c.priceMore} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Documents */}
+      <section className="container-x py-16 lg:py-20">
+        <div className="max-w-3xl">
+          <h2 className="text-2xl font-bold sm:text-3xl">{c.docsHead}</h2>
+          <p className="mt-3 leading-7 text-ink-muted">{c.docsBody}</p>
+          <Link
+            href={localePath(locale, "/guide/licence")}
+            className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800"
+          >
+            {c.docsMore} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
       {/* Coverage */}
       <section className="bg-slate-50">
         <div className="container-x py-16 lg:py-20">
@@ -117,13 +167,16 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
               <Link href={localePath(locale, "/guide/fees")} className="btn-outline">
                 {isEn ? "Rent & fees" : "租金及費用"}
               </Link>
+              <Link href={localePath(locale, "/guide/licence")} className="btn-outline">
+                {dict.guideMenu.licence}
+              </Link>
+              <Link href={localePath(locale, "/guide/insurance")} className="btn-outline">
+                {dict.guideMenu.insurance}
+              </Link>
             </div>
           </div>
           <ol className="space-y-3 text-sm text-ink-soft">
-            {(isEn
-              ? ["Check your documents", "Pick a branch & bike", "Choose your dates", "Send the booking form", "Collect & ride"]
-              : ["確認證件", "選擇分店及車款", "選擇租用日期", "填寫預約表格", "取車出發"]
-            ).map((step, i) => (
+            {c.steps.map((step, i) => (
               <li key={i} className="flex items-center gap-3">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-600 text-xs font-black text-white">
                   {i + 1}

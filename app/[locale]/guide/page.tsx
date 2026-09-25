@@ -43,7 +43,7 @@ export default function GuideIndex({ params }: { params: { locale: string } }) {
       <PageHero
         image="/images/tours/kansai-sakura-2026-04-08.jpg"
         eyebrow={dict.nav.guide}
-        title={isEn ? "The Japan ride guide" : "日本自駕攻略"}
+        title={isEn ? "The Japan motorcycle ride guide" : "日本電單車自駕攻略"}
         intro={
           isEn
             ? "From licences and traffic rules to insurance, ETC and itinerary planning — read up before you ride."

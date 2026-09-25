@@ -25,6 +25,7 @@ const dict: Dictionary = {
     howManyDays: "打算開幾天車？",
     budget: "預算怎樣計？",
     fees: "租金及費用",
+    gear: "裝備清單",
     insurance: "保險",
     etc: "ETC 高速公路",
     trafficRules: "日本交通規則",

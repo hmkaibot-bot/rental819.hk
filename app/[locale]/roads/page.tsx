@@ -26,6 +26,7 @@ export default function RoadsPage({ params }: { params: { locale: string } }) {
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
   const dict = getDictionary(locale);
   const c = roadsContent[locale];
+  const toursLabel = locale === "en" ? "Tour dates" : "電單車旅行團團期";
 
   return (
     <>
@@ -41,11 +42,17 @@ export default function RoadsPage({ params }: { params: { locale: string } }) {
           locale={locale}
           items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.roads }]}
         />
-        <div className="mt-6">
+        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
           <a href={TOURS_URL} target="_blank" rel="noopener noreferrer" className="btn-primary">
             {c.ctaTours}
             <ArrowRight className="h-4 w-4" />
           </a>
+          <Link
+            href={localePath(locale, "/tours")}
+            className="text-sm font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
+          >
+            {toursLabel}
+          </Link>
         </div>
       </PageHero>
 
@@ -94,6 +101,12 @@ export default function RoadsPage({ params }: { params: { locale: string } }) {
                   otherwise barely linked to from anywhere on the site. */}
               <Link href={localePath(locale, "/rental")} className="inline-flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">
                 {locale === "en" ? "Rent a bike and ride it yourself" : "租電單車自駕走一趟"}
+              </Link>
+              <Link
+                href={localePath(locale, "/tours")}
+                className="self-center px-2 text-sm font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
+              >
+                {toursLabel}
               </Link>
             </div>
           </div>

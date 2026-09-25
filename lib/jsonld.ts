@@ -4,6 +4,7 @@ import { aboutContent } from "@/lib/content/about";
 import type { GuideDoc } from "@/lib/content/blocks";
 import type { Package } from "@/lib/content/tours";
 import type { RoadRegion } from "@/lib/content/roads";
+import { RENT_TABLE } from "@/lib/content/prices";
 
 /** Stable node ids so every page's graph points at one organization / one site. */
 export const ORG_ID = `${site.url}/#organization`;
@@ -194,11 +195,17 @@ export function articleLd(doc: GuideDoc, locale: Locale): Record<string, unknown
 /**
  * Service structured data for /rental. The offer catalog mirrors the bike
  * categories actually rendered on the page, so each locale describes its own
- * cards. No price is shown on /rental, so none is emitted.
+ * cards. Prices are the 1-day (24 h) reference rents shown in the rate table
+ * on /rental.
  */
 export function serviceLd(
   locale: Locale,
-  c: { name: string; description: string; categories: { title: string }[] },
+  c: {
+    name: string;
+    description: string;
+    categories: { title: string }[];
+    offers?: { low: number; high: number };
+  },
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
@@ -226,6 +233,17 @@ export function serviceLd(
         provider: { "@id": ORG_ID },
       })),
     },
+    ...(c.offers
+      ? {
+          offers: {
+            "@type": "AggregateOffer",
+            priceCurrency: "HKD",
+            lowPrice: c.offers.low,
+            highPrice: c.offers.high,
+            offerCount: RENT_TABLE.length,
+          },
+        }
+      : {}),
   };
 }
 
