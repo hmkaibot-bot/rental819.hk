@@ -28,7 +28,7 @@ const content: Record<Locale, { title: string; blocks: Block[] }> = {
     blocks: [
       { type: "p", text: `本私隱政策說明 RENTAL819 香港（頭盔王集團）如何收集、使用及保護你透過本網站提供的個人資料。` },
       { type: "h", text: "我們收集的資料" },
-      { type: "p", text: "當你透過預約或查詢表格與我們聯絡時，我們可能會收集你的稱呼、電話／WhatsApp、電郵，以及你提供的行程需求（如地區、日期、車款、備註）。當你提交預約表格時，我們亦會記錄你進入本網站的首個頁面及來源網站（只記錄網域名稱），以了解哪些內容對騎士有幫助；本網站使用不設 Cookie 的流量統計。" },
+      { type: "p", text: "當你透過預約或查詢表格與我們聯絡時，我們可能會收集你的稱呼、電話／WhatsApp、電郵，以及你提供的行程需求（如地區、日期、車款、備註）。當你提交預約表格時，我們亦會記錄你進入本網站的首個頁面、來源網站（只記錄網域名稱），以及連結上的廣告活動標籤（utm_source／utm_medium／utm_campaign）和連結是否帶有 Google／Facebook 點擊識別碼（不記錄識別碼本身），以了解哪些內容對騎士有幫助；本網站使用不設 Cookie 的流量統計。未提交的預約表格中的行程資料（例如分店、日期、車款及附加項目；不包括姓名、出生日期、聯絡方式及地址）只會保存在你的裝置上，由最後一次填寫起計最多 24 小時。" },
       { type: "h", text: "資料用途" },
       { type: "ul", items: [
         "處理及回覆你的租車、旅行團或套票查詢",
@@ -49,7 +49,7 @@ const content: Record<Locale, { title: string; blocks: Block[] }> = {
     blocks: [
       { type: "p", text: `This policy explains how RENTAL819 Hong Kong (Helmet King group) collects, uses and protects the personal data you provide through this website.` },
       { type: "h", text: "Information we collect" },
-      { type: "p", text: "When you contact us via the booking or enquiry form, we may collect your name, phone/WhatsApp, email and the trip details you provide (region, dates, bike preference, notes). When you submit the booking form we also record the first page you visited on this site and the referring website (domain only), so we can see which content helps riders; the site uses cookieless visitor statistics." },
+      { type: "p", text: "When you contact us via the booking or enquiry form, we may collect your name, phone/WhatsApp, email and the trip details you provide (region, dates, bike preference, notes). When you submit the booking form we also record the first page you visited on this site, the referring website (domain only), any campaign tags on the link (utm_source/utm_medium/utm_campaign) and whether the link carried a Google or Facebook click ID (not the ID itself), so we can see which content helps riders; the site uses cookieless visitor statistics. Trip details in an unsent booking form (such as branch, dates, bikes and add-ons; not your name, date of birth, contact details or addresses) are kept only on your device, for up to 24 hours after you last edit them." },
       { type: "h", text: "How we use it" },
       { type: "ul", items: [
         "To process and respond to your rental, tour or package enquiry",

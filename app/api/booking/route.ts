@@ -102,6 +102,10 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
   }
+  // Valid JSON that is not an object (e.g. the literal `null`) would crash below.
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  }
 
   // Core required fields (mirrors the client-side gate).
   const name = clean(body.name_en) ?? clean(body.name_zh);

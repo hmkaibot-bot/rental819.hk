@@ -13,9 +13,11 @@ import CTABand from "@/components/CTABand";
 import JsonLd from "@/components/JsonLd";
 import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 
-// Re-derive each tour's listing state daily, so departures drop out of
-// 「現已接受報名」 without a deploy.
-export const revalidate = 86400;
+// Re-derive each tour's listing state hourly, so departures drop out of
+// 「現已接受報名」 without a deploy, within about an hour of HK midnight.
+// (A daily window would not line up with HK midnight, and ISR serves the
+// stale page to the first request after it expires.)
+export const revalidate = 3600;
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
@@ -58,9 +60,15 @@ function tourState(t: Tour, today: string): TourState {
 function whatsappCta(t: Tour, state: TourState, isEn: boolean): { message: string; label: string } {
   switch (state) {
     case "open":
+      // Undated = the private club / group / corporate entry; a dated tour
+      // without a 26adventure page gets a sign-up message for that tour.
+      if (t.date === "")
+        return isEn
+          ? { message: "Hi, I'd like to ask about a private club / group / corporate tour.", label: "Ask on WhatsApp" }
+          : { message: "你好，我想查詢車會／團體／公司包團服務。", label: "WhatsApp 查詢" };
       return isEn
-        ? { message: "Hi, I'd like to ask about a private club / group / corporate tour.", label: "Ask on WhatsApp" }
-        : { message: "你好，我想查詢車會／團體／公司包團服務。", label: "WhatsApp 查詢" };
+        ? { message: `Hi, I'd like to sign up for "${t.title}" (${t.dateLabel}).`, label: "Ask to sign up" }
+        : { message: `你好，我想報名「${t.title}」（${t.dateLabel}）。`, label: "查詢報名" };
     case "closed":
       return isEn
         ? { message: `Hi, are there any places left on "${t.title}"?`, label: "Ask about places" }

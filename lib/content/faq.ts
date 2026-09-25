@@ -77,7 +77,7 @@ export const faq: Record<Locale, FaqGroup[]> = {
         },
         {
           q: "可以車人（搭載乘客）嗎？",
-          a: "可以，但 50cc 或以下的車輛，以及車輛登記文件列明只有一個座位的車輛不能搭載乘客；首都高速公路（例如中央環狀線、灣岸線等）亦不能搭載乘客。另外，租用 125cc 以下車款時，強制保險的乘客傷亡賠償不予支付。",
+          a: "以下情況不能搭載乘客：50cc 或以下，或車輛登記文件列明只有一個座位的車輛；首都高速公路部分路線（例如中央環狀線、灣岸線）。另外，租用 125cc 以下車款時，強制保險的乘客傷亡賠償不予支付。",
           href: "/guide/traffic-rules",
         },
       ],
@@ -93,7 +93,7 @@ export const faq: Record<Locale, FaqGroup[]> = {
         {
           q: "可以租頭盔及其他裝備嗎？",
           a: "可以。頭盔可預先預約，首天 HK$60，第 2 天起每天 HK$10；尾箱、側袋及側箱亦可預約（供應因車款而異），手機架免費。手套、防摔外套等只供出發日當天於分店租用，以日圓結算。取車時須穿著合適的電單車衣著，包括頭盔、防摔衣、防摔長褲及電單車靴。",
-          href: "/guide/fees",
+          href: "/guide/gear",
         },
         {
           q: "油錢有包括在租金裡嗎？",
@@ -245,7 +245,7 @@ export const faq: Record<Locale, FaqGroup[]> = {
         },
         {
           q: "Can I carry a passenger?",
-          a: "Yes, except on bikes of 50cc or under or bikes registered with a single seat. Passengers are also not allowed on the Metropolitan Expressway (e.g. the Central Circular and Bayshore routes). And on bikes under 125cc, the included insurance does not pay passenger injury or death benefits.",
+          a: "Passengers are not allowed on bikes of 50cc or under, on bikes registered with a single seat, or on some Metropolitan Expressway routes (e.g. the Central Circular and Bayshore routes). On bikes under 125cc, the included insurance does not pay passenger injury or death benefits.",
           href: "/guide/traffic-rules",
         },
       ],
@@ -261,7 +261,7 @@ export const faq: Record<Locale, FaqGroup[]> = {
         {
           q: "Can I rent a helmet and other gear?",
           a: "Yes. Helmets can be reserved in advance at HK$60 for the first day and HK$10 per day after that; tail boxes, side bags and side boxes can also be reserved (availability varies by bike), and a phone mount is free. Gloves, jackets and similar items can only be rented at the branch on departure day and are paid in yen. At pick-up you must wear proper riding gear, including a helmet, protective jacket, protective trousers and riding boots.",
-          href: "/guide/fees",
+          href: "/guide/gear",
         },
         {
           q: "Is fuel included in the rental?",

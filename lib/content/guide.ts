@@ -138,7 +138,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "日本電單車自駕遊行程規劃",
       seoDescription:
         "日本電單車自駕遊行程規劃只需回答三條問題：打算開幾多日車、預算怎樣計、路線如何串連。走一般道路每日約 100 至 150 公里較舒適，天數直接影響預算，普通汽油約每公升 160 日圓。",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "安排行程很簡單！" },
         {
@@ -468,7 +468,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             "車輛租金：按車輛等級及租用時段（4 小時、8 小時、1 天，及第 2 天起按 24 小時）計算。",
             "燃油：油費需自行負責，還車時須注滿油。",
             "高速公路費（ETC）：ETC 卡租金為每天 220 日圓，過路費於還車時一併結算。",
-            "保險：基本費用已含強制及任意保險，另可加購車輛補償及 MamoRide 補償。",
+            "保險：基本費用已含強制及任意保險，車輛補償及 MamoRide 補償另計。",
             "頭盔／裝備：可自備，或按尺碼租用頭盔等裝備。",
             "泊車：泊車費用按停車場而定，請盡量使用停車場。",
           ],
@@ -479,7 +479,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "本站列明的港幣價目、付款方式（轉數快／銀行匯款予頭盔王）及取消條款，只適用於經 RENTAL819 香港預約的租車；直接於 rental819.com 預約者，以日本 Rental819 的條款為準。",
+          text: "本站列明的港幣租車價目、付款方式（轉數快／銀行匯款予頭盔王）及租車取消條款，只適用於經 RENTAL819 香港預約的租車；直接於 rental819.com 預約者，以日本 Rental819 的條款為準。",
         },
         { type: "cta", text: "想知道實際報價？填寫租車預約表格，或 WhatsApp 我們的香港團隊。" },
       ],
@@ -549,7 +549,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         "基本費用已包含日本國內的強制險及任意保險，另有車輛補償及 MamoRide 補償。",
       seoTitle: "日本租電單車保險｜強制險、車輛補償及 MamoRide",
       seoDescription:
-        "基本費用已包強制險、任意保險及竊盜險：對人賠償無上限，對物每件事故最高 1,000 萬日圓。另可加購車輛補償及 MamoRide。營業損失賠償為能騎回店家 20,000 日圓、需拖吊 50,000 日圓。",
+        "基本費用已包強制險、任意保險及竊盜險：對人賠償無上限，對物每件事故最高 1,000 萬日圓。車輛補償及 MamoRide 另計。營業損失賠償為能騎回店家 20,000 日圓、需拖吊 50,000 日圓。",
       updated: "2026-08-24",
       blocks: [
         { type: "h", text: "包含在基本費用中的保險" },
@@ -737,7 +737,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro: "ETC 是日本高速公路的無線自動繳費系統，讓你不用停車即可通過收費閘。",
       seoTitle: "日本高速公路 ETC｜電單車 ETC 卡租用",
       seoDescription:
-        "ETC 是日本高速公路的無線自動繳費系統，插卡即可不停車過閘。Rental819 大部分車輛已裝設 ETC 機，ETC 卡租金每天 220 日圓，過路費於還車時一併結算；125cc 以下的電單車不能在高速公路行駛。",
+        "ETC 是日本高速公路的無線自動繳費系統，插卡即可不停車過閘。Rental819 大部分車輛已裝設 ETC 機，ETC 卡於分店租用，過路費於還車時一併結算；125cc 以下的電單車不能在高速公路行駛。",
       updated: "2026-08-26",
       blocks: [
         { type: "h", text: "甚麼是 ETC？" },
@@ -1054,7 +1054,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "Planning a Japan motorcycle trip",
       seoDescription:
         "Planning a Japan motorcycle trip comes down to three questions: how many days to ride, how to budget and how to link the route. About 100–150 km a day is comfortable on ordinary roads, and regular petrol is around 160 yen a litre.",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "Scheduling is easy!" },
         {
@@ -1387,7 +1387,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
             "Vehicle rent: charged by vehicle class and rental band (4 hours, 8 hours, 1 day, and per 24 hours from the 2nd day).",
             "Fuel: you pay for your own fuel and must return the bike with a full tank.",
             "Expressway tolls (ETC): the ETC card rental is 220 yen per day, and tolls are settled when you return the bike.",
-            "Insurance: the basic fee already includes compulsory and voluntary insurance; vehicle compensation and MamoRide compensation can be added.",
+            "Insurance: the basic fee already includes compulsory and voluntary insurance; vehicle compensation and MamoRide compensation are charged separately.",
             "Helmet / gear: bring your own, or rent a helmet and gear by size.",
             "Parking: parking fees depend on the car park; please use parking lots where possible.",
           ],
@@ -1398,7 +1398,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "The HK$ prices, payment method (FPS / bank transfer to Helmet King) and cancellation terms on this site apply to rentals booked through RENTAL819 Hong Kong; bookings made directly on rental819.com follow Rental819 Japan's own terms.",
+          text: "The HK$ rental prices, payment method (FPS / bank transfer to Helmet King) and rental cancellation terms on this site apply to rentals booked through RENTAL819 Hong Kong; bookings made directly on rental819.com follow Rental819 Japan's own terms.",
         },
         { type: "cta", text: "Want an exact quote? Send the rental booking form or WhatsApp our Hong Kong team." },
       ],
@@ -1408,7 +1408,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       title: "Japan motorcycle trip gear checklist",
       intro:
         "When you rent a motorcycle in Japan you can bring your own helmet or reserve one in your size, and you must wear proper riding gear on pick-up day. Here is what to bring, what you can rent, and what each item costs.",
-      seoTitle: "Riding gear for a Japan motorcycle trip | Bring or rent a helmet?",
+      seoTitle: "Japan Motorcycle Gear: Bring or Rent a Helmet?",
       seoDescription:
         "At pick-up you must wear a helmet, protective jacket, protective trousers and riding boots. Helmets can be reserved at HK$60 for the first day and HK$10 a day after; tail boxes and side bags too, and a phone mount is free. Gloves and jackets are rented at the branch on departure day.",
       updated: "2026-09-25",

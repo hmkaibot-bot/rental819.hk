@@ -20,8 +20,8 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
     "/booking",
     isEn ? "Japan Motorcycle Rental Booking Form" : "日本租電單車預約表格",
     isEn
-      ? "Send a booking enquiry for a Japan motorcycle rental, guided tour or self-drive package."
-      : "填表提交日本電單車租車、自駕團或自駕套票的預約查詢：須年滿 18 歲並持正式駕駛執照、國際駕駛執照及護照，建議提前 1 星期至 1 個月預約，香港團隊 3–5 個工作天內以中文或英文回覆。",
+      ? "Japan motorcycle rental booking enquiry: 18+ with a full licence, IDP and passport. Book 1 week to 1 month ahead; our Hong Kong team replies in 3–5 working days."
+      : "填表預約日本電單車租車：須年滿 18 歲並持正式駕駛執照、國際駕駛執照及護照，建議提前 1 星期至 1 個月預約，香港團隊 3–5 個工作天內回覆。",
   );
 }
 
@@ -129,8 +129,8 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
               <li className="flex gap-2.5 text-sm text-ink-muted">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" />
                 {isEn
-                  ? "The HK$ prices, payment method (FPS / bank transfer to Helmet King) and cancellation terms on this site apply to rentals booked through RENTAL819 Hong Kong; bookings made directly on rental819.com follow Rental819 Japan's own terms."
-                  : "本站列明的港幣價目、付款方式（轉數快／銀行匯款予頭盔王）及取消條款，只適用於經 RENTAL819 香港預約的租車；直接於 rental819.com 預約者，以日本 Rental819 的條款為準。"}
+                  ? "The HK$ rental prices, payment method (FPS / bank transfer to Helmet King) and rental cancellation terms on this site apply to rentals booked through RENTAL819 Hong Kong; bookings made directly on rental819.com follow Rental819 Japan's own terms."
+                  : "本站列明的港幣租車價目、付款方式（轉數快／銀行匯款予頭盔王）及租車取消條款，只適用於經 RENTAL819 香港預約的租車；直接於 rental819.com 預約者，以日本 Rental819 的條款為準。"}
               </li>
             </ul>
 

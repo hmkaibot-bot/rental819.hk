@@ -17,7 +17,7 @@ type Status = "idle" | "submitting" | "done" | "error";
 
 const t = {
   "zh-hk": {
-    // choose-a-bike link (opens /rental in a new tab)
+    // choose-a-bike link (goes to /rental; its category cards link back here)
     chooseBike: "選擇車款",
     chooseBikeHint: "想先睇下有咩車？",
     // section headings
@@ -270,13 +270,21 @@ const REQUIRED = [
 ] as const;
 const CONSENTS = ["consent_pay", "consent_cancel", "consent_privacy"] as const;
 
-// Never saved in the draft: the consents must be ticked afresh, and these
-// personal details are not left on the device.
+// Never saved in the draft: the consents must be ticked afresh, and personal
+// and contact details are not left on the device (a shared computer would
+// otherwise show them to the next person). The draft keeps trip data only.
 const NOT_IN_DRAFT: readonly (keyof Form)[] = [
   "idp",
   ...CONSENTS,
+  "name_zh",
+  "name_en",
   "dob",
+  "email",
+  "email_confirm",
+  "hk_phone",
   "hk_address",
+  "jp_address",
+  "jp_phone",
   "emergency_contact",
   "emergency_phone",
 ];
@@ -343,6 +351,9 @@ export default function BookingForm({ locale }: { locale: Locale }) {
   const [todayISO, setTodayISO] = useState<string>();
   // The ?bike= value already merged into the draft, saved alongside it.
   const bikeApplied = useRef<string | null>(null);
+  // The form as restored on mount. It is not saved back, so reopening the
+  // page does not restart the draft's 24-hour expiry.
+  const restoredForm = useRef<Form | null>(null);
   const doneRef = useRef<HTMLDivElement>(null);
 
   // Restore the draft, then merge /rental's ?bike=… into it. Read from window
@@ -363,12 +374,17 @@ export default function BookingForm({ locale }: { locale: Locale }) {
     // overwrite what the rider has typed since.
     if (bike && bike !== savedBike) draft.bike_pref_1 = bike;
     bikeApplied.current = bike ?? (typeof savedBike === "string" ? savedBike : null);
-    if (Object.keys(draft).length) setForm((f) => ({ ...f, ...draft }));
+    if (Object.keys(draft).length)
+      setForm((f) => {
+        const next = { ...f, ...draft };
+        restoredForm.current = next;
+        return next;
+      });
   }, [draftKey]);
 
   useEffect(() => {
     // `form` is still the emptyForm object until something is typed or restored.
-    if (form === emptyForm || status === "done") return;
+    if (form === emptyForm || form === restoredForm.current || status === "done") return;
     const id = window.setTimeout(
       () => writeStored(draftKey, { ...draftFrom(form), _bike: bikeApplied.current }),
       500,
@@ -382,6 +398,9 @@ export default function BookingForm({ locale }: { locale: Locale }) {
     // been cancelled and cannot write the draft back.
     removeStored(draftKey);
     removeStored(ATTR_KEY);
+    // The focused submit button is gone; move focus to the confirmation so
+    // screen readers announce it.
+    doneRef.current?.focus({ preventScroll: true });
     doneRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
   }, [status, draftKey]);
 
@@ -516,7 +535,9 @@ export default function BookingForm({ locale }: { locale: Locale }) {
     return (
       <div
         ref={doneRef}
-        className="scroll-mt-24 rounded-2xl border border-brand-100 bg-brand-50 p-8 text-center"
+        tabIndex={-1}
+        role="status"
+        className="scroll-mt-24 rounded-2xl border border-brand-100 bg-brand-50 p-8 text-center outline-none"
       >
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white">
           <CheckIcon className="h-7 w-7" />
@@ -600,9 +621,10 @@ export default function BookingForm({ locale }: { locale: Locale }) {
           {sp}
           {c.chooseBikeHint}
           {sp}
-          {/* New tab, so the half-filled form stays open here. */}
-          <Link href={localePath(locale, "/rental")} target="_blank" className="font-semibold text-brand-700">
-            {c.chooseBike} ↗
+          {/* Same tab: shop and dates are in the draft, and each /rental
+              category links back to /booking?bike=…, which restores them. */}
+          <Link href={localePath(locale, "/rental")} className="font-semibold text-brand-700">
+            {c.chooseBike} →
           </Link>
         </p>
         <div className="grid gap-5 sm:grid-cols-3">

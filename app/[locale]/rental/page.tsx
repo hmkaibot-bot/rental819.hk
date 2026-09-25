@@ -20,7 +20,7 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return pageMeta(
     params.locale,
     "/rental",
-    isEn ? "Rent a Motorcycle in Japan | Book from Hong Kong" : "日本租電單車｜香港中文預約・1 天 HK$295 起",
+    isEn ? "Rent a Motorcycle in Japan" : "日本租電單車｜香港中文預約・1 天 HK$295 起",
     isEn
       ? `Rent a motorcycle in Japan from HK$295 a day (class P-1, reference price) with compulsory and voluntary insurance included — scooters, naked bikes, tourers, Harleys and adventure bikes at ${site.parent.branches} branches, quoted by our Hong Kong team.`
       : `日本租電單車 1 天參考租金 HK$295 起（P-1 級），已包強制及任意保險；綿羊、街車、旅行車、Harley 及越野車，全日本 ${site.parent.branches} 間分店取車，香港團隊以中文確認報價。`,
