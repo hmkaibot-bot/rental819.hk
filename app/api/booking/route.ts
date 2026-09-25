@@ -60,7 +60,8 @@ interface BookingPayload {
   attribution?: unknown;
 }
 
-const clean = (v?: string) => (v && v.trim() ? v.trim() : null);
+const clean = (v: unknown) =>
+  typeof v === "string" && v.trim() ? v.trim() : null;
 const count = (v?: string) => {
   const n = Number(v);
   return Number.isFinite(n) && n > 0 ? n : undefined;
@@ -142,10 +143,10 @@ export async function POST(request: Request) {
     `${SOURCE_NOTE_PREFIX}${a.landing ?? "-"} | ref=${a.ref ?? "direct"}${a.utm_campaign ? ` | utm=${a.utm_source ?? ""}/${a.utm_medium ?? ""}/${a.utm_campaign}` : ""}${a.gclid ? " | gclid" : ""}${a.fbclid ? " | fbclid" : ""}`;
 
   const notes = [
-    body.helmet_size?.trim() && `頭盔尺碼：${body.helmet_size.trim()}`,
+    clean(body.helmet_size) && `頭盔尺碼：${clean(body.helmet_size)}`,
     "已確認年滿 18 歲並持正式駕照、IDP 及護照",
     "已同意繳費詳情、取消政策及私隱聲明",
-    body.notes?.trim() && `備註：${body.notes.trim()}`,
+    clean(body.notes) && `備註：${clean(body.notes)}`,
     sourceLine,
   ]
     .filter(Boolean)
