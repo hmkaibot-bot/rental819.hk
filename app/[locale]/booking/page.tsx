@@ -20,7 +20,7 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
     isEn ? "Book / Enquire" : "預約查詢",
     isEn
       ? "Send a booking enquiry for a Japan motorcycle rental, guided tour or self-drive package."
-      : "填表提交日本電單車租車、自駕團或自駕套票的預約查詢：須年滿 18 歲並持國際駕駛執照，建議提前 1 星期至 1 個月預約，香港團隊 3–5 個工作天內以中文或英文回覆。",
+      : "填表提交日本電單車租車、自駕團或自駕套票的預約查詢：須年滿 18 歲並持正式駕駛執照、國際駕駛執照及護照，建議提前 1 星期至 1 個月預約，香港團隊 3–5 個工作天內以中文或英文回覆。",
   );
 }
 
@@ -31,7 +31,7 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
 
   const points = isEn
     ? [
-        "18 or older with a valid International Driving Permit (IDP)",
+        "18 or older, with a full licence, a valid International Driving Permit (IDP) and a passport",
         "Pick-up and return must be at the same branch",
         "Book 1 week to 1 month ahead (first-come, first-served)",
         "We reply within 3–5 working days in Chinese or English",
@@ -39,7 +39,7 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
         "Cancellation: 20% 6 days before · 30% 2 days before · 50% same day · no-show non-refundable",
       ]
     : [
-        "須年滿 18 歲並持有效國際駕駛執照（IDP）",
+        "須年滿 18 歲，並持正式駕駛執照、國際駕駛執照（IDP）及護照",
         "租車及還車必須於同一分店",
         "建議提前 1 星期至 1 個月預約（先到先得）",
         "我們會於 3–5 個工作天內以中文或英文回覆",

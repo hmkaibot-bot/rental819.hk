@@ -6,7 +6,7 @@ import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { homeContent } from "@/lib/content/home";
 import { guidePages } from "@/lib/nav";
-import { whatsappLink } from "@/lib/site";
+import { site, whatsappLink } from "@/lib/site";
 import { Section, SectionHeader } from "@/components/Section";
 import FeatureIcon from "@/components/FeatureIcon";
 import CTABand from "@/components/CTABand";
@@ -14,16 +14,22 @@ import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
-  return pageMeta(
-    params.locale,
-    "",
-    isEn
-      ? "Japan Motorcycle Rental & Self-Drive Tours"
-      : "日本電單車租賃・自駕遊團",
-    isEn
-      ? "Rent a motorcycle in Japan and ride self-drive tours, booked from Hong Kong. 99 branches, full insurance, ETC and gear included."
-      : "由香港預約日本電單車租賃及自駕遊，全日本 99 間分店，包保險、ETC 及裝備。",
-  );
+  const title = isEn
+    ? "Japan Motorcycle Trips — Rental, Guided Tours & Packages"
+    : "日本電單車自駕遊｜租車・旅行團・自駕套票";
+  return {
+    ...pageMeta(
+      params.locale,
+      "",
+      title,
+      isEn
+        ? `Rent a motorcycle in Japan, booked from Hong Kong in Chinese or English: ${site.parent.branches} branches, from HK$295 a day with Japan's compulsory and voluntary insurance included, plus Cantonese-led guided tours and self-drive packages.`
+        : `由香港以中文預約日本電單車租賃及自駕遊：全日本 ${site.parent.branches} 間分店取車，1 天參考租金 HK$295 起（已包強制及任意保險），另有廣東話領隊電單車旅行團及自駕套票，WhatsApp 即可查詢。`,
+    ),
+    // A layout's title template skips the page in its own segment, so the home
+    // page writes out its brand suffix instead of relying on one.
+    title: { absolute: isEn ? `${title} | RENTAL819 Hong Kong` : `${title}｜RENTAL819 香港` },
+  };
 }
 
 export default function HomePage({ params }: { params: { locale: string } }) {

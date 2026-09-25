@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 
   const notes = [
     body.helmet_size?.trim() && `頭盔尺碼：${body.helmet_size.trim()}`,
-    "已確認持有效國際駕駛執照（IDP）",
+    "已確認年滿 18 歲並持正式駕照、IDP 及護照",
     "已同意繳費詳情、取消政策及私隱聲明",
     body.notes?.trim() && `備註：${body.notes.trim()}`,
   ]

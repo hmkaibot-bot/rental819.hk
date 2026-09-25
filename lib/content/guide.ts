@@ -11,7 +11,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "香港車牌可以在日本租電單車嗎？｜國際駕駛執照 IDP 須知",
       seoDescription:
         "可以。持香港或澳門的正式電單車駕駛執照，連同國際駕駛執照（IDP）及護照三者齊備，即可在日本租電單車；暫準執照（P 牌）恕不受理，租車人須年滿 18 歲，IDP 亦須清楚顯示可駕駛電單車。",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "三份證件，缺一不可" },
         {
@@ -38,7 +38,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         { type: "h", text: "年齡限制" },
         {
           type: "p",
-          text: "Rental819 只向 18 歲以上的成年人提供服務，未滿 18 歲恕無法提供電單車出租服務。18 歲或以上並持有有效國際駕駛執照者，均可租賃 RENTAL819 的電單車。",
+          text: "Rental819 只向 18 歲以上的成年人提供服務，未滿 18 歲恕無法提供電單車出租服務。18 歲或以上，並同時持有香港／澳門正式駕駛執照、有效國際駕駛執照（IDP）及護照者，均可租賃 RENTAL819 的電單車。",
         },
         { type: "h", text: "在香港／澳門以外簽發的駕駛執照" },
         {
@@ -293,7 +293,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "日本租電單車價錢｜租金、保險及裝備收費表",
       seoDescription:
         "日本租電單車幾錢？P-1 至 P-7 一天租金由 HK$295 至 HK$1,765，已包強制及任意保險，但不包括燃油、高速公路費及泊車。另附車輛損傷補償、MamoRide 補償，以及頭盔、尾箱、ETC 卡等裝備的收費表。",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         {
           type: "p",
@@ -400,7 +400,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "溫馨提示：租賃者須於租車單據發出後三個工作天內以銀行匯款／轉數快繳付予頭盔王。僅限 18 歲以上、持有效港／澳駕照、國際駕照及護照人士，並只接受租賃者本人之實體信用卡或扣帳卡付款。如需報價，請使用租車預約表格，或 WhatsApp 我們的團隊：wa.me/85298686569。",
+          text: "溫馨提示：租金本身須於租車單據發出後三個工作天內，以銀行匯款／轉數快繳付予頭盔王。僅限 18 歲以上、持有效港／澳正式駕照、國際駕照及護照人士，並只接受租賃者本人之實體信用卡或扣帳卡付款。如需報價，請使用租車預約表格，或 WhatsApp 我們的團隊：wa.me/85298686569。",
         },
       ],
     },
@@ -651,7 +651,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "日本電單車交通規則",
       seoDescription:
         "日本與港澳同樣靠左行駛；無標示時國道時速上限 100 公里、其他道路 50 公里。停止標誌必須完全停車、腳板觸地，平交道亦要停。違例泊車須自行到警署繳款，否則我們會另收 20,000 日圓。",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "靠左行駛" },
         {
@@ -677,7 +677,17 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         { type: "h", text: "時速限制" },
         {
           type: "p",
-          text: "如果道路上沒有時速標示，日本的時速上限為國道 100km/h、其他道路 50km/h。但大部分快速公路的時速為 90km/h，有些更會是 80km/h。時速限制有時亦會按天氣狀況調整，請留意當時的時速標示。",
+          text: "時速限制以道路標誌為準；如無標誌，須遵守日本法定速度。時速限制有時亦會按天氣狀況調整，請留意當時的時速標示。",
+        },
+        {
+          type: "link",
+          items: [
+            {
+              href: "https://www.npa.go.jp/bureau/traffic/seikatsudouro/seikatsudoro.html",
+              label: "日本警察廳：生活道路的法定速度（日文）",
+              text: "日本法定速度的官方資料。",
+            },
+          ],
         },
         { type: "h", text: "超車" },
         {
@@ -825,7 +835,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro:
         "Yes. If you hold a full Hong Kong or Macau motorcycle licence and bring your International Driving Permit (IDP) and passport, you can rent a RENTAL819 motorcycle in Japan. Probationary (P) licences cannot be accepted.",
       seoTitle: "Can I rent a motorcycle in Japan with a Hong Kong licence?",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "Three documents — all of them required" },
         {
@@ -852,7 +862,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         { type: "h", text: "Age limit" },
         {
           type: "p",
-          text: "Rental819 serves only adults aged 18 or older; if you are under 18, we are unable to provide motorcycle rental services. Anyone 18 or older holding a valid International Driving Permit may rent a RENTAL819 motorcycle.",
+          text: "Rental819 serves only adults aged 18 or older; if you are under 18, we are unable to provide motorcycle rental services. Anyone 18 or older who holds a full Hong Kong or Macau licence, a valid International Driving Permit and a passport may rent a RENTAL819 motorcycle.",
         },
         { type: "h", text: "Licences issued outside Hong Kong or Macau" },
         {
@@ -1100,7 +1110,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro:
         "How much does it cost to rent a motorcycle in Japan? The actual rent depends on the vehicle class, rental period and the accessories you choose — here is the full price list.",
       seoTitle: "Japan motorcycle rental prices & fees",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         {
           type: "p",
@@ -1207,7 +1217,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "Note: payment is made to Helmet King by bank transfer / FPS within three working days after the rental invoice is issued. Rentals are for those aged 18+ holding a valid HK/Macau licence, International Driving Permit and passport, and only the renter's own physical credit or debit card is accepted. For a quote, use the rental booking form or WhatsApp our team: wa.me/85298686569.",
+          text: "Note: the rent itself is paid to Helmet King by bank transfer / FPS within three working days after the rental invoice is issued. Rentals are for those aged 18+ holding a valid full HK/Macau licence, International Driving Permit and passport, and only the renter's own physical credit or debit card is accepted. For a quote, use the rental booking form or WhatsApp our team: wa.me/85298686569.",
         },
       ],
     },
@@ -1473,7 +1483,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       title: "Japanese traffic rules",
       intro: "Here are the main traffic rules you need to follow when driving in Japan.",
       seoTitle: "Japan traffic rules for riders",
-      updated: "2026-08-06",
+      updated: "2026-09-25",
       blocks: [
         { type: "h", text: "Keep left" },
         {
@@ -1499,7 +1509,17 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         { type: "h", text: "Speed limits" },
         {
           type: "p",
-          text: "If there is no speed sign on the road, the maximum in Japan is 100 km/h on national highways and 50 km/h on other roads. But most expressways are 90 km/h, and some are 80 km/h. Speed limits may also be adjusted for weather, so watch the current speed signs.",
+          text: "Speed limits follow the road signs; where there is no sign, Japan's statutory speed limits apply. Speed limits may also be adjusted for weather, so watch the current speed signs.",
+        },
+        {
+          type: "link",
+          items: [
+            {
+              href: "https://www.npa.go.jp/bureau/traffic/seikatsudouro/seikatsudoro.html",
+              label: "National Police Agency: statutory speeds on residential roads (Japanese)",
+              text: "Official information on Japan's statutory speed limits.",
+            },
+          ],
         },
         { type: "h", text: "Overtaking" },
         {

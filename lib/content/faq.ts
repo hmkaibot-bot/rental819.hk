@@ -20,7 +20,7 @@ export const faq: Record<Locale, FaqGroup[]> = {
         },
         {
           q: "我今年 18 歲，可以租車嗎？",
-          a: "可以。18 歲或以上並持有有效國際駕駛執照者，均可租賃 RENTAL819 的電單車。",
+          a: "可以。只要年滿 18 歲，並同時持有香港／澳門正式駕駛執照、有效國際駕駛執照（IDP）及護照，即可租賃 RENTAL819 的電單車；暫準執照（P 牌）恕不受理。",
         },
         {
           q: "租車一定要會說日語嗎？",
@@ -153,7 +153,7 @@ export const faq: Record<Locale, FaqGroup[]> = {
         },
         {
           q: "I'm 18 — can I rent?",
-          a: "Yes. Anyone 18 or older holding a valid International Driving Permit may rent a RENTAL819 motorcycle.",
+          a: "Yes. Anyone 18 or older who holds a full Hong Kong or Macau licence, a valid International Driving Permit (IDP) and a passport may rent a RENTAL819 motorcycle. Probationary (P) licences are not accepted.",
         },
         {
           q: "Do I need to speak Japanese to rent?",

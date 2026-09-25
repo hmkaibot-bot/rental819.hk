@@ -1,6 +1,6 @@
 /** A link out of a guide article, used by the `link` block. */
 export interface BlockLink {
-  href: string; // locale-prefixed path, e.g. "/zh-hk/guide/route"
+  href: string; // locale-prefixed path, e.g. "/zh-hk/guide/route", or an external URL
   label: string; // anchor text
   text?: string; // one-line summary shown after the link
 }

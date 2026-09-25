@@ -83,7 +83,7 @@ const t = {
     promo: "優惠碼（如有）",
     promoPh: "例如 CARDO88",
     // consent
-    idp: "本人持有效國際駕駛執照（IDP），並已滿 18 歲。",
+    idp: "本人已滿 18 歲，並持有正式電單車駕駛執照、有效國際駕駛執照（IDP）及護照。",
     idpHint: "沒有有效 IDP 恕無法租車。",
     consentPay:
       "本人已明白繳費詳情：須於租車發票發出後三個工作天內以銀行匯款／轉數快繳付。",
@@ -169,7 +169,7 @@ const t = {
     mamoride: "Add MamoRide compensation (reservations of 15 days or less)",
     promo: "Promo code (if any)",
     promoPh: "e.g. CARDO88",
-    idp: "I hold a valid International Driving Permit (IDP) and am 18 or older.",
+    idp: "I am 18 or older and hold a full motorcycle licence, a valid International Driving Permit (IDP) and a passport.",
     idpHint: "We cannot rent without a valid IDP.",
     consentPay:
       "I understand payment is due to Helmet King within three working days of the rental invoice, by bank transfer / FPS.",

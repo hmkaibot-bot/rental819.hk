@@ -51,7 +51,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       highlight: "電單車自駕遊",
       tagline: "體驗日本道路之美，感受日本二輪文化",
       subtitle:
-        "喺日本租電單車自駕遊，由香港直接以中文預約，於全日本 99 間分店取車。由 125cc 到大型旅行電單車、Harley、越野車一應俱全，連保險、ETC、頭盔裝備一次過安排妥當。",
+        "喺日本租電單車自駕遊，由香港直接以中文預約，於全日本 99 間分店取車。由 125cc 到大型旅行電單車、Harley、越野車一應俱全，租金已包強制及任意保險，頭盔等裝備亦可預先預約。",
       primaryCta: "立即預約租車",
       secondaryCta: "WhatsApp 免費查詢",
       stats: [
@@ -70,7 +70,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       {
         icon: "fleet",
         title: "全日本最大車隊",
-        body: "橫跨北海道至九州 99 間分店，數以千計車款任揀，熱門日子亦有充足選擇。",
+        body: "橫跨北海道至九州 99 間分店，數以千計車款任揀。",
       },
       {
         icon: "support",
@@ -79,13 +79,13 @@ export const homeContent: Record<Locale, HomeContent> = {
       },
       {
         icon: "shield",
-        title: "全面保險保障",
-        body: "所有租車均包含基本車輛保險，並可加購免責額補償（NOC）及進階保障，安心上路。",
+        title: "已包強制及任意保險",
+        body: "所有租車均已包含日本的強制保險及任意保險；車輛損傷補償及 MamoRide 補償另計，詳情見保險頁。",
       },
       {
         icon: "gear",
         title: "裝備一次過安排",
-        body: "頭盔、手套、ETC 卡、車架箱、導航等按需要準備，落機即可出發。",
+        body: "頭盔、尾箱、側袋、側箱可預先預約，手機架免費；手套、ETC 卡等可於取車當日向分店查詢租用。",
       },
       {
         icon: "clock",
@@ -121,7 +121,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       },
       {
         title: "自駕套票",
-        body: "租車＋住宿＋行程建議一次搞掂，最抵最方便的自由行組合。",
+        body: "機票＋電單車一次搞掂，亦可連住宿及建議路線，最方便的自由行組合。",
         href: "/packages",
         image: "/images/home/way-3.png",
         cta: "瀏覽套票",
@@ -171,7 +171,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       highlight: "self-drive motorcycle tour",
       tagline: "Experience the beauty of Japan's roads and the spirit of its riding culture",
       subtitle:
-        "Rent a motorcycle in Japan and ride it yourself — book from Hong Kong in your own language and pick up at any of 99 branches across Japan. From 125cc to big tourers, Harleys and off-road machines — with insurance, ETC and gear all sorted for you.",
+        "Rent a motorcycle in Japan and ride it yourself — book from Hong Kong in your own language and pick up at any of 99 branches across Japan. From 125cc to big tourers, Harleys and off-road machines — compulsory and voluntary insurance included, and helmets and other gear can be reserved in advance.",
       primaryCta: "Book a rental",
       secondaryCta: "Free WhatsApp enquiry",
       stats: [
@@ -190,7 +190,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       {
         icon: "fleet",
         title: "Japan's largest fleet",
-        body: "99 branches from Hokkaido to Kyushu with thousands of bikes — real availability, even on peak dates.",
+        body: "99 branches from Hokkaido to Kyushu with thousands of bikes to choose from.",
       },
       {
         icon: "support",
@@ -199,13 +199,13 @@ export const homeContent: Record<Locale, HomeContent> = {
       },
       {
         icon: "shield",
-        title: "Full insurance cover",
-        body: "Every rental includes basic vehicle insurance, with optional NOC and premium cover for total peace of mind.",
+        title: "Insurance included",
+        body: "Every rental includes Japan's compulsory and voluntary insurance; vehicle-damage compensation and MamoRide cover are charged separately — see the insurance guide.",
       },
       {
         icon: "gear",
         title: "Gear sorted for you",
-        body: "Helmets, gloves, ETC card, panniers and navigation prepared as needed — land and ride.",
+        body: "Reserve helmets, tail boxes, side bags and side boxes in advance, with a free phone mount; gloves, ETC cards and more can be rented at the branch on pick-up day, subject to supply.",
       },
       {
         icon: "clock",
@@ -241,7 +241,7 @@ export const homeContent: Record<Locale, HomeContent> = {
       },
       {
         title: "Self-drive packages",
-        body: "Bike, accommodation and a suggested itinerary bundled together — the easy-value way to go independent.",
+        body: "Flight and bike bundled, with an optional hotel version and a suggested route — the easy way to go independent.",
         href: "/packages",
         image: "/images/home/way-3.png",
         cta: "Browse packages",
