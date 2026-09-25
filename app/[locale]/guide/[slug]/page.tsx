@@ -5,13 +5,14 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { guideDocs } from "@/lib/content/guide";
+import { waEnquiry } from "@/lib/site";
 import { articleLd, breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import GuideArticle from "@/components/GuideArticle";
 import CTABand from "@/components/CTABand";
 import JsonLd from "@/components/JsonLd";
-import { ArrowRight } from "@/components/icons";
+import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 
 export function generateStaticParams() {
   return guideDocs["zh-hk"].map((d) => ({ slug: d.slug }));
@@ -57,6 +58,13 @@ export default function GuideDocPage({
   const prev = index > 0 ? docs[index - 1] : null;
   const next = index < docs.length - 1 ? docs[index + 1] : null;
   const isEn = locale === "en";
+  const waHref = waEnquiry(locale, "rental", doc.title);
+  const nextSteps = [
+    { href: "/rental", label: isEn ? "Renting a motorcycle in Japan" : "日本租電單車詳情" },
+    { href: "/guide/licence", label: dict.guideMenu.licence },
+    { href: "/guide/fees", label: dict.guideMenu.fees },
+    { href: "/faq", label: dict.nav.faq },
+  ].filter((s) => s.href !== `/guide/${doc.slug}`);
 
   return (
     <>
@@ -77,6 +85,22 @@ export default function GuideDocPage({
             { label: doc.title },
           ]}
         />
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href={localePath(locale, "/booking")} className="btn-primary" data-cta="guide-hero-book">
+            {dict.common.bookNow}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn bg-white/10 text-white ring-1 ring-inset ring-white/20 hover:bg-white/20"
+            data-cta="guide-hero-wa"
+          >
+            <WhatsAppIcon className="h-5 w-5 text-[#25D366]" />
+            {dict.common.whatsapp}
+          </a>
+        </div>
       </PageHero>
 
       <section className="container-x py-14 lg:py-16">
@@ -93,7 +117,25 @@ export default function GuideDocPage({
             {isEn ? " · RENTAL819 Hong Kong team" : "・RENTAL819 香港團隊"}
           </p>
         )}
-        <GuideArticle blocks={doc.blocks} />
+        <GuideArticle blocks={doc.blocks} locale={locale} waHref={waHref} />
+
+        <div className="mt-12 max-w-3xl rounded-2xl border border-slate-100 bg-slate-50 p-6">
+          <h2 className="text-lg font-bold">{isEn ? "Next steps" : "下一步"}</h2>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            {nextSteps.map((s) => (
+              <li key={s.href}>
+                <Link
+                  href={localePath(locale, s.href)}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
+                  data-cta="guide-next-step"
+                >
+                  {s.label}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Prev / next */}
         <nav className="mt-14 grid gap-4 border-t border-slate-100 pt-8 sm:grid-cols-2">
@@ -133,6 +175,7 @@ export default function GuideDocPage({
               ? "Book a rental or message our Hong Kong team for tailored advice."
               : "立即預約租車，或聯絡香港團隊獲取個人化建議。"
           }
+          waMessageHref={waHref}
         />
       </div>
     </>

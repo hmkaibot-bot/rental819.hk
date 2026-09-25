@@ -41,6 +41,11 @@ const dict: Dictionary = {
     getStarted: "開始規劃",
     enquire: "免費查詢",
   },
+  trust: {
+    price: "1 天租金 {price} 起（參考價，已包強制及任意保險）",
+    same: "租金與日本 Rental819 相同，經香港預約毋須額外收費",
+    lead: "最遲出發前一星期預約，先到先得",
+  },
   footer: {
     about:
       "RENTAL819 香港 — 頭盔王 × Rental819 合作，為港澳騎士提供日本電單車租賃及自駕遊團，橫跨全日本 99 間分店。",

@@ -169,6 +169,7 @@ export default function PackagesPage({ params }: { params: { locale: string } })
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-outline"
+                  data-cta="package-wa"
                 >
                   <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
                   {isEn ? "Ask on WhatsApp" : "WhatsApp 查詢"}

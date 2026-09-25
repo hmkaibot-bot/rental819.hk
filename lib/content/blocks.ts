@@ -15,7 +15,9 @@ export type Block =
   // An ordered list of links — used to point a hub page at its sibling docs.
   | { type: "link"; items: BlockLink[] }
   | { type: "note"; text: string }
-  | { type: "table"; head: string[]; rows: string[][] };
+  | { type: "table"; head: string[]; rows: string[][] }
+  // A short prompt rendered with Book / WhatsApp buttons.
+  | { type: "cta"; text: string };
 
 export interface GuideDoc {
   slug: string; // path under /guide, e.g. "insurance"

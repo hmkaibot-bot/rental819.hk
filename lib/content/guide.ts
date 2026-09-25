@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import type { GuideDoc } from "./blocks";
+import { RENT_TABLE_ROWS } from "./prices";
 
 export const guideDocs: Record<Locale, GuideDoc[]> = {
   "zh-hk": [
@@ -52,8 +53,9 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "本頁只說明在日本租車時所需的證件。國際駕駛執照的申請手續請向發證機關查詢；如不肯定手上的證件是否合用，歡迎 WhatsApp 我們的團隊：wa.me/85298686569。",
+          text: "本頁只說明在日本租車時所需的證件。國際駕駛執照的申請手續請向發證機關查詢。",
         },
+        { type: "cta", text: "不肯定手上的證件是否合用？WhatsApp 我們的團隊，或直接填表預約。" },
         {
           type: "link",
           items: [
@@ -167,7 +169,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           ],
         },
         {
-          type: "p",
+          type: "cta",
           text: "自己編排行程有自己的樂趣。如果人數多、日程趕，又或者想有人幫手睇一睇行程行唔行得通，WhatsApp 香港團隊即可，我們會按你的日數與想去的景點提供意見。",
         },
       ],
@@ -303,20 +305,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         {
           type: "table",
           head: ["等級", "4 小時", "8 小時", "1 天（24 小時）", "第 2 天以後每天", "延遲費用／小時"],
-          rows: [
-            ["P-1", "$220", "$245", "$295", "$195", "$50"],
-            ["P-2", "$330", "$365", "$440", "$295", "$75"],
-            ["P-3", "$605", "$675", "$810", "$540", "$135"],
-            ["P-4", "$770", "$855", "$1,030", "$685", "$170"],
-            ["P-5", "$880", "$980", "$1,175", "$785", "$195"],
-            ["P-6", "$990", "$1,100", "$1,320", "$880", "$220"],
-            ["P-7", "$1,320", "$1,470", "$1,765", "$1,175", "$295"],
-          ],
+          rows: RENT_TABLE_ROWS,
         },
         {
           type: "note",
           text: "上表已包含強制及任意保險，但不包含燃油、高速公路費及泊車。租金收費時段分為 4 小時、8 小時、1 天，及第 2 天以後按每 24 小時計算。",
         },
+        { type: "cta", text: "以上為參考價。填寫租車預約表格，香港團隊會按你的車款及日期以中文確認報價。" },
         { type: "h", text: "強制保險（已包含在租車費用內）" },
         {
           type: "table",
@@ -400,12 +395,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "溫馨提示：租金本身須於租車單據發出後三個工作天內，以銀行匯款／轉數快繳付予頭盔王。僅限 18 歲以上、持有效港／澳正式駕照、國際駕照及護照人士，並只接受租賃者本人之實體信用卡或扣帳卡付款。如需報價，請使用租車預約表格，或 WhatsApp 我們的團隊：wa.me/85298686569。",
+          text: "溫馨提示：租金本身須於租車單據發出後三個工作天內，以銀行匯款／轉數快繳付予頭盔王。僅限 18 歲以上、持有效港／澳正式駕照、國際駕照及護照人士，並只接受租賃者本人之實體信用卡或扣帳卡付款。",
         },
         {
           type: "note",
           text: "本站列明的港幣價目、付款方式（轉數快／銀行匯款予頭盔王）及取消條款，只適用於經 RENTAL819 香港預約的租車；直接於 rental819.com 預約者，以日本 Rental819 的條款為準。",
         },
+        { type: "cta", text: "想知道實際報價？填寫租車預約表格，或 WhatsApp 我們的香港團隊。" },
       ],
     },
     {
@@ -882,8 +878,9 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "This page covers only the documents needed to rent in Japan. For how to apply for an International Driving Permit, ask the issuing authority. If you are unsure whether your documents qualify, WhatsApp our team: wa.me/85298686569.",
+          text: "This page covers only the documents needed to rent in Japan. For how to apply for an International Driving Permit, ask the issuing authority.",
         },
+        { type: "cta", text: "Not sure your documents qualify? WhatsApp our team, or send the booking form." },
         {
           type: "link",
           items: [
@@ -997,7 +994,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
           ],
         },
         {
-          type: "p",
+          type: "cta",
           text: "Planning it yourself is half the fun. If the group is large, the schedule is tight, or you simply want someone to sanity-check the plan, WhatsApp our Hong Kong team — we'll give you feedback based on your day count and the places you want to reach.",
         },
       ],
@@ -1136,20 +1133,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         {
           type: "table",
           head: ["Class", "4 hrs", "8 hrs", "1 day (24 hrs)", "Each day from day 2", "Overtime / hour"],
-          rows: [
-            ["P-1", "$220", "$245", "$295", "$195", "$50"],
-            ["P-2", "$330", "$365", "$440", "$295", "$75"],
-            ["P-3", "$605", "$675", "$810", "$540", "$135"],
-            ["P-4", "$770", "$855", "$1,030", "$685", "$170"],
-            ["P-5", "$880", "$980", "$1,175", "$785", "$195"],
-            ["P-6", "$990", "$1,100", "$1,320", "$880", "$220"],
-            ["P-7", "$1,320", "$1,470", "$1,765", "$1,175", "$295"],
-          ],
+          rows: RENT_TABLE_ROWS,
         },
         {
           type: "note",
           text: "The table above already includes compulsory and voluntary insurance, but not fuel, expressway tolls or parking. Rental bands are 4 hours, 8 hours, 1 day, and per 24 hours from the 2nd day onward.",
         },
+        { type: "cta", text: "These are reference prices. Send the booking form and our Hong Kong team will confirm a quote for your bike and dates." },
         { type: "h", text: "Compulsory insurance (already included in the rental fee)" },
         {
           type: "table",
@@ -1233,12 +1223,13 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         },
         {
           type: "note",
-          text: "Note: the rent itself is paid to Helmet King by bank transfer / FPS within three working days after the rental invoice is issued. Rentals are for those aged 18+ holding a valid full HK/Macau licence, International Driving Permit and passport, and only the renter's own physical credit or debit card is accepted. For a quote, use the rental booking form or WhatsApp our team: wa.me/85298686569.",
+          text: "Note: the rent itself is paid to Helmet King by bank transfer / FPS within three working days after the rental invoice is issued. Rentals are for those aged 18+ holding a valid full HK/Macau licence, International Driving Permit and passport, and only the renter's own physical credit or debit card is accepted.",
         },
         {
           type: "note",
           text: "The HK$ prices, payment method (FPS / bank transfer to Helmet King) and cancellation terms on this site apply to rentals booked through RENTAL819 Hong Kong; bookings made directly on rental819.com follow Rental819 Japan's own terms.",
         },
+        { type: "cta", text: "Want an exact quote? Send the rental booking form or WhatsApp our Hong Kong team." },
       ],
     },
     {

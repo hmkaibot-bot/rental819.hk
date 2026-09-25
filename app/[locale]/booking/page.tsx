@@ -4,12 +4,13 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { rentalContent } from "@/lib/content/rental";
-import { site } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import BookingForm from "@/components/BookingForm";
 import JsonLd from "@/components/JsonLd";
+import TrustLine from "@/components/TrustLine";
 import { WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
@@ -90,15 +91,18 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
                   : "WhatsApp 我們的團隊，回覆最快。"}
               </p>
               <a
-                href={site.whatsapp}
+                href={waEnquiry(locale, "rental", dict.nav.book)}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-cta="booking-aside-wa"
                 className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-semibold text-white hover:brightness-95"
               >
                 <WhatsAppIcon className="h-5 w-5" />
                 {site.phone}
               </a>
             </div>
+
+            <TrustLine locale={locale} dict={dict} tone="light" />
 
             <ul className="space-y-3">
               {points.map((p) => (

@@ -4,13 +4,14 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { rentalContent } from "@/lib/content/rental";
-import { site } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd, serviceLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import CTABand from "@/components/CTABand";
 import CoverageMap from "@/components/CoverageMap";
 import JsonLd from "@/components/JsonLd";
+import TrustLine from "@/components/TrustLine";
 import { ArrowRight } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
@@ -54,11 +55,12 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
           items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.rental }]}
         />
         <div className="mt-6">
-          <Link href={localePath(locale, "/booking")} className="btn-primary">
+          <Link href={localePath(locale, "/booking")} className="btn-primary" data-cta="rental-hero-book">
             {dict.common.bookNow}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+        <TrustLine locale={locale} dict={dict} tone="dark" />
       </PageHero>
 
       {/* Bike categories */}
@@ -69,7 +71,12 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {c.categories.map((cat) => (
-            <div key={cat.name} className="card p-6">
+            <Link
+              key={cat.name}
+              href={localePath(locale, `/booking?bike=${encodeURIComponent(`${cat.name} ${cat.cc}`)}`)}
+              className="card-hover block p-6"
+              data-cta="rental-category"
+            >
               <div className="flex items-baseline justify-between">
                 <h3 className="text-lg font-bold">{cat.name}</h3>
                 <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700">
@@ -77,7 +84,10 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
                 </span>
               </div>
               <p className="mt-2 text-sm leading-6 text-ink-muted">{cat.note}</p>
-            </div>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
+                {isEn ? "Choose this type" : "揀呢類車"} <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
           ))}
         </div>
       </section>
@@ -126,7 +136,13 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
       </section>
 
       <div className="pb-20">
-        <CTABand locale={locale} dict={dict} title={c.ctaTitle} subtitle={c.ctaSubtitle} />
+        <CTABand
+          locale={locale}
+          dict={dict}
+          title={c.ctaTitle}
+          subtitle={c.ctaSubtitle}
+          waMessageHref={waEnquiry(locale, "rental", dict.nav.rental)}
+        />
       </div>
     </>
   );

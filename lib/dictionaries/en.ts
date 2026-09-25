@@ -41,6 +41,11 @@ const dict: Dictionary = {
     getStarted: "Start planning",
     enquire: "Free enquiry",
   },
+  trust: {
+    price: "From {price} a day (reference price, compulsory & voluntary insurance included)",
+    same: "Same rent as Rental819 Japan — no extra charge for booking via Hong Kong",
+    lead: "Book at least a week ahead; first come, first served",
+  },
   footer: {
     about:
       "RENTAL819 Hong Kong — a Helmet King × Rental819 partnership bringing Japan motorcycle rentals and self-drive tours to Hong Kong & Macau riders, across 99 branches nationwide in Japan.",

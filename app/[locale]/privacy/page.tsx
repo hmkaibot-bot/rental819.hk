@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
-import { site } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -86,7 +86,7 @@ export default function PrivacyPage({ params }: { params: { locale: string } }) 
         />
       </PageHero>
       <section className="container-x py-14 lg:py-16">
-        <GuideArticle blocks={c.blocks} />
+        <GuideArticle blocks={c.blocks} locale={locale} waHref={waEnquiry(locale, "general", c.title)} />
       </section>
     </>
   );

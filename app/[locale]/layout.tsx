@@ -45,7 +45,7 @@ export default function LocaleLayout({
         <Header locale={locale} dict={dict} nav={nav} />
         <main className="flex-1">{children}</main>
         <Footer locale={locale} dict={dict} />
-        <WhatsAppFloat label={dict.common.whatsapp} />
+        <WhatsAppFloat locale={locale} label={dict.common.whatsapp} />
       </body>
     </html>
   );

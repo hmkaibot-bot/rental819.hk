@@ -4,7 +4,7 @@ import type { Locale } from "@/lib/i18n";
 import { localePath } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { buildNav, guidePages } from "@/lib/nav";
-import { site, whatsappLink } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { WhatsAppIcon, FacebookIcon, InstagramIcon } from "./icons";
 
 export default function Footer({
@@ -43,9 +43,10 @@ export default function Footer({
           </p>
           <div className="mt-5 flex items-center gap-3">
             <a
-              href={whatsappLink()}
+              href={waEnquiry(locale, "general")}
               target="_blank"
               rel="noopener noreferrer"
+              data-cta="footer-wa"
               className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
               aria-label="WhatsApp"
             >
@@ -131,7 +132,7 @@ export default function Footer({
               <span className="block text-xs uppercase tracking-wide text-brand-300">
                 WhatsApp
               </span>
-              <a href={whatsappLink()} className="transition hover:text-white">
+              <a href={waEnquiry(locale, "general")} className="transition hover:text-white" data-cta="footer-wa">
                 {site.phone}
               </a>
             </li>

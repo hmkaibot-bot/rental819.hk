@@ -3,7 +3,7 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { faq } from "@/lib/content/faq";
-import { whatsappLink } from "@/lib/site";
+import { waEnquiry } from "@/lib/site";
 import { breadcrumbLd, faqLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -80,10 +80,11 @@ export default function FaqPage({ params }: { params: { locale: string } }) {
               {isEn ? "Still have a question?" : "還有其他問題嗎？"}
             </p>
             <a
-              href={whatsappLink()}
+              href={waEnquiry(locale, "general", dict.nav.faq)}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary mt-3"
+              data-cta="faq-wa"
             >
               <WhatsAppIcon className="h-5 w-5" />
               {dict.common.whatsapp}
@@ -102,6 +103,7 @@ export default function FaqPage({ params }: { params: { locale: string } }) {
               ? "Book a rental or plan a tour with our Hong Kong team."
               : "立即預約租車，或與香港團隊規劃行程。"
           }
+          waMessageHref={waEnquiry(locale, "rental", dict.nav.faq)}
         />
       </div>
     </>

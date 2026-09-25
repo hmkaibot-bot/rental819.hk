@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { tours, providerNote, REG_CLOSE_DAYS, type Tour } from "@/lib/content/tours";
-import { whatsappLink, site } from "@/lib/site";
+import { whatsappLink, waEnquiry, site } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -132,6 +132,7 @@ function TourCard({ tour, state, locale }: { tour: Tour; state: TourState; local
             href={bookUrl ?? whatsappLink(cta?.message)}
             target="_blank"
             rel="noopener noreferrer"
+            data-cta="tour-signup"
             className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
           >
             {cta && <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />}
@@ -249,10 +250,11 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
         </p>
         <div className="mt-6">
           <a
-            href={whatsappLink()}
+            href={waEnquiry(locale, "tours", dict.nav.tours)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn bg-white text-brand-800 hover:bg-brand-50"
+            data-cta="tours-hero-wa"
           >
             <WhatsAppIcon className="h-5 w-5 text-[#25D366]" />
             {dict.common.whatsapp}
@@ -271,6 +273,7 @@ export default function ToursPage({ params }: { params: { locale: string } }) {
           dict={dict}
           primaryHref={site.adventureUrl}
           primaryLabel={isEn ? "Book on 26 Adventure" : "到 26 Adventure 報名"}
+          waMessageHref={waEnquiry(locale, "tours", dict.nav.tours)}
           title={isEn ? "Ready to join a tour?" : "想參加自駕團？"}
           subtitle={
             isEn ? (

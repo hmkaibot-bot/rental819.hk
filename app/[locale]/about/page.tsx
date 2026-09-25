@@ -4,7 +4,7 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { aboutContent } from "@/lib/content/about";
-import { site } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -137,6 +137,7 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
               ? "Rent a bike, join a tour, or ask us anything."
               : "租車、參團，或有任何問題，歡迎聯絡我們。"
           }
+          waMessageHref={waEnquiry(locale, "rental", dict.nav.about)}
         />
       </div>
     </>

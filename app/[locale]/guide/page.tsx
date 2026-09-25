@@ -4,6 +4,7 @@ import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { guideDocs } from "@/lib/content/guide";
+import { waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -89,6 +90,7 @@ export default function GuideIndex({ params }: { params: { locale: string } }) {
               ? "Our Hong Kong team is here to help you plan every detail."
               : "香港團隊樂意為你解答並規劃行程每個細節。"
           }
+          waMessageHref={waEnquiry(locale, "rental", dict.nav.guide)}
         />
       </div>
     </>

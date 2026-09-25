@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
-import { site, whatsappLink } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -31,9 +31,10 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
     {
       label: "WhatsApp",
       value: site.phone,
-      href: whatsappLink(),
+      href: waEnquiry(locale, "general", dict.nav.contact),
       icon: <WhatsAppIcon className="h-6 w-6" />,
       accent: "bg-[#25D366]",
+      cta: "contact-wa",
     },
     {
       label: isEn ? "Email" : "電郵",
@@ -91,6 +92,7 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
               target="_blank"
               rel="noopener noreferrer"
               className="card-hover flex items-center gap-4 p-6"
+              data-cta={m.cta}
             >
               <span className={`flex h-12 w-12 items-center justify-center rounded-xl text-white ${m.accent}`}>
                 {m.icon}
@@ -136,7 +138,11 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
           <p className="text-ink-muted">
             {isEn ? "Ready to book?" : "準備好預約？"}
           </p>
-          <Link href={localePath(locale, "/booking")} className="btn-primary mt-3">
+          <Link
+            href={localePath(locale, "/booking")}
+            className="btn-primary mt-3"
+            data-cta="contact-book"
+          >
             {dict.common.bookNow}
             <ArrowRight className="h-4 w-4" />
           </Link>

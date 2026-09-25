@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { localePath, type Locale } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/site";
@@ -273,6 +273,17 @@ export default function BookingForm({ locale }: { locale: Locale }) {
   const [status, setStatus] = useState<Status>("idle");
   const [errKey, setErrKey] = useState<keyof typeof c | null>(null);
   const [form, setForm] = useState<Form>(emptyForm);
+
+  // /rental's category cards link here with ?bike=…. Read from window rather than
+  // useSearchParams, which would need a Suspense boundary on this static page.
+  useEffect(() => {
+    try {
+      const b = new URLSearchParams(window.location.search).get("bike");
+      if (b) setForm((f) => (f.bike_pref_1 ? f : { ...f, bike_pref_1: b.slice(0, 80) }));
+    } catch {
+      // Unparseable query — leave the field empty.
+    }
+  }, []);
 
   const setText =
     (k: keyof Form) =>

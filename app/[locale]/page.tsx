@@ -6,10 +6,11 @@ import { isLocale, localePath, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { homeContent } from "@/lib/content/home";
 import { guidePages } from "@/lib/nav";
-import { site, whatsappLink } from "@/lib/site";
+import { site, waEnquiry } from "@/lib/site";
 import { Section, SectionHeader } from "@/components/Section";
 import FeatureIcon from "@/components/FeatureIcon";
 import CTABand from "@/components/CTABand";
+import TrustLine from "@/components/TrustLine";
 import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
@@ -74,20 +75,26 @@ export default function HomePage({ params }: { params: { locale: string } }) {
               {c.hero.subtitle}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href={localePath(locale, "/booking")} className="btn-primary text-base">
+              <Link
+                href={localePath(locale, "/booking")}
+                className="btn-primary text-base"
+                data-cta="hero-book"
+              >
                 {c.hero.primaryCta}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href={whatsappLink()}
+                href={waEnquiry(locale, "rental", dict.nav.home)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn bg-white/10 text-white ring-1 ring-inset ring-white/20 hover:bg-white/20"
+                data-cta="hero-wa"
               >
                 <WhatsAppIcon className="h-5 w-5 text-[#25D366]" />
                 {c.hero.secondaryCta}
               </a>
             </div>
+            <TrustLine locale={locale} dict={dict} tone="dark" />
             <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-8">
               {c.hero.stats.map((s) => (
                 <div key={s.label}>
@@ -253,6 +260,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
           dict={dict}
           title={c.ctaBand.title}
           subtitle={c.ctaBand.subtitle}
+          waMessageHref={waEnquiry(locale, "rental", dict.nav.home)}
         />
       </div>
     </>
