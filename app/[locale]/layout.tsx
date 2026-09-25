@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Analytics } from "@vercel/analytics/next";
 import { locales, isLocale, htmlLang, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { buildNav } from "@/lib/nav";
@@ -8,6 +9,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import JsonLd from "@/components/JsonLd";
+import ConversionTracker from "@/components/ConversionTracker";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -46,6 +48,8 @@ export default function LocaleLayout({
         <main className="flex-1">{children}</main>
         <Footer locale={locale} dict={dict} />
         <WhatsAppFloat locale={locale} label={dict.common.whatsapp} />
+        <Analytics />
+        <ConversionTracker />
       </body>
     </html>
   );

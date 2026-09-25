@@ -74,13 +74,28 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
 
       <section className="container-x py-16 lg:py-20">
         <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr]">
-          <div className="order-2 lg:order-1">
+          <div className="order-1 lg:order-1">
             <div className="card p-6 sm:p-8">
+              {/* The aside (requirements, WhatsApp) sits below the form on phones. */}
+              <p className="mb-5 text-sm text-ink-muted lg:hidden">
+                {isEn
+                  ? "18+ with a full licence, an IDP and a passport · Prefer to chat? "
+                  : "須年滿 18 歲，並持正式駕駛執照、國際駕駛執照（IDP）及護照・想直接傾？"}
+                <a
+                  href={waEnquiry(locale, "rental", dict.nav.book)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-cta="booking-mobile-wa"
+                  className="font-semibold text-brand-700"
+                >
+                  WhatsApp {site.phone}
+                </a>
+              </p>
               <BookingForm locale={locale} />
             </div>
           </div>
 
-          <aside className="order-1 space-y-6 lg:order-2">
+          <aside className="order-2 space-y-6 lg:order-2">
             <div className="rounded-2xl bg-brand-950 p-6 text-white">
               <h2 className="text-lg font-bold">
                 {isEn ? "Prefer to chat?" : "想直接傾？"}
