@@ -883,7 +883,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       intro: "為了提供最佳服務，請花幾分鐘了解在日本租用電單車的詳情及限制。",
       seoTitle: "日本租電單車流程｜預約及取車須知",
       seoDescription:
-        "在日本租電單車須出示護照、香港／澳門駕駛執照及國際駕駛執照，並須年滿 18 歲。最遲一星期前預約、先到先得，租還車必須於同一分店；取車手續約需 15 分鐘，還車前請注滿指定汽油。",
+        "在日本租電單車須出示護照、香港／澳門正式駕駛執照及國際駕駛執照，並須年滿 18 歲。最遲一星期前預約、先到先得，租還車必須於同一分店；取車手續約需 15 分鐘，還車前請注滿指定汽油。",
       updated: "2026-08-06",
       blocks: [
         { type: "h", text: "出發前" },
@@ -984,7 +984,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         "Yes. If you hold a full Hong Kong or Macau motorcycle licence and bring your International Driving Permit (IDP) and passport, you can rent a RENTAL819 motorcycle in Japan. Probationary (P) licences cannot be accepted.",
       seoTitle: "Can I rent a motorcycle in Japan with a Hong Kong licence?",
       seoDescription:
-        "Yes. With a full Hong Kong or Macau motorcycle licence, an International Driving Permit (IDP) and your passport you can rent a motorcycle in Japan. Probationary (P) licences are not accepted, riders must be 18+, and the IDP must clearly show motorcycle entitlement.",
+        "Yes, with a full Hong Kong or Macau motorcycle licence, an IDP and your passport. Riders must be 18+; probationary (P) licences are not accepted.",
       updated: "2026-09-25",
       blocks: [
         { type: "h", text: "Three documents — all of them required" },
@@ -1306,7 +1306,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         "How much does it cost to rent a motorcycle in Japan? The actual rent depends on the vehicle class, rental period and the accessories you choose — here is the full price list.",
       seoTitle: "Japan motorcycle rental prices & fees",
       seoDescription:
-        "How much is a motorcycle rental in Japan? Classes P-1 to P-7 cost HK$295 to HK$1,765 for one day, with compulsory and voluntary insurance included but not fuel, tolls or parking. Also: vehicle-damage and MamoRide cover and gear prices.",
+        "Classes P-1 to P-7 cost HK$295 to HK$1,765 for one day, with compulsory and voluntary insurance included; fuel, tolls and parking are extra.",
       updated: "2026-09-25",
       blocks: [
         {
@@ -1410,7 +1410,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         "When you rent a motorcycle in Japan you can bring your own helmet or reserve one in your size, and you must wear proper riding gear on pick-up day. Here is what to bring, what you can rent, and what each item costs.",
       seoTitle: "Japan Motorcycle Gear: Bring or Rent a Helmet?",
       seoDescription:
-        "At pick-up you must wear a helmet, protective jacket, protective trousers and riding boots. Helmets can be reserved at HK$60 for the first day and HK$10 a day after; tail boxes and side bags too, and a phone mount is free. Gloves and jackets are rented at the branch on departure day.",
+        "At pick-up wear a helmet, protective jacket and trousers, and riding boots. Helmets can be reserved at HK$60 for the first day and HK$10 a day after.",
       updated: "2026-09-25",
       blocks: [
         { type: "h", text: "What you must wear at pick-up" },
@@ -1468,7 +1468,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         "The basic fee already includes Japan's compulsory and voluntary insurance, with vehicle compensation and MamoRide compensation also available.",
       seoTitle: "Japan motorcycle rental insurance explained",
       seoDescription:
-        "Compulsory, voluntary and theft insurance are included: unlimited third-party injury cover and up to 10 million yen per accident for property. Vehicle compensation and MamoRide are extra; the non-operation charge (NOC) is 20,000 or 50,000 yen.",
+        "Compulsory, voluntary and theft insurance are included; vehicle compensation and MamoRide cost extra. Non-operation charge (NOC): 20,000 or 50,000 yen.",
       updated: "2026-08-24",
       blocks: [
         { type: "h", text: "Insurance included in the basic fee" },
@@ -1824,7 +1824,7 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
         "To give you the best service, please take a few minutes to learn the details and restrictions of renting a motorcycle in Japan.",
       seoTitle: "How to book & collect a rental motorcycle in Japan",
       seoDescription:
-        "To rent a motorcycle in Japan bring your passport, Hong Kong/Macau licence and International Driving Permit; riders must be 18+. Book at least a week ahead (first-come, first-served), return to the same branch, and allow about 15 minutes for pick-up.",
+        "Bring your passport, full Hong Kong/Macau licence and IDP; riders must be 18+. Book at least a week ahead and return the bike to the same branch.",
       updated: "2026-08-06",
       blocks: [
         { type: "h", text: "Before departure" },

@@ -22,7 +22,9 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return {
     title: {
       template: en ? "%s | RENTAL819 Hong Kong" : "%s｜RENTAL819 香港",
-      default: en ? "RENTAL819 Hong Kong — Japan motorcycle rental" : "RENTAL819 香港 — 日本電單車自駕遊",
+      // `absolute`, not `default`: a default would still get the root layout's
+      // "%s — RENTAL819" template and carry the brand twice.
+      absolute: en ? "RENTAL819 Hong Kong — Japan motorcycle rental" : "RENTAL819 香港 — 日本電單車自駕遊",
     },
   };
 }

@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { ATTR_KEY, trackEvent, type Attribution } from "@/lib/track";
-import { readStored, writeStored } from "@/lib/storage";
+import { bookingDraftKey, readStored, writeStored } from "@/lib/storage";
+import { locales } from "@/lib/i18n";
 
 function hostOf(url: string): string | null {
   try {
@@ -24,6 +25,9 @@ function fileOf(pathname: string): string {
 /** Records first-touch attribution and turns CTA clicks into conversion events. */
 export default function ConversionTracker() {
   useEffect(() => {
+    // Reading an expired entry deletes it, so a booking-form trip draft older
+    // than 24 hours is removed on the next visit to any page, not only /booking.
+    for (const l of locales) readStored(bookingDraftKey(l));
     try {
       if (!readStored(ATTR_KEY)) {
         const params = new URLSearchParams(window.location.search);

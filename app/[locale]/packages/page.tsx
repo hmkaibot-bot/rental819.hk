@@ -21,7 +21,7 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return pageMeta(
     params.locale,
     "/packages",
-    isEn ? "Japan Self-Drive Motorcycle Packages | Flight + Bike" : "日本電單車自駕套票｜機票連電單車，可加住宿",
+    isEn ? "Japan Motorcycle Packages: Flight + Bike" : "日本電單車自駕套票｜機票連電單車，可加住宿",
     isEn
       ? `Japan self-drive motorcycle packages from Hong Kong: return flight + bike from HK$${fmt(noHotelMin)} (3 days / 2 nights), or flight + hotel with breakfast + bike from HK$${fmt(hotelMin)}. Osaka, Kyushu, Okinawa and Tokyo routes, each with a suggested-route leaflet.`
       : `日本電單車自駕套票：香港來回機票＋電單車 3日2夜 HK$${fmt(noHotelMin)} 起；另有機票＋住宿連早餐＋電單車套票 HK$${fmt(hotelMin)} 起。大阪、九州、沖繩、東京四條路線，附建議路線單張，WhatsApp 即可查詢。`,

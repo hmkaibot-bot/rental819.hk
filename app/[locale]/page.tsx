@@ -16,7 +16,7 @@ import { ArrowRight, WhatsAppIcon } from "@/components/icons";
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
   const title = isEn
-    ? "Japan Motorcycle Trips — Rental, Guided Tours & Packages"
+    ? "Japan Motorcycle Rental, Tours & Packages"
     : "日本電單車自駕遊｜租車・旅行團・自駕套票";
   return {
     ...pageMeta(

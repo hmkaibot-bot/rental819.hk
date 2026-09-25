@@ -5,7 +5,13 @@ import Link from "next/link";
 import { localePath, type Locale } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/site";
 import { ATTR_KEY, trackEvent } from "@/lib/track";
-import { readStored, removeStored, writeStored } from "@/lib/storage";
+import {
+  bookingDraftKey,
+  bookingPersonalKey,
+  readStored,
+  removeStored,
+  writeStored,
+} from "@/lib/storage";
 import {
   SHOP_AREAS,
   JP_ABILITY_OPTIONS,
@@ -270,32 +276,41 @@ const REQUIRED = [
 ] as const;
 const CONSENTS = ["consent_pay", "consent_cancel", "consent_privacy"] as const;
 
-// Never saved in the draft: the consents must be ticked afresh, and personal
-// and contact details are not left on the device (a shared computer would
-// otherwise show them to the next person). The draft keeps trip data only.
-const NOT_IN_DRAFT: readonly (keyof Form)[] = [
-  "idp",
-  ...CONSENTS,
+// Never stored: the IDP declaration and the consents must be ticked afresh.
+const NEVER_STORED: readonly (keyof Form)[] = ["idp", ...CONSENTS];
+// Personal details, the free-text notes included, go to sessionStorage only:
+// they survive a same-tab trip to /rental and back but are gone once the tab
+// closes, so a shared computer does not show them to the next person.
+const PERSONAL: readonly (keyof Form)[] = [
   "name_zh",
   "name_en",
+  "gender",
   "dob",
   "email",
   "email_confirm",
   "hk_phone",
   "hk_address",
+  "japanese_ability",
+  "english_ability",
   "jp_address",
   "jp_phone",
   "emergency_contact",
   "emergency_phone",
+  "notes",
 ];
+// Everything else is the trip draft in localStorage (24 hours): branch, dates,
+// bikes, helmets, add-ons and promo code.
+const TRIP = (Object.keys(emptyForm) as (keyof Form)[]).filter(
+  (k) => !NEVER_STORED.includes(k) && !PERSONAL.includes(k),
+);
 
-/** The draftable fields of `src`, keeping only values of the expected type. */
-function draftFrom(src: unknown): Partial<Form> {
+/** The `keys` fields of `src`, keeping only values of the expected type. */
+function pick(src: unknown, keys: readonly (keyof Form)[]): Partial<Form> {
   const out: Record<string, unknown> = {};
   if (src && typeof src === "object") {
-    for (const k of Object.keys(emptyForm) as (keyof Form)[]) {
+    for (const k of keys) {
       const v = (src as Record<string, unknown>)[k];
-      if (!NOT_IN_DRAFT.includes(k) && typeof v === typeof emptyForm[k]) out[k] = v;
+      if (typeof v === typeof emptyForm[k]) out[k] = v;
     }
   }
   return out as Partial<Form>;
@@ -339,7 +354,8 @@ function ageFrom(dob: string): number | null {
 export default function BookingForm({ locale }: { locale: Locale }) {
   const c = t[locale];
   const isEn = locale === "en";
-  const draftKey = `r819_booking_draft_${locale}`;
+  const draftKey = bookingDraftKey(locale);
+  const personalKey = bookingPersonalKey(locale);
   const [status, setStatus] = useState<Status>("idle");
   const [errKey, setErrKey] = useState<keyof typeof c | null>(null);
   const [badFields, setBadFields] = useState<(keyof Form)[]>([]);
@@ -349,60 +365,73 @@ export default function BookingForm({ locale }: { locale: Locale }) {
   // Set after mount: this page is prerendered, so a server-side "today" would
   // be the build date.
   const [todayISO, setTodayISO] = useState<string>();
-  // The ?bike= value already merged into the draft, saved alongside it.
-  const bikeApplied = useRef<string | null>(null);
   // The form as restored on mount. It is not saved back, so reopening the
   // page does not restart the draft's 24-hour expiry.
   const restoredForm = useRef<Form | null>(null);
   const doneRef = useRef<HTMLDivElement>(null);
 
-  // Restore the draft, then merge /rental's ?bike=… into it. Read from window
-  // rather than useSearchParams, which would need a Suspense boundary on this
-  // static page.
+  // Restore the trip draft and this tab's personal details, then merge
+  // /rental's ?bike=… into them. Read from window rather than useSearchParams,
+  // which would need a Suspense boundary on this static page.
   useEffect(() => {
     setTodayISO(hkToday());
-    const saved = readStored(draftKey);
-    const draft = draftFrom(saved);
-    const savedBike = (saved as { _bike?: unknown } | null)?._bike;
+    const restored: Partial<Form> = {
+      ...pick(readStored(draftKey), TRIP),
+      ...pick(readStored(personalKey, "session"), PERSONAL),
+    };
     let bike: string | null = null;
+    let strip: number | undefined;
     try {
-      bike = new URLSearchParams(window.location.search).get("bike")?.slice(0, 80) || null;
+      const url = new URL(window.location.href);
+      bike = url.searchParams.get("bike")?.slice(0, 80) || null;
+      if (bike) {
+        // Every pick on /rental wins, and ?bike= is then dropped from the URL
+        // so a reload keeps what the rider types afterwards. Deferred because
+        // on a first load this effect runs before the App Router's own, which
+        // patches history.replaceState to keep Next's history state and
+        // update its router URL.
+        url.searchParams.delete("bike");
+        strip = window.setTimeout(
+          () => window.history.replaceState(null, "", url.pathname + url.search + url.hash),
+          0,
+        );
+      }
     } catch {
-      // Unparseable query — leave the field as it is.
+      // Unparseable URL — leave the field as it is.
     }
-    // A ?bike= the draft already took in (i.e. this is a reload) must not
-    // overwrite what the rider has typed since.
-    if (bike && bike !== savedBike) draft.bike_pref_1 = bike;
-    bikeApplied.current = bike ?? (typeof savedBike === "string" ? savedBike : null);
-    if (Object.keys(draft).length)
+    if (bike) restored.bike_pref_1 = bike;
+    if (Object.keys(restored).length)
       setForm((f) => {
-        const next = { ...f, ...draft };
-        restoredForm.current = next;
+        const next = { ...f, ...restored };
+        // A newly applied ?bike= is saved, since the URL no longer carries it.
+        if (!bike) restoredForm.current = next;
         return next;
       });
-  }, [draftKey]);
+    return () => window.clearTimeout(strip);
+  }, [draftKey, personalKey]);
 
   useEffect(() => {
     // `form` is still the emptyForm object until something is typed or restored.
     if (form === emptyForm || form === restoredForm.current || status === "done") return;
-    const id = window.setTimeout(
-      () => writeStored(draftKey, { ...draftFrom(form), _bike: bikeApplied.current }),
-      500,
-    );
+    const id = window.setTimeout(() => {
+      writeStored(draftKey, pick(form, TRIP));
+      writeStored(personalKey, pick(form, PERSONAL), "session");
+    }, 500);
     return () => window.clearTimeout(id);
-  }, [form, status, draftKey]);
+  }, [form, status, draftKey, personalKey]);
 
   useEffect(() => {
     if (status !== "done") return;
     // Cleared here rather than in onSubmit so a pending draft save has already
     // been cancelled and cannot write the draft back.
     removeStored(draftKey);
+    removeStored(personalKey, "session");
     removeStored(ATTR_KEY);
     // The focused submit button is gone; move focus to the confirmation so
     // screen readers announce it.
     doneRef.current?.focus({ preventScroll: true });
     doneRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
-  }, [status, draftKey]);
+  }, [status, draftKey, personalKey]);
 
   const clearBad = (k: keyof Form) =>
     setBadFields((b) => (b.includes(k) ? b.filter((x) => x !== k) : b));
@@ -621,8 +650,9 @@ export default function BookingForm({ locale }: { locale: Locale }) {
           {sp}
           {c.chooseBikeHint}
           {sp}
-          {/* Same tab: shop and dates are in the draft, and each /rental
-              category links back to /booking?bike=…, which restores them. */}
+          {/* Same tab: the trip draft (localStorage) and this tab's personal
+              details (sessionStorage) are restored when a /rental category
+              links back to /booking?bike=…. */}
           <Link href={localePath(locale, "/rental")} className="font-semibold text-brand-700">
             {c.chooseBike} →
           </Link>

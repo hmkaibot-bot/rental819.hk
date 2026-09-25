@@ -18,7 +18,7 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
     params.locale,
     "/guide",
     isEn
-      ? "Japan Motorcycle Ride Guide: Licence, Prices & Rules"
+      ? "Japan Motorcycle Ride Guide"
       : "日本電單車自駕攻略｜證件、租金、保險及交通規則",
     isEn
       ? "What Hong Kong and Macau riders need before renting a motorcycle in Japan: licence and IDP rules, prices from HK$295 a day, insurance, ETC, traffic rules, trip and budget planning, and the pick-up process."
