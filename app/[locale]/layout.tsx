@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Analytics } from "@vercel/analytics/next";
 import { locales, isLocale, htmlLang, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
-import { buildNav } from "@/lib/nav";
+import { buildMenu } from "@/lib/nav";
 import { organizationLd, websiteLd } from "@/lib/jsonld";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -39,7 +39,7 @@ export default function LocaleLayout({
   if (!isLocale(params.locale)) notFound();
   const locale = params.locale as Locale;
   const dict = getDictionary(locale);
-  const nav = buildNav(dict);
+  const nav = buildMenu(dict);
 
   return (
     <html lang={htmlLang[locale]}>

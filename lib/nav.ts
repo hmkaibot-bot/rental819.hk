@@ -39,6 +39,17 @@ export function buildNav(d: Dictionary): NavItem[] {
   ];
 }
 
+/**
+ * Pages temporarily left out of the header menu. The pages themselves stay
+ * live (and stay in the footer and sitemap); remove an entry to restore it.
+ */
+const HIDDEN_FROM_MENU = new Set(["/packages"]);
+
+/** The header menu: the primary nav minus anything temporarily hidden. */
+export function buildMenu(d: Dictionary): NavItem[] {
+  return buildNav(d).filter((i) => !HIDDEN_FROM_MENU.has(i.href));
+}
+
 /** The ordered list of guide sub-pages (used for the guide index + prev/next). */
 export function guidePages(d: Dictionary): NavItem[] {
   return buildNav(d).find((i) => i.href === "/guide")?.children ?? [];
