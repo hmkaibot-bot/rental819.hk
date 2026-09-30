@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import type { Reservation, InvoiceItem } from "@/lib/reservations/types";
 import {
   ISSUER,
@@ -59,6 +59,25 @@ export default function InvoiceEditor({
   );
   const [saved, setSaved] = useState(false);
   const [pending, start] = useTransition();
+
+  // "Print / Save as PDF" names the file after the document title, so while
+  // this page is open the title is the SI number (SI-2026-078.pdf), tracking
+  // whatever is typed in the SI field. The text node is edited in place:
+  // assigning document.title would replace the node React owns and freeze the
+  // title for every later client-side navigation.
+  useEffect(() => {
+    const el = document.querySelector("title");
+    if (!el) return;
+    const name = si.trim() || autoSiNumber(r) || r.booking_ref || "Invoice";
+    const node = el.firstChild;
+    const prev = node ? node.nodeValue : el.textContent;
+    if (node) node.nodeValue = name;
+    else el.textContent = name;
+    return () => {
+      const n = el.firstChild;
+      if (n) n.nodeValue = prev ?? "";
+    };
+  }, [si, r]);
 
   // A saved invoice keeps its lines, so a bike confirmed AFTER the first save
   // never appears on it by itself. Spot that case (the seed has a bike-rent

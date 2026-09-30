@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getReservation } from "@/lib/reservations/store";
 import { getCatalog } from "@/lib/reservations/items-store";
-import { defaultInvoiceItems } from "@/lib/reservations/invoice";
+import { autoSiNumber, defaultInvoiceItems } from "@/lib/reservations/invoice";
 import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
 import { adminDict } from "@/lib/admin/i18n";
@@ -10,6 +10,12 @@ import { rt819GroupLabels } from "@/lib/reservations/items";
 import InvoiceEditor from "@/components/admin/InvoiceEditor";
 
 export const dynamic = "force-dynamic";
+
+/** The tab/PDF name is the SI number, not the back-office title. */
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const r = await getReservation(params.id);
+  return { title: { absolute: r ? autoSiNumber(r) || r.booking_ref || "Invoice" : "Invoice" } };
+}
 
 export default async function InvoicePage({
   params,
