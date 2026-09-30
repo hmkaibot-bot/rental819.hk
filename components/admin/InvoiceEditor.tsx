@@ -61,15 +61,19 @@ export default function InvoiceEditor({
   const [pending, start] = useTransition();
 
   // A saved invoice keeps its lines, so a bike confirmed AFTER the first save
-  // never appears on it by itself. Spot that case (Japan has a grade now, the
-  // seed has a bike-rent line, the saved lines have none) and offer a re-seed.
+  // never appears on it by itself. Spot that case (the seed has a bike-rent
+  // line, the lines on screen have none) and offer a re-seed. Descriptions are
+  // free text the operator may have edited, so match the catalog label OR the
+  // "BIKE RENT" wording, and check the live list so the notice clears as soon
+  // as a bike line is added or the items are re-seeded.
   const bikeLabels = useMemo(
     () => new Set(catalog.filter((c) => c.group === "bike").map(rt819Label)),
     [catalog],
   );
-  const hasBikeLine = (list: InvoiceItem[]) => list.some((it) => bikeLabels.has(it.description));
+  const hasBikeLine = (list: InvoiceItem[]) =>
+    list.some((it) => bikeLabels.has(it.description) || /BIKE RENT/i.test(it.description));
   const savedIsStale =
-    Boolean(r.invoice_items?.length) && hasBikeLine(seed) && !hasBikeLine(r.invoice_items ?? []);
+    Boolean(r.invoice_items?.length) && hasBikeLine(seed) && !hasBikeLine(items);
   const reseed = () => {
     if (items.length && !window.confirm(t.reseedConfirm)) return;
     setItems(seed);
