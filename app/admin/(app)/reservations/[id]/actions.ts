@@ -43,7 +43,8 @@ const NULLABLE_TEXT = [
   "bike_pref_1",
   "bike_pref_2",
   "bike_pref_3",
-  "confirmed_bike",
+  // confirmed_bike is deliberately absent: the confirmed model is only ever
+  // set from the Japan-confirmation block (saveConfirmationAndCosts).
   "pickup_date",
   "pickup_time",
   "return_date",
@@ -157,13 +158,13 @@ export async function saveAddons(formData: FormData) {
 }
 
 /**
- * Save the per-item supplier cost (¥). The total and the rebate are derived,
- * never typed: cost_jpy is the sum of the lines and the rebate is always 10% of
- * the base bike rental, so the two can never drift out of step.
+ * Per-item supplier cost (¥) from the billing block. The total and the rebate
+ * are derived, never typed: cost_jpy is the sum of the lines and the rebate is
+ * always 10% of the base bike rental, so the two can never drift out of step.
+ * An all-blank cost form (e.g. only the SI number was filled in on a booking
+ * whose cost lives elsewhere) must not wipe a recorded total.
  */
-export async function saveCostItems(formData: FormData) {
-  assertCanWrite();
-  const id = String(formData.get("id"));
+function costPatch(formData: FormData): Partial<Reservation> {
   const items: CostItems = {};
   for (const l of COST_ITEM_LABELS) {
     const raw = formData.get(`cost_${l.key}`);
@@ -172,39 +173,29 @@ export async function saveCostItems(formData: FormData) {
       items[l.key] = n;
     }
   }
-  const total = costItemsTotal(items);
   const si = formData.get("si_number");
   const anyEntered = Object.keys(items).length > 0;
-
-  await updateReservation(id, {
-    // Submitting an all-blank cost form (e.g. just saving the SI number on a
-    // booking whose cost lives elsewhere) must not wipe a recorded total.
+  return {
     ...(anyEntered
       ? {
           cost_items: items,
-          cost_jpy: total,
+          cost_jpy: costItemsTotal(items),
           rebate_jpy: rebateFromCostItems(items) || null,
         }
       : {}),
     ...(si != null ? { si_number: si === "" ? null : String(si) } : {}),
-  });
-  revalidatePath(`/admin/reservations/${id}`, "layout");
-  revalidatePath("/admin");
-  revalidatePath("/admin/accounting");
-  // Land on the clean URL so a stale ?err= from a refused save never sticks.
-  redirect(`/admin/reservations/${id}`);
+  };
 }
 
 /**
- * Japan confirmation (step 3): confirm not just the bike but the whole rental —
- * confirmed model, P-grade, pick-up/return date+time, and the confirmed add-ons.
- * The invoice then seeds its line items from all of this.
+ * Japan confirmation (step 3): not just the bike but the whole rental —
+ * confirmed model, P-grade, pick-up/return date+time, and the confirmed
+ * add-ons. The invoice then seeds its line items from all of this.
  */
-export async function confirmReservation(formData: FormData) {
-  assertCanWrite();
-  const id = String(formData.get("id"));
-  const current = await getReservation(id);
-
+function confirmationPatch(
+  formData: FormData,
+  current: Reservation | null,
+): Partial<Reservation> {
   const text = (k: string) => {
     const v = formData.get(k);
     return v === "" || v == null ? null : String(v);
@@ -234,7 +225,7 @@ export async function confirmReservation(formData: FormData) {
     open_face: count("helmet_open"),
   };
 
-  await updateReservation(id, {
+  return {
     confirmed_bike: text("confirmed_bike"),
     pickup_date: text("pickup_date"),
     pickup_time: text("pickup_time"),
@@ -243,9 +234,26 @@ export async function confirmReservation(formData: FormData) {
     addons,
     settlement,
     // Status is never advanced automatically — staff set it in the 狀態 dropdown.
+  };
+}
+
+/**
+ * One save for the whole 下一步 block: the Japan confirmation and the SI
+ * number + supplier costs go into the same record in a single write, so staff
+ * fill everything in and press one button.
+ */
+export async function saveConfirmationAndCosts(formData: FormData) {
+  assertCanWrite();
+  const id = String(formData.get("id"));
+  const current = await getReservation(id);
+
+  await updateReservation(id, {
+    ...confirmationPatch(formData, current),
+    ...costPatch(formData),
   });
   revalidatePath(`/admin/reservations/${id}`, "layout");
   revalidatePath("/admin");
+  revalidatePath("/admin/accounting");
   // Land on the clean URL so a stale ?err= from a refused save never sticks.
   redirect(`/admin/reservations/${id}`);
 }
