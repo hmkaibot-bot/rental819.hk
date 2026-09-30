@@ -19,6 +19,7 @@ import {
   rebateFromCostItems,
 } from "@/lib/reservations/types";
 import AbilitySelect from "@/components/admin/AbilitySelect";
+import ActionForm from "@/components/admin/ActionForm";
 import { autoSiNumber } from "@/lib/reservations/invoice";
 import {
   patchReservation,
@@ -395,7 +396,7 @@ export default async function ReservationDetail({
             {/* Japan confirmation (bike + grade + dates + add-ons) and the SI number +
                 supplier costs share ONE form and one save button at the bottom. */}
             {!r.cardo_only && (
-            <form action={saveConfirmationAndCosts} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+            <ActionForm key={r.updated_at ?? "confirm"} action={saveConfirmationAndCosts} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <div className="text-xs font-bold text-brand-700">{t.detail.jpConfirmTitle}</div>
@@ -512,11 +513,11 @@ export default async function ReservationDetail({
               </div>
               <button className="btn-brand w-full text-xs">{t.detail.saveSiCost}</button>
               </fieldset>
-            </form>
+            </ActionForm>
             )}
 
             {/* CARDO — HK-side value-add (not Japan-confirmed) */}
-            <form action={setCardo} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+            <ActionForm key={`cardo-${r.updated_at ?? ""}`} action={setCardo} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <div className="text-xs font-bold text-brand-700">{t.detail.cardoTitle}</div>
@@ -535,7 +536,7 @@ export default async function ReservationDetail({
                 )}
               </div>
               </fieldset>
-            </form>
+            </ActionForm>
 
             {/* Customer paid → paid */}
             <form action={patchReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">

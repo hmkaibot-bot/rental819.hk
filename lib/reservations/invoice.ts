@@ -128,8 +128,10 @@ export function autoSiNumber(r: Reservation): string {
 /**
  * Seed invoice line items from everything Japan confirmed — grade + duration
  * (bike rent + insurance), plus each confirmed add-on (MamoRide, helmets,
- * cases) and the HK-side CARDO value-add — mirroring the master sheet's
- * 1st-day + subsequent-day billing. The agent can adjust before saving.
+ * cases) — mirroring the master sheet's 1st-day + subsequent-day billing. The
+ * agent can adjust before saving. The HK-side CARDO value-add is deliberately
+ * NOT seeded on a rental invoice (the operator bills it separately); it can
+ * still be picked from the catalog.
  */
 export function defaultInvoiceItems(
   r: Reservation,
@@ -190,9 +192,6 @@ export function defaultInvoiceItems(
     push(items, L("RT819-SC-1D", 1));
     if (extra) push(items, L("RT819-SC-2D", extra));
   }
-  // CARDO — HK-side value-add, flat HK$200
-  if (a.cardo) push(items, L("HK-CARDO", 1));
-
   if (!items.length) {
     // The invoice quotes the bike Japan finally confirmed (後台「確認車款」),
     // never the customer's form preference — before Japan replies the line
