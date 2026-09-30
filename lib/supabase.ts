@@ -22,7 +22,14 @@ export function supabaseAdmin(): SupabaseClient {
     cached = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false } },
+      {
+        auth: { persistSession: false },
+        // Every read must hit Postgres: the back-office shows what staff just
+        // saved, so Next's fetch Data Cache is never allowed to answer here.
+        global: {
+          fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+        },
+      },
     );
   }
   return cached;

@@ -19,13 +19,13 @@ import {
   rebateFromCostItems,
 } from "@/lib/reservations/types";
 import AbilitySelect from "@/components/admin/AbilitySelect";
+import ActionForm from "@/components/admin/ActionForm";
 import { autoSiNumber } from "@/lib/reservations/invoice";
 import {
   patchReservation,
-  confirmReservation,
   setCardo,
   saveAddons,
-  saveCostItems,
+  saveConfirmationAndCosts,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -278,9 +278,6 @@ export default async function ReservationDetail({
                 </select>
               </div>
               )}
-              {!r.cardo_only && (
-                <Edit label={f.confirmedBike} name="confirmed_bike" value={r.confirmed_bike} readOnly={readOnly} />
-              )}
               <Edit label={f.pickupDate} name="pickup_date" value={r.pickup_date} type="date" readOnly={readOnly} />
               <Edit label={f.pickupTime} name="pickup_time" value={r.pickup_time} type="time" readOnly={readOnly} />
               <Edit label={f.returnDate} name="return_date" value={r.return_date} type="date" readOnly={readOnly} />
@@ -396,9 +393,10 @@ export default async function ReservationDetail({
               </Link>
             </div>
 
-            {/* Japan confirmation → confirmed (bike + grade + dates + add-ons) */}
+            {/* Japan confirmation (bike + grade + dates + add-ons) and the SI number +
+                supplier costs share ONE form and one save button at the bottom. */}
             {!r.cardo_only && (
-            <form action={confirmReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+            <ActionForm key={r.updated_at ?? "confirm"} action={saveConfirmationAndCosts} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <fieldset disabled={readOnly} className="contents">
               <input type="hidden" name="id" value={r.id} />
               <div className="text-xs font-bold text-brand-700">{t.detail.jpConfirmTitle}</div>
@@ -461,42 +459,17 @@ export default async function ReservationDetail({
                   <input type="number" min="0" name="helmet_open" defaultValue={r.addons?.open_face ?? 0} className={input} />
                 </div>
               </div>
-              <button className="btn-brand w-full text-xs">{t.common.save}</button>
-              </fieldset>
-            </form>
-            )}
 
-            {/* CARDO — HK-side value-add (not Japan-confirmed) */}
-            <form action={setCardo} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
-              <fieldset disabled={readOnly} className="contents">
-              <input type="hidden" name="id" value={r.id} />
-              <div className="text-xs font-bold text-brand-700">{t.detail.cardoTitle}</div>
-              <label className="flex items-center gap-2 text-xs text-ink-soft">
-                <input type="checkbox" name="cardo" defaultChecked={!!r.addons?.cardo} className="h-3.5 w-3.5 rounded border-slate-300" />
-                {t.detail.cardoCheck}
-              </label>
-              <div className="flex flex-wrap gap-2">
-                <button className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-slate-200">
-                  {t.common.update}
-                </button>
-                {r.addons?.cardo && (
-                  <Link href={`/admin/reservations/${r.id}/cardo`} target="_blank" className="btn-outline text-xs">
-                    {t.detail.printCardo}
-                  </Link>
-                )}
-              </div>
-              </fieldset>
-            </form>
-
-            {/* Invoice — supplier cost is entered per line, mirroring the Excel */}
-            {!r.cardo_only && (
-            <form action={saveCostItems} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
-              <fieldset disabled={readOnly} className="contents">
-              <input type="hidden" name="id" value={r.id} />
+              {/* Invoice — supplier cost is entered per line, mirroring the Excel */}
+              <div className="mt-1 flex flex-col gap-2 border-t border-slate-100 pt-3">
               <div className="text-xs font-medium text-ink-soft">{t.detail.billingTitle}</div>
               <div>
                 <label className="text-xs text-ink-soft" htmlFor="si_number">{t.detail.siNumber}</label>
-                <input id="si_number" name="si_number" defaultValue={autoSiNumber(r)} className={`mt-1 ${input}`} placeholder="SI-26-xxxxx" />
+                {/* Not prefilled: this button also saves the Japan confirmation, and a
+                    prefilled suggestion would be written as a real SI number (the
+                    accounting page treats any SI as "billed"). The suggestion stays
+                    visible as the placeholder for staff to type when they invoice. */}
+                <input id="si_number" name="si_number" defaultValue={r.si_number ?? ""} className={`mt-1 ${input}`} placeholder={autoSiNumber(r)} />
               </div>
               <div className="text-xs font-medium text-ink-soft">{t.detail.costPerItem}</div>
               <div className="space-y-1.5">
@@ -537,10 +510,33 @@ export default async function ReservationDetail({
                 </div>
               </dl>
               <p className="text-[11px] leading-4 text-ink-muted">{t.detail.costHint}</p>
+              </div>
               <button className="btn-brand w-full text-xs">{t.detail.saveSiCost}</button>
               </fieldset>
-            </form>
+            </ActionForm>
             )}
+
+            {/* CARDO — HK-side value-add (not Japan-confirmed) */}
+            <ActionForm key={`cardo-${r.updated_at ?? ""}`} action={setCardo} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+              <fieldset disabled={readOnly} className="contents">
+              <input type="hidden" name="id" value={r.id} />
+              <div className="text-xs font-bold text-brand-700">{t.detail.cardoTitle}</div>
+              <label className="flex items-center gap-2 text-xs text-ink-soft">
+                <input type="checkbox" name="cardo" defaultChecked={!!r.addons?.cardo} className="h-3.5 w-3.5 rounded border-slate-300" />
+                {t.detail.cardoCheck}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <button className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-slate-200">
+                  {t.common.update}
+                </button>
+                {r.addons?.cardo && (
+                  <Link href={`/admin/reservations/${r.id}/cardo`} target="_blank" className="btn-outline text-xs">
+                    {t.detail.printCardo}
+                  </Link>
+                )}
+              </div>
+              </fieldset>
+            </ActionForm>
 
             {/* Customer paid → paid */}
             <form action={patchReservation} className="flex flex-col gap-2 border-t border-slate-100 pt-3">

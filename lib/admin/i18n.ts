@@ -237,6 +237,9 @@ export interface AdminDict {
     colAmount: string;
     deleteAria: string;
     addRow: string;
+    reseed: string;
+    reseedNotice: string;
+    reseedConfirm: string;
     total: string;
     saveAndInvoice: string;
     saveOnly: string;
@@ -494,6 +497,9 @@ const zh: AdminDict = {
     colAmount: "金額",
     deleteAria: "刪除",
     addRow: "+ 自訂一行",
+    reseed: "↻ 按日本確認重新產生項目",
+    reseedNotice: "呢張單未有車租項目，但預約已有級別／車款資料，可以按日本確認重新產生項目。",
+    reseedConfirm: "會以日本確認內容重新產生全部項目，現有項目會被取代，確定？",
     total: "總額",
     saveAndInvoice: "儲存並標記已開單",
     saveOnly: "只儲存",
@@ -751,6 +757,9 @@ const ja: AdminDict = {
     colAmount: "金額",
     deleteAria: "削除",
     addRow: "+ 行を追加",
+    reseed: "↻ 日本の確定内容から項目を再生成",
+    reseedNotice: "この請求書には車両レンタル料の項目がありませんが、予約にはクラス／車種の情報があります。日本の確定内容から項目を再生成できます。",
+    reseedConfirm: "日本の確定内容から全項目を再生成します。現在の項目は置き換えられます。よろしいですか？",
     total: "合計",
     saveAndInvoice: "保存して請求済にする",
     saveOnly: "保存のみ",

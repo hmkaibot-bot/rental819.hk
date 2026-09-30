@@ -60,6 +60,25 @@ export default function InvoiceEditor({
   const [saved, setSaved] = useState(false);
   const [pending, start] = useTransition();
 
+  // A saved invoice keeps its lines, so a bike confirmed AFTER the first save
+  // never appears on it by itself. Spot that case (the seed has a bike-rent
+  // line, the lines on screen have none) and offer a re-seed. Descriptions are
+  // free text the operator may have edited, so match the catalog label OR the
+  // "BIKE RENT" wording, and check the live list so the notice clears as soon
+  // as a bike line is added or the items are re-seeded.
+  const bikeLabels = useMemo(
+    () => new Set(catalog.filter((c) => c.group === "bike").map(rt819Label)),
+    [catalog],
+  );
+  const hasBikeLine = (list: InvoiceItem[]) =>
+    list.some((it) => bikeLabels.has(it.description) || /BIKE RENT/i.test(it.description));
+  const savedIsStale =
+    Boolean(r.invoice_items?.length) && hasBikeLine(seed) && !hasBikeLine(items);
+  const reseed = () => {
+    if (items.length && !window.confirm(t.reseedConfirm)) return;
+    setItems(seed);
+  };
+
   // Every line's `amount` is already net of that line's own discount, so the
   // invoice total needs no further adjustment.
   const total = useMemo(() => invoiceTotal(items), [items]);
@@ -217,8 +236,18 @@ export default function InvoiceEditor({
           </table>
         </div>
 
+        {savedIsStale && !readOnly && (
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <span>{t.reseedNotice}</span>
+            <button onClick={reseed} className="font-semibold underline">{t.reseed}</button>
+          </div>
+        )}
+
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">{t.addRow}</button>
+          <div className="flex flex-wrap items-center gap-4">
+            <button onClick={addRow} className="text-sm font-medium text-brand-700 hover:underline">{t.addRow}</button>
+            <button onClick={reseed} className="text-sm font-medium text-brand-700 hover:underline">{t.reseed}</button>
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-ink-muted">{t.total}</span>
             <span className="text-lg font-black text-ink">HK${fmtAmount(total)}</span>
