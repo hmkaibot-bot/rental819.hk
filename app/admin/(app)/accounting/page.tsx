@@ -10,6 +10,12 @@ import AccountingTable, { type AcctRow } from "./AccountingTable";
 
 export const dynamic = "force-dynamic";
 
+/** The period filter opens on the current year, by Hong Kong's calendar (computed
+    on the server so the first render and hydration agree). */
+function currentHkYear(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Hong_Kong", year: "numeric" }).format(new Date());
+}
+
 // Post-SI states in the Excel pipeline (an SI/invoice exists): 待付款 + 已確認預定.
 const BILLED = ["awaiting_payment", "confirmed"];
 const EXCLUDED = ["cancelled"];
@@ -90,7 +96,7 @@ export default async function AccountingPage() {
           {t.accounting.toReservations}
         </Link>
       </div>
-      <AccountingTable rows={rows} t={t.accounting} readOnly={readOnly} />
+      <AccountingTable rows={rows} t={t.accounting} readOnly={readOnly} defaultYear={currentHkYear()} />
     </div>
   );
 }

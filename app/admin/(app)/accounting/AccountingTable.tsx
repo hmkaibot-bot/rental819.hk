@@ -72,12 +72,15 @@ export default function AccountingTable({
   rows,
   t,
   readOnly,
+  defaultYear,
 }: {
   rows: AcctRow[];
   t: AcctDict;
   readOnly: boolean;
+  /** Year the period filter starts on (the current one); "全部年份" stays a click away. */
+  defaultYear: string;
 }) {
-  const [year, setYear] = useState("all");
+  const [year, setYear] = useState(defaultYear);
   const [month, setMonth] = useState("all");
   const [colFilter, setColFilter] = useState<Record<string, string>>({});
   const [supplierFilter, setSupplierFilter] = useState<"all" | "paid" | "unpaid">("all");
@@ -88,10 +91,12 @@ export default function AccountingTable({
   const [pending, startTransition] = useTransition();
 
   const years = useMemo(() => {
-    const s = new Set<string>();
+    // Always list the default year, so early in January (no pick-ups yet) the
+    // selector still shows the year that is actually selected.
+    const s = new Set<string>([defaultYear]);
     for (const r of rows) if (r.pickup_date) s.add(r.pickup_date.slice(0, 4));
     return [...s].sort((a, b) => b.localeCompare(a));
-  }, [rows]);
+  }, [rows, defaultYear]);
 
   const filtered = useMemo(() => {
     let out = rows;
@@ -158,7 +163,7 @@ export default function AccountingTable({
   };
 
   const resetFilters = () => {
-    setYear("all");
+    setYear(defaultYear);
     setMonth("all");
     setColFilter({});
     setSupplierFilter("all");
