@@ -248,35 +248,11 @@ export function serviceLd(
 }
 
 /**
- * How many purchasable variants a package card actually offers: the duration
- * tiers printed on it ("3日2夜 / 4日3夜 / 5日4夜" -> 3). Derived from the very string the
- * card renders, so the count can never drift from what a visitor is shown.
- */
-function tierCount(tiers: string): number {
-  return tiers.split("/").filter((t) => t.trim()).length;
-}
-
-/**
- * Product list for /packages. `lowPrice` is the cheapest HK$ figure printed on
- * each card: the no-hotel flight + bike price (P3 bike, 3日2夜). `offerCount`
- * is the no-hotel duration tiers plus the one flight + hotel + bike version.
- * The seller is the licensed travel agent named in the disclosure line on the
- * same page — not this organization, which only arranges the bikes.
- *
- * Search Console flags `highPrice`, `aggregateRating` and `review` as missing
- * recommended fields here. Three deliberate positions, so nobody "fixes" them
- * by inventing data:
- *
- *  - `highPrice` is emitted only from `priceTo`, i.e. only once a top-tier
- *    price is actually published on the card. Every leaflet figure, including
- *    `hotelFrom`, is a "+" from-price, so none of them is a top price. Deriving
- *    one from `priceFrom` would put a number in the search result that appears
- *    nowhere on the page.
- *  - `aggregateRating` and `review` are NOT emitted. The site displays no
- *    customer reviews at all, and Google's structured-data policy requires
- *    review markup to reflect genuine reviews visible on that page; marking up
- *    ratings that do not exist risks a manual action against the whole site.
- *    The fix is to publish real reviews first, then mark them up.
+ * Travel package services listed on /packages, rather than retail Products.
+ * Each card advertises two service options with starting prices, not a bounded
+ * price range. minPrice preserves that distinction without inventing a ceiling
+ * or counting duration labels as independently priced offers. Reviews and
+ * ratings must only be added once genuine reviews are visible on the page.
  */
 export function packagesLd(
   locale: Locale,
@@ -293,23 +269,43 @@ export function packagesLd(
       "@type": "ListItem",
       position: i + 1,
       item: {
-        "@type": "Product",
+        "@type": "Service",
         "@id": `${url}#${p.id}`,
+        url: `${url}#${p.id}`,
         name: p.title,
         description: p.blurb,
-        brand: { "@id": ORG_ID },
-        offers: {
-          "@type": "AggregateOffer",
-          lowPrice: p.priceFrom,
-          ...(p.priceTo ? { highPrice: p.priceTo } : {}),
-          offerCount: tierCount(p.tiers) + 1,
-          priceCurrency: "HKD",
-          url,
+        serviceType: "Self-drive motorcycle travel package",
+        provider: {
+          "@type": "Organization",
+          name: site.travelAgent.name,
+        },
+        areaServed: { "@type": "Country", name: "Japan" },
+        offers: [
+          {
+            name: locale === "en" ? "Flight + bike (no hotel)" : "機票＋電單車（不含住宿）",
+            description: p.tiers,
+            from: p.priceFrom,
+          },
+          {
+            name: locale === "en" ? "Flight + hotel with breakfast + bike" : "機票＋住宿連早餐＋電單車",
+            description: p.hotelDuration,
+            from: p.hotelFrom,
+          },
+        ].map((option) => ({
+          "@type": "Offer",
+          name: option.name,
+          description: option.description,
+          url: `${url}#${p.id}`,
+          priceSpecification: {
+            "@type": "PriceSpecification",
+            minPrice: option.from,
+            priceCurrency: "HKD",
+          },
           seller: {
             "@type": "Organization",
             name: site.travelAgent.name,
           },
-        },
+        })),
       },
     })),
   };
