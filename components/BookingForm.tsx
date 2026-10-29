@@ -17,6 +17,7 @@ import {
   JP_ABILITY_OPTIONS,
   EN_ABILITY_OPTIONS,
 } from "@/lib/reservations/types";
+import { shopAreaLabel, shopLabel } from "@/lib/reservations/shop-labels";
 import { WhatsAppIcon, CheckIcon } from "./icons";
 
 type Status = "idle" | "submitting" | "done" | "error";
@@ -502,7 +503,7 @@ export default function BookingForm({ locale }: { locale: Locale }) {
   function waMessage() {
     const lines = [
       locale === "en" ? "Rental819 rental booking" : "Rental819 租車預約",
-      `${c.shop}: ${form.shop}`,
+      `${c.shop}: ${shopLabel(form.shop, locale)}`,
       `${c.pickupDate}: ${form.pickup_date} ${form.pickup_time}`,
       `${c.returnDate}: ${form.return_date} ${form.return_time}`,
       `${c.bikePref}: ${form.bike_pref_1}`,
@@ -614,9 +615,9 @@ export default function BookingForm({ locale }: { locale: Locale }) {
           <select {...ctl("shop")} value={form.shop} onChange={setText("shop")}>
             <option value="">{c.shopPlaceholder}</option>
             {SHOP_AREAS.map((a) => (
-              <optgroup key={a.area} label={a.area}>
+              <optgroup key={a.area} label={shopAreaLabel(a.area, locale)}>
                 {a.shops.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>{shopLabel(s, locale)}</option>
                 ))}
               </optgroup>
             ))}
