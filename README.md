@@ -34,8 +34,12 @@ npm run dev     # http://localhost:3000  → redirects to /zh-hk
 
 ## Bike catalogue sync
 
-`/zh-hk/rental` and `/en/rental` read the `catalogue_*` tables (migration
-`supabase/migrations/0012_catalogue.sql`). A daily GitHub Action
+`/zh-hk/rental` and `/en/rental` read the `catalogue_*` tables (migrations
+`supabase/migrations/0012_catalogue.sql` and `0013_catalogue_equipment.sql`).
+Each unit's free and paid equipment is scraped from the bike page bitmask
+(`data-default-option` / `data-custom-option`). NULL means that unit has not
+been scraped since the column was added; the booking form then leaves every
+add-on selectable. A daily GitHub Action
 (`.github/workflows/sync-catalogue.yml`, 02:00 Hong Kong time) refreshes every
 branch. It is a few thousand polite requests, so it does not run as a Vercel
 cron. The booking form's branch list is loaded from `catalogue_shops` and

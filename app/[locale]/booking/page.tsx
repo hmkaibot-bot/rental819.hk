@@ -10,10 +10,13 @@ import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import BookingForm from "@/components/BookingForm";
 import { listShopGroups } from "@/lib/catalogue/shops";
+import { loadEquipmentBikes } from "@/lib/catalogue/equipment-index";
 import { shopAreaLabel, shopLabel } from "@/lib/reservations/shop-labels";
 import JsonLd from "@/components/JsonLd";
 import TrustLine from "@/components/TrustLine";
 import { WhatsAppIcon } from "@/components/icons";
+
+export const dynamic = "force-dynamic";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
@@ -31,6 +34,7 @@ export default async function BookingPage({ params }: { params: { locale: string
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
   const dict = getDictionary(locale);
   const isEn = locale === "en";
+  const equipmentBikes = await loadEquipmentBikes();
   const shopGroups = (await listShopGroups()).map((g) => ({
     area: g.areaJa,
     areaLabel: isEn ? g.areaEn || shopAreaLabel(g.areaJa, locale) : g.areaJa,
@@ -101,7 +105,7 @@ export default async function BookingPage({ params }: { params: { locale: string
                   WhatsApp {site.phone}
                 </a>
               </p>
-              <BookingForm locale={locale} shopGroups={shopGroups} />
+              <BookingForm locale={locale} shopGroups={shopGroups} equipmentBikes={equipmentBikes} />
             </div>
           </div>
 

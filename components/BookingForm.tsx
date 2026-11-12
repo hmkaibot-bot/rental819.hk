@@ -18,6 +18,7 @@ import {
   EN_ABILITY_OPTIONS,
 } from "@/lib/reservations/types";
 import { shopAreaLabel, shopLabel } from "@/lib/reservations/shop-labels";
+import { matchEquipmentBike, type EquipmentBikeRef } from "@/lib/catalogue/equipment";
 import { WhatsAppIcon, CheckIcon } from "./icons";
 
 type Status = "idle" | "submitting" | "done" | "error";
@@ -87,6 +88,7 @@ const t = {
       luggage_storage: "行李寄存",
     },
     shuttleNote: "只適用於部份分店",
+    equipLimited: "此車款只可選擇有提供的付費配備，灰色項目未能加購。",
     etcNote: "ETC 卡因供應有限，請到店取車時向職員查詢。",
     mamoride: "加購 MamoRide 補償（只限 15 日內預約）",
     promo: "優惠碼（如有）",
@@ -179,6 +181,7 @@ const t = {
       luggage_storage: "Luggage storage",
     },
     shuttleNote: "available at selected branches only",
+    equipLimited: "Only paid equipment offered with this bike can be selected. Greyed-out items are unavailable.",
     etcNote: "ETC cards are limited in supply — please ask staff at the branch when you collect the bike.",
     mamoride: "Add MamoRide compensation (reservations of 15 days or less)",
     promo: "Promo code (if any)",
@@ -361,9 +364,12 @@ export interface BookingShopGroup {
 export default function BookingForm({
   locale,
   shopGroups,
+  equipmentBikes = [],
 }: {
   locale: Locale;
   shopGroups?: BookingShopGroup[];
+  /** Catalogue models with scraped equipment. Empty keeps every add-on selectable. */
+  equipmentBikes?: EquipmentBikeRef[];
 }) {
   const c = t[locale];
   const isEn = locale === "en";
@@ -477,15 +483,40 @@ export default function BookingForm({
     "aria-invalid": badFields.includes(k) || undefined,
     className: badFields.includes(k) ? fieldBad : field,
   });
-  const box = (k: keyof Form, extra = "") => ({
+  const box = (k: keyof Form, extra = "", disabled = false) => ({
     id: k,
     name: k,
-    type: "checkbox",
+    type: "checkbox" as const,
+    disabled,
     "aria-invalid": badFields.includes(k) || undefined,
-    className: `${checkCls} ${extra} ${badFields.includes(k) ? "ring-2 ring-accent-500" : "focus:ring-brand-500"}`,
-    checked: form[k] as boolean,
+    className: `${checkCls} ${extra} ${
+      disabled ? "cursor-not-allowed opacity-40" : badFields.includes(k) ? "ring-2 ring-accent-500" : "focus:ring-brand-500"
+    }`,
+    checked: disabled ? false : (form[k] as boolean),
     onChange: setCheck(k),
   });
+
+  // First-choice bike from the catalogue limits 尾箱 / 側袋 / 側箱 to the paid
+  // equipment that model offers. Null means we don't know, so nothing is greyed out.
+  const matchedBike = matchEquipmentBike(form.shop, form.bike_pref_1, equipmentBikes);
+  const allowedPaid = matchedBike ? matchedBike.paid : null;
+
+  useEffect(() => {
+    if (!allowedPaid) return;
+    const allow = new Set(allowedPaid);
+    setForm((f) => {
+      let changed = false;
+      const next = { ...f };
+      for (const key of ["addon_topcase", "addon_sidebag", "addon_pannier"] as const) {
+        const code = key.slice("addon_".length);
+        if (!allow.has(code) && next[key]) {
+          next[key] = false;
+          changed = true;
+        }
+      }
+      return changed ? next : f;
+    });
+  }, [allowedPaid]);
 
   const requiredLabel: Record<(typeof REQUIRED)[number], string> = {
     shop: c.shop,
@@ -828,22 +859,34 @@ export default function BookingForm({
           <p className={labelCls}>{c.addonsLabel}</p>
           <div className="grid gap-2.5 sm:grid-cols-2">
             {([
-              ["addon_topcase", c.addons.topcase],
-              ["addon_sidebag", c.addons.sidebag],
-              ["addon_pannier", c.addons.pannier],
-              ["addon_cardo", c.addons.cardo],
-              ["addon_shuttle_bus", c.addons.shuttle_bus],
-              ["addon_luggage_storage", c.addons.luggage_storage],
-            ] as const).map(([key, label]) => (
-              <label key={key} htmlFor={key} className="flex items-center gap-2.5 text-sm text-ink-soft">
-                <input {...box(key)} />
-                {label}
-                {key === "addon_shuttle_bus" && (
-                  <span className="text-xs text-ink-muted">（{c.shuttleNote}）</span>
-                )}
-              </label>
-            ))}
+              ["addon_topcase", "topcase", c.addons.topcase],
+              ["addon_sidebag", "sidebag", c.addons.sidebag],
+              ["addon_pannier", "pannier", c.addons.pannier],
+              ["addon_cardo", "", c.addons.cardo],
+              ["addon_shuttle_bus", "", c.addons.shuttle_bus],
+              ["addon_luggage_storage", "", c.addons.luggage_storage],
+            ] as const).map(([key, code, label]) => {
+              const unavailable = code !== "" && allowedPaid !== null && !allowedPaid.includes(code);
+              return (
+                <label
+                  key={key}
+                  htmlFor={key}
+                  data-equipment={code || undefined}
+                  data-equipment-state={code ? (unavailable ? "disabled" : "enabled") : undefined}
+                  className={`flex items-center gap-2.5 text-sm ${unavailable ? "cursor-not-allowed text-slate-400" : "text-ink-soft"}`}
+                >
+                  <input {...box(key, "", unavailable)} />
+                  {label}
+                  {key === "addon_shuttle_bus" && (
+                    <span className="text-xs text-ink-muted">（{c.shuttleNote}）</span>
+                  )}
+                </label>
+              );
+            })}
           </div>
+          {allowedPaid !== null && (
+            <p className="mt-2 text-xs leading-5 text-ink-muted">{c.equipLimited}</p>
+          )}
           {/* ETC is not a customer-selectable add-on: stock is limited and it is
               arranged at the branch on collection. */}
           <p className="mt-2.5 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-5 text-ink-muted">

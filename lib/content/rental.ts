@@ -40,6 +40,8 @@ export interface RentalContent {
     noPhoto: string;
     footnote: string;
     browse: string;
+    freeEquip: string;
+    paidEquip: string;
   };
   coverageHead: string;
   coverageIntro: string;
@@ -120,6 +122,8 @@ export const rentalContent: Record<Locale, RentalContent> = {
       noPhoto: "暫無相片",
       footnote: "供應情況每日更新。所選日期未能預約的車款仍可提交表格，香港團隊會再作安排。",
       browse: "瀏覽車款",
+      freeEquip: "免費配備",
+      paidEquip: "付費配備",
     },
     coverageHead: "全日本取車網絡",
     coverageIntro: "分店遍佈全國主要地區及機場，租還車須於同一分店辦理。",
@@ -188,6 +192,8 @@ export const rentalContent: Record<Locale, RentalContent> = {
       footnote:
         "Availability is refreshed daily. You can still send the form for a bike that is not free — the Hong Kong team will follow up.",
       browse: "Browse bikes",
+      freeEquip: "Free equipment",
+      paidEquip: "Paid equipment",
     },
     coverageHead: "Nationwide pick-up network",
     coverageIntro:
