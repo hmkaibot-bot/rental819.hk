@@ -1,11 +1,8 @@
-// Rental819 nationwide branch coverage, grouped by the same 11 regions as the
-// master site. Region headers link to the Japanese Rental819 store list, anchored
-// to that region (…/shop/shopList#area_N).
-
-export const JAPAN_SHOPLIST = "https://www.rental819.com/shop/shopList";
+// Nationwide branch coverage, grouped into the same 11 regions as the fleet.
+// Region headers link to /rental?area=N on this site.
 
 export interface CoverageRegion {
-  area: number; // rental819.com shopList area anchor
+  area: number; // matches catalogue_shops.area_id
   zh: string; // 關東區
   zhShort: string; // 關東  (map label)
   en: string; // Kanto

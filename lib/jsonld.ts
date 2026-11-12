@@ -80,12 +80,10 @@ export function organizationLd(locale: Locale): Record<string, unknown> {
     brand: {
       "@type": "Organization",
       name: site.parent.name,
-      url: site.parent.url,
     },
     memberOf: {
       "@type": "Organization",
       name: site.parent.name,
-      url: site.parent.url,
     },
     parentOrganization: {
       "@type": "Organization",

@@ -10,6 +10,37 @@ export interface RentalContent {
   categoriesHead: string;
   categoriesIntro: string;
   categories: BikeCategory[];
+  catalogue: {
+    head: string;
+    intro: string;
+    shop: string;
+    pickup: string;
+    return: string;
+    type: string;
+    maker: string;
+    any: string;
+    search: string;
+    clear: string;
+    results: string;
+    available: string;
+    unavailable: string;
+    pickDates: string;
+    book: string;
+    reference: string;
+    quoteNote: string;
+    perDay: string;
+    days: string;
+    noBikes: string;
+    noShops: string;
+    emptyFilter: string;
+    dateOrder: string;
+    datePast: string;
+    areaEmpty: string;
+    colours: string;
+    noPhoto: string;
+    footnote: string;
+    browse: string;
+  };
   coverageHead: string;
   coverageIntro: string;
   // The region/prefecture list itself lives in lib/content/coverage.ts, which is
@@ -47,7 +78,7 @@ export const rentalContent: Record<Locale, RentalContent> = {
       eyebrow: "租車",
       title: "在日本租電單車自駕遊",
       intro:
-        "由 125cc 綿羊到大型旅行電單車、Harley 及越野車，全日本 99 間分店任你就近取車。填表選車、我們以中文確認報價，落機即可上路。",
+        "由 125cc 綿羊到大型旅行電單車、Harley 及越野車，先在本頁揀分店同日期，再由香港團隊以港幣確認報價，落機即可上路。",
     },
     categoriesHead: "車款選擇",
     categoriesIntro: "每間分店可租車款各有不同，填表時列出心儀首三位，我們會按供應情況為你安排。",
@@ -59,6 +90,37 @@ export const rentalContent: Record<Locale, RentalContent> = {
       { name: "Harley / 美式", cc: "883cc 以上", note: "巡航風格，感受美式騎旅" },
       { name: "越野 / Adventure", cc: "250–1200cc", note: "上山下海，探索林道與郊野" },
     ],
+    catalogue: {
+      head: "可租車款",
+      intro: "揀分店同取還日期，查看該店車款及供應情況。所示為港幣參考價，最終報價由香港團隊確認。",
+      shop: "分店",
+      pickup: "取車日期",
+      return: "還車日期",
+      type: "類型",
+      maker: "廠牌",
+      any: "全部",
+      search: "查看供應",
+      clear: "清除",
+      results: "{n} 款",
+      available: "所選日期可預約",
+      unavailable: "所選日期未能預約",
+      pickDates: "選擇日期以查看供應",
+      book: "預約",
+      reference: "參考價",
+      quoteNote: "最終報價於確認後提供",
+      perDay: "/ 天",
+      days: "{n} 天",
+      noBikes: "這間分店暫時未有車款資料。可改選其他分店，或直接填寫預約表格。",
+      noShops: "車款目錄尚未同步。你仍可填寫預約表格，香港團隊會為你安排。",
+      emptyFilter: "沒有符合篩選的車款。",
+      dateOrder: "還車日期必須在取車日期之後。",
+      datePast: "取車日期必須是今天或之後。",
+      areaEmpty: "這個地區暫時未有分店列入目錄。",
+      colours: "顏色",
+      noPhoto: "暫無相片",
+      footnote: "供應情況每日更新。所選日期未能預約的車款仍可提交表格，香港團隊會再作安排。",
+      browse: "瀏覽車款",
+    },
     coverageHead: "全日本取車網絡",
     coverageIntro: "分店遍佈全國主要地區及機場，租還車須於同一分店辦理。",
     priceHead: "租金參考（港元）",
@@ -81,7 +143,7 @@ export const rentalContent: Record<Locale, RentalContent> = {
       eyebrow: "Rent a bike",
       title: "Rent a motorcycle & self-drive Japan",
       intro:
-        "From 125cc scooters to big tourers, Harleys and adventure bikes — pick up at any of 99 branches nationwide. Send the form, we confirm your quote, and you ride from the moment you land.",
+        "From 125cc scooters to big tourers, Harleys and adventure bikes. Choose a branch and your dates here, then our Hong Kong team confirms the HK$ quote before you land and ride.",
     },
     categoriesHead: "Choose your bike",
     categoriesIntro:
@@ -94,6 +156,39 @@ export const rentalContent: Record<Locale, RentalContent> = {
       { name: "Harley / cruiser", cc: "883cc+", note: "Cruiser style — the American road-trip feel" },
       { name: "Adventure", cc: "250–1200cc", note: "On- and off-road exploration of trails and countryside" },
     ],
+    catalogue: {
+      head: "Bikes you can rent",
+      intro:
+        "Choose a branch and your dates to see what is free. Prices shown are HK$ reference rates; the Hong Kong team confirms the final quote.",
+      shop: "Branch",
+      pickup: "Pick-up date",
+      return: "Return date",
+      type: "Type",
+      maker: "Maker",
+      any: "Any",
+      search: "Check availability",
+      clear: "Clear",
+      results: "{n} bikes",
+      available: "Free for your dates",
+      unavailable: "Not free for your dates",
+      pickDates: "Choose dates to check availability",
+      book: "Book",
+      reference: "Reference price",
+      quoteNote: "Final quote after confirmation",
+      perDay: "/ day",
+      days: "{n} days",
+      noBikes: "No bikes are listed for this branch yet. Try another branch, or send the booking form.",
+      noShops: "The bike catalogue has not been synced yet. You can still send the booking form and the Hong Kong team will arrange it.",
+      emptyFilter: "No bikes match these filters.",
+      dateOrder: "The return date must be after the pick-up date.",
+      datePast: "The pick-up date must be today or later.",
+      areaEmpty: "No branches are listed in this region yet.",
+      colours: "Colours",
+      noPhoto: "No photo",
+      footnote:
+        "Availability is refreshed daily. You can still send the form for a bike that is not free — the Hong Kong team will follow up.",
+      browse: "Browse bikes",
+    },
     coverageHead: "Nationwide pick-up network",
     coverageIntro:
       "Branches across every major region and airport. Pick-up and return must be at the same branch.",

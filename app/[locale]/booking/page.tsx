@@ -9,6 +9,8 @@ import { breadcrumbLd } from "@/lib/jsonld";
 import PageHero from "@/components/PageHero";
 import Breadcrumb from "@/components/Breadcrumb";
 import BookingForm from "@/components/BookingForm";
+import { listShopGroups } from "@/lib/catalogue/shops";
+import { shopAreaLabel, shopLabel } from "@/lib/reservations/shop-labels";
 import JsonLd from "@/components/JsonLd";
 import TrustLine from "@/components/TrustLine";
 import { WhatsAppIcon } from "@/components/icons";
@@ -25,10 +27,18 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   );
 }
 
-export default function BookingPage({ params }: { params: { locale: string } }) {
+export default async function BookingPage({ params }: { params: { locale: string } }) {
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
   const dict = getDictionary(locale);
   const isEn = locale === "en";
+  const shopGroups = (await listShopGroups()).map((g) => ({
+    area: g.areaJa,
+    areaLabel: isEn ? g.areaEn || shopAreaLabel(g.areaJa, locale) : g.areaJa,
+    shops: g.shops.map((s) => ({
+      value: s.nameJa,
+      label: isEn ? s.nameEn || shopLabel(s.nameJa, locale) : s.nameJa,
+    })),
+  }));
 
   const points = isEn
     ? [
@@ -91,7 +101,7 @@ export default function BookingPage({ params }: { params: { locale: string } }) 
                   WhatsApp {site.phone}
                 </a>
               </p>
-              <BookingForm locale={locale} />
+              <BookingForm locale={locale} shopGroups={shopGroups} />
             </div>
           </div>
 

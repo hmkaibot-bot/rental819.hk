@@ -1,15 +1,16 @@
 import Image from "next/image";
-import { coverageRegions, JAPAN_SHOPLIST } from "@/lib/content/coverage";
-import type { Locale } from "@/lib/i18n";
+import Link from "next/link";
+import { coverageRegions } from "@/lib/content/coverage";
+import { localePath, type Locale } from "@/lib/i18n";
 
 /**
  * Nationwide branch coverage: the Japan region map with a clickable label over
- * each region, plus a linked region/prefecture list. Each region opens the
- * Rental819 store list anchored to that area.
+ * each region, plus a region/prefecture list. Each region opens our catalogue
+ * with a branch in that area selected.
  */
 export default function CoverageMap({ locale }: { locale: Locale }) {
   const isEn = locale === "en";
-  const areaHref = (a: number) => `${JAPAN_SHOPLIST}#area_${a}`;
+  const areaHref = (a: number) => localePath(locale, `/rental?area=${a}#catalogue`);
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,460px)_1fr] lg:gap-12">
@@ -26,11 +27,9 @@ export default function CoverageMap({ locale }: { locale: Locale }) {
               sizes="(min-width: 1024px) 460px, 100vw"
             />
             {coverageRegions.map((r) => (
-              <a
+              <Link
                 key={r.area}
                 href={areaHref(r.area)}
-                target="_blank"
-                rel="noopener noreferrer"
                 title={isEn ? r.en : r.zh}
                 className="group absolute -translate-x-1/2 -translate-y-1/2"
                 style={{ left: `${r.px}%`, top: `${r.py}%` }}
@@ -41,14 +40,12 @@ export default function CoverageMap({ locale }: { locale: Locale }) {
                 >
                   {isEn ? r.en : r.zhShort}
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
         <figcaption className="mt-3 text-center text-xs text-ink-muted">
-          {isEn
-            ? "Tap a region to see its Rental819 branches"
-            : "點選地區，查看該區 Rental819 分店"}
+          {isEn ? "Choose a region to see its bikes" : "點選地區，查看該區車款"}
         </figcaption>
       </figure>
 
@@ -56,10 +53,8 @@ export default function CoverageMap({ locale }: { locale: Locale }) {
       <ul className="grid gap-3 sm:grid-cols-2">
         {coverageRegions.map((r) => (
           <li key={r.area} className="rounded-xl border border-slate-100 bg-white p-4">
-            <a
+            <Link
               href={areaHref(r.area)}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-bold text-brand-700 hover:underline"
             >
               <span
@@ -68,8 +63,7 @@ export default function CoverageMap({ locale }: { locale: Locale }) {
                 style={{ backgroundColor: r.color }}
               />
               {isEn ? r.en : r.zh}
-              <span aria-hidden className="text-xs">↗</span>
-            </a>
+            </Link>
             <p className="mt-1.5 text-sm leading-6 text-ink-muted">
               {r.prefectures.join(isEn ? " · " : "、")}
             </p>

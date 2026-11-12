@@ -10,8 +10,6 @@ import {
   statusMeta,
   ADDON_LABELS,
   COST_ITEM_LABELS,
-  SHOP_AREAS,
-  SHOPS,
   PAYMENT_CHANNELS,
   JP_ABILITY_OPTIONS,
   EN_ABILITY_OPTIONS,
@@ -20,6 +18,7 @@ import {
 } from "@/lib/reservations/types";
 import AbilitySelect from "@/components/admin/AbilitySelect";
 import ActionForm from "@/components/admin/ActionForm";
+import { shopAreasForSelect } from "@/lib/catalogue/shops";
 import { autoSiNumber } from "@/lib/reservations/invoice";
 import {
   patchReservation,
@@ -108,6 +107,8 @@ export default async function ReservationDetail({
 }) {
   const r = await getReservation(params.id);
   if (!r) notFound();
+  const shopAreas = await shopAreasForSelect();
+  const shopNames = new Set(shopAreas.flatMap((a) => a.shops));
   const readOnly = !canWrite();
   const lang = getAdminLang();
   const t = adminDict(lang);
@@ -265,10 +266,10 @@ export default async function ReservationDetail({
                   {/* Historical bookings carry free-text branch names imported from
                       the Excel (e.g. 那霸空港店) that predate the official list.
                       Keep the stored value selectable so saving never wipes it. */}
-                  {r.shop && !SHOPS.includes(r.shop) && (
+                  {r.shop && !shopNames.has(r.shop) && (
                     <option value={r.shop}>{r.shop}{t.detail.existingSuffix}</option>
                   )}
-                  {SHOP_AREAS.map((a) => (
+                  {shopAreas.map((a) => (
                     <optgroup key={a.area} label={a.area}>
                       {a.shops.map((sh) => (
                         <option key={sh} value={sh}>{sh}</option>

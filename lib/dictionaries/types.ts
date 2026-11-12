@@ -44,7 +44,6 @@ export interface Dictionary {
   /** Reassurance line shown beside the main rental CTAs; `price` contains "{price}". */
   trust: {
     price: string;
-    same: string;
     lead: string;
   };
   footer: {

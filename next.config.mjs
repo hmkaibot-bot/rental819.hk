@@ -104,7 +104,7 @@ const nextConfig = {
     // Existing brand assets still live on the WordPress origin during migration.
     remotePatterns: [
       { protocol: "https", hostname: "rental819.hk" },
-      { protocol: "https", hostname: "rental819.com" },
+      { protocol: "https", hostname: "cdn.rental819.com" },
     ],
   },
   async redirects() {

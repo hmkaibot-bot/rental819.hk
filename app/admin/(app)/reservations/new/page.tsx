@@ -1,10 +1,10 @@
 import Link from "next/link";
 import {
   ADDON_LABELS,
-  SHOP_AREAS,
   JP_ABILITY_OPTIONS,
   EN_ABILITY_OPTIONS,
 } from "@/lib/reservations/types";
+import { shopAreasForSelect } from "@/lib/catalogue/shops";
 import { redirect } from "next/navigation";
 import { canWrite } from "@/lib/admin/auth";
 import { getAdminLang } from "@/lib/admin/lang";
@@ -46,10 +46,11 @@ const ADDON_CHECKS = ADDON_LABELS.filter(
   (a) => a.key !== "full_face" && a.key !== "open_face",
 );
 
-export default function NewReservationPage() {
+export default async function NewReservationPage() {
   // This page exists only to create a record — send a read-only session back to
   // the list rather than showing a form whose submit can never succeed.
   if (!canWrite()) redirect("/admin");
+  const shopAreas = await shopAreasForSelect();
   const lang = getAdminLang();
   const t = adminDict(lang);
   const f = t.fields;
@@ -114,7 +115,7 @@ export default function NewReservationPage() {
               <label className={label} htmlFor="shop">{f.shop}</label>
               <select id="shop" name="shop" defaultValue="" className={`mt-1 ${input}`}>
                 <option value="">—</option>
-                {SHOP_AREAS.map((a) => (
+                {shopAreas.map((a) => (
                   <optgroup key={a.area} label={a.area}>
                     {a.shops.map((sh) => (
                       <option key={sh} value={sh}>{sh}</option>

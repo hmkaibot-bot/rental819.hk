@@ -352,7 +352,19 @@ function ageFrom(dob: string): number | null {
   return age;
 }
 
-export default function BookingForm({ locale }: { locale: Locale }) {
+export interface BookingShopGroup {
+  area: string;
+  areaLabel: string;
+  shops: { value: string; label: string }[];
+}
+
+export default function BookingForm({
+  locale,
+  shopGroups,
+}: {
+  locale: Locale;
+  shopGroups?: BookingShopGroup[];
+}) {
   const c = t[locale];
   const isEn = locale === "en";
   const draftKey = bookingDraftKey(locale);
@@ -380,32 +392,40 @@ export default function BookingForm({ locale }: { locale: Locale }) {
       ...pick(readStored(draftKey), TRIP),
       ...pick(readStored(personalKey, "session"), PERSONAL),
     };
-    let bike: string | null = null;
+    const prefill: Partial<Form> = {};
     let strip: number | undefined;
     try {
       const url = new URL(window.location.href);
-      bike = url.searchParams.get("bike")?.slice(0, 80) || null;
-      if (bike) {
-        // Every pick on /rental wins, and ?bike= is then dropped from the URL
-        // so a reload keeps what the rider types afterwards. Deferred because
-        // on a first load this effect runs before the App Router's own, which
-        // patches history.replaceState to keep Next's history state and
-        // update its router URL.
-        url.searchParams.delete("bike");
+      const bike = url.searchParams.get("bike")?.trim().slice(0, 160) || "";
+      const shop = url.searchParams.get("shop")?.trim().slice(0, 160) || "";
+      const pickup = url.searchParams.get("pickup_date")?.trim() || "";
+      const ret = url.searchParams.get("return_date")?.trim() || "";
+      const iso = /^\d{4}-\d{2}-\d{2}$/;
+      // A catalogue "Book" link wins over the saved draft, then those params
+      // are dropped so a reload keeps what the rider types afterwards.
+      // Deferred because on a first load this effect runs before the App
+      // Router's own, which patches history.replaceState to keep Next's
+      // history state and update its router URL.
+      if (bike) prefill.bike_pref_1 = bike;
+      if (shop) prefill.shop = shop;
+      if (iso.test(pickup)) prefill.pickup_date = pickup;
+      if (iso.test(ret)) prefill.return_date = ret;
+      if (Object.keys(prefill).length) {
+        for (const key of ["bike", "shop", "pickup_date", "return_date"]) url.searchParams.delete(key);
         strip = window.setTimeout(
           () => window.history.replaceState(null, "", url.pathname + url.search + url.hash),
           0,
         );
       }
     } catch {
-      // Unparseable URL — leave the field as it is.
+      // Unparseable URL — leave the fields as they are.
     }
-    if (bike) restored.bike_pref_1 = bike;
+    Object.assign(restored, prefill);
     if (Object.keys(restored).length)
       setForm((f) => {
         const next = { ...f, ...restored };
-        // A newly applied ?bike= is saved, since the URL no longer carries it.
-        if (!bike) restoredForm.current = next;
+        // A newly applied catalogue link is saved, since the URL no longer carries it.
+        if (!Object.keys(prefill).length) restoredForm.current = next;
         return next;
       });
     return () => window.clearTimeout(strip);
@@ -599,6 +619,15 @@ export default function BookingForm({ locale }: { locale: Locale }) {
     );
   }
 
+  const groups: BookingShopGroup[] =
+    shopGroups ??
+    SHOP_AREAS.map((a) => ({
+      area: a.area,
+      areaLabel: shopAreaLabel(a.area, locale),
+      shops: a.shops.map((s) => ({ value: s, label: shopLabel(s, locale) })),
+    }));
+  const knownShops = new Set(groups.flatMap((g) => g.shops.map((s) => s.value)));
+
   const star = <span className="text-accent-600">*</span>;
   const sp = isEn ? " " : "";
   const missingLabels =
@@ -614,10 +643,13 @@ export default function BookingForm({ locale }: { locale: Locale }) {
           <label htmlFor="shop" className={labelCls}>{c.shop} {star}</label>
           <select {...ctl("shop")} value={form.shop} onChange={setText("shop")}>
             <option value="">{c.shopPlaceholder}</option>
-            {SHOP_AREAS.map((a) => (
-              <optgroup key={a.area} label={shopAreaLabel(a.area, locale)}>
+            {form.shop && !knownShops.has(form.shop) && (
+              <option value={form.shop}>{form.shop}</option>
+            )}
+            {groups.map((a) => (
+              <optgroup key={a.area} label={a.areaLabel}>
                 {a.shops.map((s) => (
-                  <option key={s} value={s}>{shopLabel(s, locale)}</option>
+                  <option key={s.value} value={s.value}>{s.label}</option>
                 ))}
               </optgroup>
             ))}

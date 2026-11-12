@@ -5,7 +5,7 @@ import type { Dictionary } from "@/lib/dictionaries";
 import { RENT_FROM_HKD, hkd } from "@/lib/content/prices";
 import { CheckIcon } from "./icons";
 
-/** Price + "same rent as Japan" + lead-time line shown under the rental CTAs. */
+/** Reference price and lead-time line shown under the rental CTAs. */
 export default function TrustLine({
   locale,
   dict,
@@ -33,10 +33,6 @@ export default function TrustLine({
         >
           {dict.trust.price.replace("{price}", hkd(RENT_FROM_HKD))}
         </Link>
-      </li>
-      <li className="flex items-start gap-1.5">
-        <CheckIcon className={icon} />
-        {dict.trust.same}
       </li>
       <li className="flex items-start gap-1.5">
         <CheckIcon className={icon} />

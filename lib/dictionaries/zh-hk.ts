@@ -44,7 +44,6 @@ const dict: Dictionary = {
   },
   trust: {
     price: "1 天租金 {price} 起（參考價，已包強制及任意保險）",
-    same: "租金與日本 Rental819 相同，經香港預約毋須額外收費",
     lead: "最遲出發前一星期預約，先到先得",
   },
   footer: {
