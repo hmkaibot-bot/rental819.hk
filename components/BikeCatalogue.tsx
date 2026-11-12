@@ -155,9 +155,18 @@ export default function BikeCatalogue({
                           ? copy.unavailable
                           : copy.pickDates}
                     </p>
-                    <Link href={card.bookHref} className="btn-primary mt-4" data-cta="catalogue-book">
-                      {copy.book}
-                    </Link>
+                    {card.availability === "no" ? (
+                      <span
+                        className="btn mt-4 cursor-default bg-slate-200 text-slate-400 opacity-70"
+                        aria-disabled="true"
+                      >
+                        {copy.rented}
+                      </span>
+                    ) : (
+                      <Link href={card.bookHref} className="btn-primary mt-4" data-cta="catalogue-book">
+                        {copy.book}
+                      </Link>
+                    )}
                   </div>
                 </li>
               ))}
