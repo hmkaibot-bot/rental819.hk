@@ -16,7 +16,6 @@ export const site = {
   },
   parent: {
     name: "Rental819 Japan",
-    url: "https://rental819.com",
     branches: 99,
   },
   /** Sister brands under the Helmet King group. */

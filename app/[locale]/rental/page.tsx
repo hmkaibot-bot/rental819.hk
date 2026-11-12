@@ -13,6 +13,8 @@ import CTABand from "@/components/CTABand";
 import CoverageMap from "@/components/CoverageMap";
 import JsonLd from "@/components/JsonLd";
 import TrustLine from "@/components/TrustLine";
+import BikeCatalogue from "@/components/BikeCatalogue";
+import { loadCatalogue } from "@/lib/catalogue/query";
 import { ArrowRight } from "@/components/icons";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
@@ -27,11 +29,20 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   );
 }
 
-export default function RentalPage({ params }: { params: { locale: string } }) {
+export const dynamic = "force-dynamic";
+
+export default async function RentalPage({
+  params,
+  searchParams,
+}: {
+  params: { locale: string };
+  searchParams?: { shop?: string; pickup?: string; return?: string; maker?: string; type?: string; area?: string };
+}) {
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
   const dict = getDictionary(locale);
   const c = rentalContent[locale];
   const isEn = locale === "en";
+  const catalogue = await loadCatalogue(locale, searchParams ?? {});
 
   return (
     <>
@@ -56,42 +67,47 @@ export default function RentalPage({ params }: { params: { locale: string } }) {
           locale={locale}
           items={[{ label: dict.nav.home, href: "/" }, { label: dict.nav.rental }]}
         />
-        <div className="mt-6">
-          <Link href={localePath(locale, "/booking")} className="btn-primary" data-cta="rental-hero-book">
-            {dict.common.bookNow}
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a href="#catalogue" className="btn-primary">
+            {c.catalogue.browse}
             <ArrowRight className="h-4 w-4" />
+          </a>
+          <Link href={localePath(locale, "/booking")} className="btn-outline" data-cta="rental-hero-book">
+            {dict.common.bookNow}
           </Link>
         </div>
         <TrustLine locale={locale} dict={dict} tone="dark" />
       </PageHero>
 
-      {/* Bike categories */}
       <section className="container-x py-16 lg:py-20">
-        <div className="mb-10 max-w-2xl">
-          <h2 className="text-2xl font-bold sm:text-3xl">{c.categoriesHead}</h2>
-          <p className="mt-3 text-ink-muted">{c.categoriesIntro}</p>
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {c.categories.map((cat) => (
-            <Link
-              key={cat.name}
-              href={localePath(locale, `/booking?bike=${encodeURIComponent(`${cat.name} ${cat.cc}`)}`)}
-              className="card-hover block p-6"
-              data-cta="rental-category"
-            >
-              <div className="flex items-baseline justify-between">
-                <h3 className="text-lg font-bold">{cat.name}</h3>
-                <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700">
-                  {cat.cc}
-                </span>
-              </div>
-              <p className="mt-2 text-sm leading-6 text-ink-muted">{cat.note}</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
-                {isEn ? "Choose this type" : "揀呢類車"} <ArrowRight className="h-4 w-4" />
-              </span>
-            </Link>
-          ))}
-        </div>
+        <BikeCatalogue locale={locale} copy={c.catalogue} data={catalogue} />
+        {!catalogue.synced && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold sm:text-3xl">{c.categoriesHead}</h2>
+            <p className="mt-3 max-w-2xl text-ink-muted">{c.categoriesIntro}</p>
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {c.categories.map((cat) => (
+                <Link
+                  key={cat.name}
+                  href={localePath(locale, `/booking?bike=${encodeURIComponent(`${cat.name} ${cat.cc}`)}`)}
+                  className="card-hover block p-6"
+                  data-cta="rental-category"
+                >
+                  <div className="flex items-baseline justify-between">
+                    <h3 className="text-lg font-bold">{cat.name}</h3>
+                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700">
+                      {cat.cc}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-ink-muted">{cat.note}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
+                    {isEn ? "Choose this type" : "揀呢類車"} <ArrowRight className="h-4 w-4" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Reference rates */}

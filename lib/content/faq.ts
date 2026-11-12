@@ -54,8 +54,8 @@ export const faq: Record<Locale, FaqGroup[]> = {
           a: "租金以轉數快／銀行匯款繳付。惟取車時日本店鋪一般需要出示信用卡作按金及身分核對之用，建議準備至少一張信用卡。",
         },
         {
-          q: "香港 Rental819 與日本 Rental819 的租車費用有分別嗎？",
-          a: "沒有分別，租金與日本相同。透過香港頭盔王預約，更可享免費中文咨詢及全程協助安排，毋須額外收費。",
+          q: "租金怎樣計算？",
+          a: "本站以港幣列出各車級參考價，最終金額由香港團隊在確認預約後報價。請經本站提交預約，由香港團隊以中文協助安排。",
         },
         {
           q: "我收不到預約的確認電郵",
@@ -222,8 +222,8 @@ export const faq: Record<Locale, FaqGroup[]> = {
           a: "Rental fees are paid by FPS/bank transfer. However, the branch in Japan usually requires a credit card at pick-up for deposit and identity verification, so please bring at least one.",
         },
         {
-          q: "Is the rental fee different between Rental819 Hong Kong and Rental819 Japan?",
-          a: "No — the rent is the same as in Japan. Booking through Helmet King in Hong Kong also gives you free Chinese-language consultation and full arrangement support at no extra charge.",
+          q: "How is the rental priced?",
+          a: "Class rates on this site are HK$ reference prices. The Hong Kong team confirms the final quote after you book, and arranges the rental with you from here.",
         },
         {
           q: "I didn't receive my confirmation email",

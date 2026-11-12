@@ -44,7 +44,6 @@ const dict: Dictionary = {
   },
   trust: {
     price: "From {price} a day (reference price, compulsory & voluntary insurance included)",
-    same: "Same rent as Rental819 Japan — no extra charge for booking via Hong Kong",
     lead: "Book at least a week ahead; first come, first served",
   },
   footer: {

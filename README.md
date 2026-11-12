@@ -28,6 +28,42 @@ npm run dev     # http://localhost:3000  → redirects to /zh-hk
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build |
 | `npm run lint` | Next.js lint |
+| `npm run sync-catalogue` | Pull shops, bikes and availability into Supabase |
+
+---
+
+## Bike catalogue sync
+
+`/zh-hk/rental` and `/en/rental` read the `catalogue_*` tables (migration
+`supabase/migrations/0012_catalogue.sql`). A daily GitHub Action
+(`.github/workflows/sync-catalogue.yml`, 02:00 Hong Kong time) refreshes every
+branch. It is a few thousand polite requests, so it does not run as a Vercel
+cron. The booking form's branch list is loaded from `catalogue_shops` and
+falls back to the static list in `lib/reservations/types.ts` when the table
+is empty.
+
+Manual run for one shop (Itami is store `110`):
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
+  npm run sync-catalogue -- --store 110
+```
+
+Omit `--store` to sync every shop. `--dump /tmp/out` writes JSON and skips the
+database when the service-role key is not set. Optional
+`CATALOGUE_SYNC_INTERVAL_MS` (default `650`) is the gap between upstream requests.
+
+GitHub repository secrets (Actions) and Vercel env:
+
+| Name | Where | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Vercel + GitHub | Supabase project URL (`rental819-hk`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel | Public catalogue reads. If unset, the site falls back to the service role on the server |
+| `SUPABASE_SERVICE_ROLE_KEY` | Vercel + GitHub | Admin writes and the sync. Never expose this in the browser |
+
+Apply `0012_catalogue.sql` before the first sync. The Action will no-op until
+those two secrets exist. A nationwide run can take a few hours of GitHub-hosted
+runner time.
 
 ---
 

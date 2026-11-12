@@ -1,0 +1,50 @@
+name: Sync bike catalogue
+
+# Daily fleet + availability sync. A full run is thousands of polite requests
+# (about 1.5/s), so it lives here rather than on a Vercel cron, which would
+# time out. GitHub-hosted runners bill the wall-clock minutes; a nationwide
+# run can take a few hours. Set repository secrets before enabling the schedule:
+#   NEXT_PUBLIC_SUPABASE_URL
+#   SUPABASE_SERVICE_ROLE_KEY
+on:
+  schedule:
+    # 18:00 UTC = 02:00 Asia/Hong_Kong
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+    inputs:
+      store:
+        description: "Official store id (blank = every shop). Example: 110"
+        required: false
+        type: string
+
+concurrency:
+  group: catalogue-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Sync catalogue
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CATALOGUE_SYNC_INTERVAL_MS: "650"
+          STORE: ${{ github.event.inputs.store }}
+        run: |
+          set -euo pipefail
+          if [ -n "${STORE}" ]; then
+            node scripts/sync-catalogue.mjs --store "${STORE}"
+          else
+            node scripts/sync-catalogue.mjs
+          fi
