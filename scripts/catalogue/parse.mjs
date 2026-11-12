@@ -1,5 +1,7 @@
 /** HTML parsers for the public Rental819 fleet pages. No prices in JPY are kept. */
 
+import { EQUIPMENT_CODE_BY_JA, codesForMask } from "./equipment.mjs";
+
 export function decodeHtml(value) {
   return String(value ?? "")
     .replace(/<[^>]+>/g, "")
@@ -102,9 +104,36 @@ function attr(tag, name) {
   return m ? decodeHtml(m[1]) : "";
 }
 
+/** Option rows under `#default_option` or `#custom_option`. Null when that block is absent. */
+export function parseOptionCatalog(html, id) {
+  const source = String(html);
+  const marker = `id="${id}"`;
+  const start = source.indexOf(marker);
+  if (start < 0) return null;
+  const slice = source.slice(start, start + 6000);
+  const ulEnd = slice.indexOf("</ul>");
+  const block = ulEnd >= 0 ? slice.slice(0, ulEnd) : slice;
+  const re = new RegExp(`id="${id}_(\\d+)"[^>]*>\\s*<span>([\\s\\S]*?)</span>`, "g");
+  const items = [];
+  let m;
+  while ((m = re.exec(block))) {
+    const label = decodeHtml(m[2]);
+    items.push({
+      bit: Number(m[1]),
+      label,
+      code: EQUIPMENT_CODE_BY_JA[label] ?? null,
+    });
+  }
+  return items;
+}
+
 /** @param {string} html bike detail page */
 export function parseBikeDetail(html) {
   const source = String(html);
+  const freeCatalog = parseOptionCatalog(source, "default_option");
+  const paidCatalog = parseOptionCatalog(source, "custom_option");
+  const equipmentKnown = freeCatalog !== null || paidCatalog !== null;
+  const unmapped = new Set();
   const units = [];
   const re = /<li\b([^>]*\bdata-id="\d+"[^>]*)>/g;
   let m;
@@ -112,11 +141,16 @@ export function parseBikeDetail(html) {
     const tag = m[1];
     const unitId = Number(attr(tag, "data-id"));
     if (!unitId) continue;
-    units.push({
+    const unit = {
       unitId,
       colour: attr(tag, "data-color") || null,
       photoUrl: attr(tag, "data-image") || null,
-    });
+    };
+    if (equipmentKnown) {
+      unit.freeEquipment = codesForMask(attr(tag, "data-default-option"), freeCatalog ?? [], unmapped);
+      unit.paidEquipment = codesForMask(attr(tag, "data-custom-option"), paidCatalog ?? [], unmapped);
+    }
+    units.push(unit);
   }
   const ccText = ddAfter(source, "排気量");
   const cc = Number((ccText.match(/[\d.]+/) || [])[0]);
@@ -127,6 +161,8 @@ export function parseBikeDetail(html) {
     bikeClass: (ddAfter(source, "クラス").match(/P-[1-7]/) || [])[0] || null,
     displacementCc: Number.isFinite(cc) ? cc : null,
     modelYear: Number.isInteger(year) && year > 1980 && year < 2100 ? year : null,
+    equipmentKnown,
+    unmappedEquipment: [...unmapped],
     units,
   };
 }

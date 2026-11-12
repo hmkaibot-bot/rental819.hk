@@ -5,6 +5,8 @@ import { bookingReceivedEmail, SOURCE_NOTE_PREFIX } from "@/lib/reservations/ema
 import { INTERNAL_COPY } from "@/lib/reservations/recipients";
 import { isGmailConfigured, sendGmailMessage } from "@/lib/gmail";
 import type { ReservationAddons } from "@/lib/reservations/types";
+import { loadEquipmentBikes } from "@/lib/catalogue/equipment-index";
+import { matchEquipmentBike } from "@/lib/catalogue/equipment";
 
 export const runtime = "nodejs";
 
@@ -136,6 +138,20 @@ export async function POST(request: Request) {
     full_face: count(body.helmet_full),
     open_face: count(body.helmet_open),
   };
+
+  // A catalogue bike may only book the paid equipment that model offers.
+  // Unknown bikes (not scraped, or the text doesn't match one model) are unchanged.
+  try {
+    const matched = matchEquipmentBike(clean(body.shop) ?? "", clean(body.bike_pref_1) ?? "", await loadEquipmentBikes());
+    if (matched) {
+      const allow = new Set(matched.paid);
+      if (!allow.has("topcase")) addons.topcase = undefined;
+      if (!allow.has("sidebag")) addons.sidebag = undefined;
+      if (!allow.has("pannier")) addons.pannier = undefined;
+    }
+  } catch (err) {
+    console.error("equipment restrict", err);
+  }
 
   const a = cleanAttribution(body.attribution);
   const sourceLine =

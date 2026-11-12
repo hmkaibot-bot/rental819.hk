@@ -236,6 +236,7 @@ async function syncShop(shop, errors) {
   const availability = [];
   const freshUnits = [];
   const preserve = new Set();
+  const unmappedEquipment = new Set();
 
   for (const item of searched.items) {
     const url = `${ORIGIN}/bike/${storeId}/${item.masterBikeId}`;
@@ -258,6 +259,7 @@ async function syncShop(shop, errors) {
       preserve.add(item.masterBikeId);
       continue;
     }
+    for (const name of detail.unmappedEquipment || []) unmappedEquipment.add(name);
     const photo = item.photoUrl || detail.units.find((u) => u.photoUrl)?.photoUrl || null;
     models.push({
       store_id: storeId,
@@ -273,7 +275,7 @@ async function syncShop(shop, errors) {
       updated_at: now,
     });
     for (const unit of detail.units) {
-      units.push({
+      const row = {
         unit_id: unit.unitId,
         store_id: storeId,
         master_bike_id: item.masterBikeId,
@@ -281,7 +283,14 @@ async function syncShop(shop, errors) {
         photo_url: unit.photoUrl || photo,
         active: true,
         updated_at: now,
-      });
+      };
+      // Only when the page still has the equipment blocks. A layout change
+      // then leaves the previous arrays in place instead of wiping them.
+      if (detail.equipmentKnown) {
+        row.free_equipment = unit.freeEquipment;
+        row.paid_equipment = unit.paidEquipment;
+      }
+      units.push(row);
       const availUrl = `${ORIGIN}/bike/get_reserve_status_dates/${unit.unitId}`;
       try {
         const payload = await fetchJson(availUrl);
@@ -321,6 +330,7 @@ async function syncShop(shop, errors) {
     models: models.length,
     units: units.length,
     availability: availability.length,
+    unmappedEquipment: [...unmappedEquipment],
   };
 }
 
@@ -443,6 +453,7 @@ async function main() {
   let models = 0;
   let units = 0;
   let availabilityRows = 0;
+  const unmappedEquipment = new Set();
   try {
     const shops = await loadShops();
     if (sb) {
@@ -475,6 +486,7 @@ async function main() {
         models += counts.models;
         units += counts.units;
         availabilityRows += counts.availability;
+        for (const name of counts.unmappedEquipment) unmappedEquipment.add(name);
         console.log(
           `ok store ${shop.store_id} ${shop.name_ja} models=${counts.models} units=${counts.units} days=${counts.availability}`,
         );
@@ -486,7 +498,10 @@ async function main() {
     }
     const status =
       shopsOk === 0 ? "failed" : shopsFailed === 0 && errors.length === 0 ? "success" : "partial";
-    const message = `${shopsOk} shops ok, ${shopsFailed} failed, ${models} models, ${units} units, ${availabilityRows} availability rows, ${stats.requests} requests`;
+    const unmappedNote = unmappedEquipment.size
+      ? `; unmapped equipment: ${[...unmappedEquipment].join(", ")}`
+      : "";
+    const message = `${shopsOk} shops ok, ${shopsFailed} failed, ${models} models, ${units} units, ${availabilityRows} availability rows, ${stats.requests} requests${unmappedNote}`;
     console.log(message);
     await finishRun(runId, {
       status,

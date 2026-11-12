@@ -4,9 +4,18 @@ import { localePath } from "@/lib/i18n";
 import { hkd } from "@/lib/content/prices";
 import { supabaseCatalogue } from "@/lib/supabase";
 import { dateDiffDays, unitAvailable, type AvailDay } from "./availability";
+import { equipmentLabel } from "./equipment";
 import { bikePrefValue, colourLabel, makerLabel, typeLabel } from "./labels";
 import { classRates, referenceTotal } from "./prices";
 import { listCatalogueShops, type CatalogueShop } from "./shops";
+
+export interface EquipmentLine {
+  key: string;
+  /** Set when colours of the same model carry different equipment. */
+  colour: string | null;
+  free: string[];
+  paid: string[];
+}
 
 export interface CatalogueCard {
   key: string;
@@ -17,6 +26,8 @@ export interface CatalogueCard {
   year: number | null;
   photo: string | null;
   colours: string[];
+  /** Null until this model's units have been scraped for equipment. */
+  equipment: { varies: boolean; lines: EquipmentLine[] } | null;
   priceLabel: string;
   availability: "unknown" | "yes" | "no";
   bookHref: string;
@@ -56,6 +67,8 @@ interface RawUnit {
   colour: string | null;
   photo_url: string | null;
   active: boolean;
+  free_equipment?: string[] | null;
+  paid_equipment?: string[] | null;
 }
 
 interface RawModel {
@@ -144,7 +157,7 @@ export async function loadCatalogue(
   const { data, error } = await sb
     .from("catalogue_models")
     .select(
-      "master_bike_id, maker, model, bike_class, bike_type, displacement_cc, model_year, photo_url, catalogue_units(unit_id, colour, photo_url, active)",
+      "master_bike_id, maker, model, bike_class, bike_type, displacement_cc, model_year, photo_url, catalogue_units(unit_id, colour, photo_url, active, free_equipment, paid_equipment)",
     )
     .eq("store_id", selected.storeId)
     .eq("active", true)
@@ -208,6 +221,7 @@ export async function loadCatalogue(
       year: m.model_year,
       photo: m.photo_url,
       colours,
+      equipment: equipmentLines(units, locale),
       priceLabel,
       availability,
       bookHref: `${localePath(locale, "/booking")}?${q.toString()}`,
@@ -232,6 +246,32 @@ export async function loadCatalogue(
     matched: cards.length,
     listed: models.length,
   };
+}
+
+function equipmentLines(units: RawUnit[], locale: Locale): CatalogueCard["equipment"] {
+  const known = units.filter((u) => u.free_equipment != null && u.paid_equipment != null);
+  if (!known.length) return null;
+  const sig = (u: RawUnit) =>
+    `${[...(u.free_equipment ?? [])].slice().sort().join(",")}|${[...(u.paid_equipment ?? [])].slice().sort().join(",")}`;
+  const distinct = new Set(known.map(sig));
+  const varies = distinct.size > 1;
+  const seen = new Set<string>();
+  const lines: EquipmentLine[] = [];
+  for (const unit of known) {
+    const colour = unit.colour ? colourLabel(unit.colour, locale) : null;
+    const key = varies ? `${colour ?? ""}:${sig(unit)}` : "all";
+    if (seen.has(key)) continue;
+    seen.add(key);
+    lines.push({
+      key,
+      colour: varies ? colour : null,
+      free: (unit.free_equipment ?? []).map((code) => equipmentLabel(code, locale)),
+      paid: (unit.paid_equipment ?? []).map((code) => equipmentLabel(code, locale)),
+    });
+  }
+  const visible = lines.filter((line) => line.free.length || line.paid.length);
+  if (!visible.length) return { varies: false, lines: [] };
+  return { varies, lines: visible };
 }
 
 async function loadAvailability(

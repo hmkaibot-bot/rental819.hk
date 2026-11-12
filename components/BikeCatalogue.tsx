@@ -133,6 +133,23 @@ export default function BikeCatalogue({
                         {copy.colours}: {card.colours.join(isEn ? ", " : "、")}
                       </p>
                     )}
+                    {card.equipment && card.equipment.lines.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {card.equipment.lines.map((line) => (
+                          <div key={line.key}>
+                            {card.equipment?.varies && line.colour && (
+                              <p className="text-xs font-semibold text-ink-muted">{line.colour}</p>
+                            )}
+                            {line.free.length > 0 && (
+                              <EquipList title={copy.freeEquip} items={line.free} />
+                            )}
+                            {line.paid.length > 0 && (
+                              <EquipList title={copy.paidEquip} items={line.paid} />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     {card.priceLabel && (
                       <p className="mt-3 text-sm font-semibold text-ink">
                         {copy.reference} {card.priceLabel}
@@ -168,6 +185,24 @@ export default function BikeCatalogue({
           )}
         </>
       )}
+    </div>
+  );
+}
+
+function EquipList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="mt-1.5">
+      <p className="text-xs font-semibold text-ink-soft">{title}</p>
+      <ul className="mt-1 space-y-1">
+        {items.map((item) => (
+          <li
+            key={item}
+            className="rounded-md border border-brand-300 px-2 py-1 text-center text-xs font-medium text-brand-800"
+          >
+            {item}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
