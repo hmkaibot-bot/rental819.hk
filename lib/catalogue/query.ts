@@ -50,7 +50,6 @@ export interface CatalogueData {
   listed: number;
 }
 
-const DEFAULT_STORE = 110;
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
 export function hkToday(): string {
@@ -108,17 +107,12 @@ export async function loadCatalogue(
 
   const areaId = Number(sp.area);
   const areaShops = Number.isInteger(areaId) ? shops.filter((s) => s.areaId === areaId) : [];
-  const areaEmpty = Number.isInteger(areaId) && sp.area !== undefined && sp.area !== "" && areaShops.length === 0;
-  const requestedId = Number(sp.shop);
-  const inArea = areaShops.length
-    ? areaShops.find((s) => s.storeId === DEFAULT_STORE) ?? areaShops[0]
-    : undefined;
-  let selected: CatalogueShop | undefined = areaEmpty
-    ? undefined
-    : shops.find((s) => s.storeId === requestedId) ??
-      inArea ??
-      shops.find((s) => s.storeId === DEFAULT_STORE) ??
-      shops[0];
+  // Only an explicit, valid branch selection can load bikes. Region links
+  // narrow the choices without silently choosing Itami or the first branch.
+  const requestedShop = typeof sp.shop === "string" ? sp.shop.trim() : "";
+  const requestedId = /^\d+$/.test(requestedShop) ? Number(requestedShop) : NaN;
+  const selected = shops.find((s) => s.storeId === requestedId);
+  const areaEmpty = !selected && Number.isInteger(areaId) && sp.area !== undefined && sp.area !== "" && areaShops.length === 0;
 
   const today = hkToday();
   let pickup = ISO.test(sp.pickup || "") ? sp.pickup! : "";
@@ -140,13 +134,13 @@ export async function loadCatalogue(
   const base: CatalogueData = {
     ...empty,
     synced: true,
-    shops,
+    shops: !selected && areaShops.length ? areaShops : shops,
     selected: selected ?? null,
     areaEmpty,
     pickup,
     returnDate,
-    maker: sp.maker || "",
-    type: sp.type || "",
+    maker: selected ? sp.maker || "" : "",
+    type: selected ? sp.type || "" : "",
     dateError,
   };
   if (!selected) return base;

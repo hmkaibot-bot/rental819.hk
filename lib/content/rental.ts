@@ -14,6 +14,8 @@ export interface RentalContent {
     head: string;
     intro: string;
     shop: string;
+    shopPlaceholder: string;
+    chooseShop: string;
     pickup: string;
     return: string;
     type: string;
@@ -96,6 +98,8 @@ export const rentalContent: Record<Locale, RentalContent> = {
       head: "可租車款",
       intro: "揀分店同取還日期，查看該店車款及供應情況。所示為港幣參考價，最終報價由香港團隊確認。",
       shop: "分店",
+      shopPlaceholder: "請選擇分店",
+      chooseShop: "請先選擇分店並查詢，查看該分店的車款。",
       pickup: "取車日期",
       return: "還車日期",
       type: "類型",
@@ -165,6 +169,8 @@ export const rentalContent: Record<Locale, RentalContent> = {
       intro:
         "Choose a branch and your dates to see what is free. Prices shown are HK$ reference rates; the Hong Kong team confirms the final quote.",
       shop: "Branch",
+      shopPlaceholder: "Select a branch",
+      chooseShop: "Select a branch and search to see its bikes.",
       pickup: "Pick-up date",
       return: "Return date",
       type: "Type",

@@ -6,7 +6,7 @@ import { localePath, type Locale } from "@/lib/i18n";
 /**
  * Nationwide branch coverage: the Japan region map with a clickable label over
  * each region, plus a region/prefecture list. Each region opens our catalogue
- * with a branch in that area selected.
+ * with that area's branches available to choose from.
  */
 export default function CoverageMap({ locale }: { locale: Locale }) {
   const isEn = locale === "en";
@@ -45,7 +45,7 @@ export default function CoverageMap({ locale }: { locale: Locale }) {
           </div>
         </div>
         <figcaption className="mt-3 text-center text-xs text-ink-muted">
-          {isEn ? "Choose a region to see its bikes" : "點選地區，查看該區車款"}
+          {isEn ? "Choose a region, then select a branch to see its bikes" : "點選地區，再選擇分店查看車款"}
         </figcaption>
       </figure>
 

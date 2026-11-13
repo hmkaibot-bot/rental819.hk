@@ -39,12 +39,12 @@ export default function BikeCatalogue({
         </div>
       ) : (
         <>
-          <form method="get" action={action} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-card sm:p-5">
+          <form key={`${data.selected?.storeId ?? ""}:${data.pickup}:${data.returnDate}:${data.maker}:${data.type}`} method="get" action={action} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-card sm:p-5">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
               <label className="block text-sm font-medium text-ink-soft lg:col-span-2">
                 {copy.shop}
                 <select name="shop" defaultValue={data.selected ? String(data.selected.storeId) : ""} className={field}>
-                  {!data.selected && <option value="">{copy.any}</option>}
+                  <option value="">{copy.shopPlaceholder}</option>
                   {groupOptions(data, locale)}
                 </select>
               </label>
@@ -97,7 +97,9 @@ export default function BikeCatalogue({
             {data.areaEmpty && <p className="mt-3 text-sm text-ink-muted">{copy.areaEmpty}</p>}
           </form>
 
-          {data.selected && data.cards.length === 0 ? (
+          {!data.selected ? (
+            <p className="mt-8 text-sm text-ink-muted">{copy.chooseShop}</p>
+          ) : data.cards.length === 0 ? (
             <p className="mt-8 text-sm text-ink-muted">{data.listed === 0 ? copy.noBikes : copy.emptyFilter}</p>
           ) : (
             <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
