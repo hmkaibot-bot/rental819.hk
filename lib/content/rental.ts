@@ -26,6 +26,7 @@ export interface RentalContent {
     unavailable: string;
     pickDates: string;
     book: string;
+    rented: string;
     reference: string;
     quoteNote: string;
     perDay: string;
@@ -108,6 +109,7 @@ export const rentalContent: Record<Locale, RentalContent> = {
       unavailable: "所選日期未能預約",
       pickDates: "選擇日期以查看供應",
       book: "預約",
+      rented: "已出租",
       reference: "參考價",
       quoteNote: "最終報價於確認後提供",
       perDay: "/ 天",
@@ -120,7 +122,7 @@ export const rentalContent: Record<Locale, RentalContent> = {
       areaEmpty: "這個地區暫時未有分店列入目錄。",
       colours: "顏色",
       noPhoto: "暫無相片",
-      footnote: "供應情況每日更新。所選日期未能預約的車款仍可提交表格，香港團隊會再作安排。",
+      footnote: "供應情況每日更新。",
       browse: "瀏覽車款",
       freeEquip: "免費配備",
       paidEquip: "付費配備",
@@ -177,6 +179,7 @@ export const rentalContent: Record<Locale, RentalContent> = {
       unavailable: "Not free for your dates",
       pickDates: "Choose dates to check availability",
       book: "Book",
+      rented: "Rented out",
       reference: "Reference price",
       quoteNote: "Final quote after confirmation",
       perDay: "/ day",
@@ -189,8 +192,7 @@ export const rentalContent: Record<Locale, RentalContent> = {
       areaEmpty: "No branches are listed in this region yet.",
       colours: "Colours",
       noPhoto: "No photo",
-      footnote:
-        "Availability is refreshed daily. You can still send the form for a bike that is not free — the Hong Kong team will follow up.",
+      footnote: "Availability is refreshed daily.",
       browse: "Browse bikes",
       freeEquip: "Free equipment",
       paidEquip: "Paid equipment",
