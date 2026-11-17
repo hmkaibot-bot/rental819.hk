@@ -1,6 +1,7 @@
 import type { InvoiceItem, Reservation } from "./types";
 import { RT819_ITEMS, rt819Label, type Rt819Item } from "./items";
 import { rentalDays } from "./duration";
+import { applyDecemberPromo } from "../promo/dec2026";
 
 /** Invoice issuer — matches the SI-24 template (Helmet King / MOTOBLOG). */
 export const ISSUER = {
@@ -132,6 +133,9 @@ export function autoSiNumber(r: Reservation): string {
  * agent can adjust before saving. The HK-side CARDO value-add is deliberately
  * NOT seeded on a rental invoice (the operator bills it separately); it can
  * still be picked from the catalog.
+ *
+ * A December 2026 pick-up also gets one negative line: 12% off the bike-rent
+ * and damage-protection rows only. See `lib/promo/dec2026.ts`.
  */
 export function defaultInvoiceItems(
   r: Reservation,
@@ -199,7 +203,8 @@ export function defaultInvoiceItems(
     const bike = r.confirmed_bike ?? "（待日本確認）";
     items.push({ description: `日本電單車租賃 — ${bike}`, qty: days, unit_price: 0, amount: 0 });
   }
-  return items;
+  const byLabel = new Map(catalog.map((it) => [rt819Label(it), it.group]));
+  return applyDecemberPromo(items, r.pickup_date, (it) => byLabel.get(it.description));
 }
 
 function push(arr: InvoiceItem[], it: InvoiceItem | null) {

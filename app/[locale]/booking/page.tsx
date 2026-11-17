@@ -11,6 +11,9 @@ import Breadcrumb from "@/components/Breadcrumb";
 import BookingForm from "@/components/BookingForm";
 import { listShopGroups } from "@/lib/catalogue/shops";
 import { loadEquipmentBikes } from "@/lib/catalogue/equipment-index";
+import { popupActive } from "@/lib/promo/dec2026";
+import { RT819_ITEMS } from "@/lib/reservations/items";
+import { getCatalog } from "@/lib/reservations/items-store";
 import { shopAreaLabel, shopLabel } from "@/lib/reservations/shop-labels";
 import JsonLd from "@/components/JsonLd";
 import TrustLine from "@/components/TrustLine";
@@ -34,8 +37,12 @@ export default async function BookingPage({ params }: { params: { locale: string
   const locale: Locale = isLocale(params.locale) ? params.locale : "zh-hk";
   const dict = getDictionary(locale);
   const isEn = locale === "en";
-  const equipmentBikes = await loadEquipmentBikes();
-  const shopGroups = (await listShopGroups()).map((g) => ({
+  const [equipmentBikes, shops, priceRows] = await Promise.all([
+    loadEquipmentBikes(),
+    listShopGroups(),
+    bookingPrices(),
+  ]);
+  const shopGroups = shops.map((g) => ({
     area: g.areaJa,
     areaLabel: isEn ? g.areaEn || shopAreaLabel(g.areaJa, locale) : g.areaJa,
     shops: g.shops.map((s) => ({
@@ -52,6 +59,9 @@ export default async function BookingPage({ params }: { params: { locale: string
         "We reply within 3–5 working days in Chinese or English",
         "Payment by bank transfer / FPS within 3 working days of the invoice",
         "Cancellation: 20% 6 days before · 30% 2 days before · 50% same day · no-show non-refundable",
+        ...(popupActive(new Date())
+          ? ["Pick-ups 1–31 December 2026: 12% off bike rent + damage protection (accessories excluded)"]
+          : []),
       ]
     : [
         "須年滿 18 歲，並持正式駕駛執照、國際駕駛執照（IDP）及護照",
@@ -60,6 +70,7 @@ export default async function BookingPage({ params }: { params: { locale: string
         "我們會於 3–5 個工作天內以中文或英文回覆",
         "以銀行匯款／轉數快於發票後 3 個工作天內付款",
         "取消：6 天前 20%・2 天前 30%・當日 50%・NO SHOW 不退款",
+        ...(popupActive(new Date()) ? ["2026年12月1日至31日起租：車租＋車損保障 88折（配件不計）"] : []),
       ];
 
   return (
@@ -105,7 +116,12 @@ export default async function BookingPage({ params }: { params: { locale: string
                   WhatsApp {site.phone}
                 </a>
               </p>
-              <BookingForm locale={locale} shopGroups={shopGroups} equipmentBikes={equipmentBikes} />
+              <BookingForm
+                locale={locale}
+                shopGroups={shopGroups}
+                equipmentBikes={equipmentBikes}
+                priceRows={priceRows}
+              />
             </div>
           </div>
 
@@ -173,4 +189,17 @@ export default async function BookingPage({ params }: { params: { locale: string
       </section>
     </>
   );
+}
+
+/** Live fee_items prices, with the static catalogue if the database is down. */
+async function bookingPrices() {
+  try {
+    const catalog = await getCatalog();
+    if (catalog.length) {
+      return catalog.map((it) => ({ code: it.code, unit_price: it.unit_price }));
+    }
+  } catch (err) {
+    console.error("booking price catalogue", err);
+  }
+  return RT819_ITEMS.map((it) => ({ code: it.code, unit_price: it.unit_price }));
 }

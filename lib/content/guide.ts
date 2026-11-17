@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/i18n";
 import type { Block, GuideDoc } from "./blocks";
 import { RENT_TABLE_ROWS } from "./prices";
+import { DEC2026_PROMO } from "@/lib/promo/dec2026";
 
 /** Gear price tables quoted by both the fees and gear docs, so the two pages can never disagree. */
 const GEAR_RESERVABLE: Record<Locale, Block> = {
@@ -388,11 +389,15 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "日本租電單車價錢｜租金、保險及裝備收費表",
       seoDescription:
         "日本租電單車幾錢？P-1 至 P-7 一天租金由 HK$295 至 HK$1,765，已包強制及任意保險，但不包括燃油、高速公路費及泊車。另附車輛損傷補償、MamoRide 補償，以及頭盔、尾箱、ETC 卡等裝備的收費表。",
-      updated: "2026-09-25",
+      updated: "2026-11-17",
       blocks: [
         {
           type: "p",
           text: "以下為車輛租金及各項費用的參考價目。實際租金會因車輛等級、租用日期及分店而略有不同，最終報價以租車預約表格確認為準。",
+        },
+        {
+          type: "note",
+          text: `12月優惠：${DEC2026_PROMO.pickupFrom} 至 ${DEC2026_PROMO.pickupTo}（含首尾兩日）起租，${DEC2026_PROMO.customerLabelZh}。頭盔、尾箱、側袋、側箱、MamoRide 及其他配件不計折扣。下表仍為正價；折讓在預約表格及發票上以獨立減項顯示。燃油、高速公路費及泊車另計。`,
         },
         { type: "h", text: "日本二輪租車費一覽（港元）" },
         {
@@ -1307,11 +1312,15 @@ export const guideDocs: Record<Locale, GuideDoc[]> = {
       seoTitle: "Japan motorcycle rental prices & fees",
       seoDescription:
         "Classes P-1 to P-7 cost HK$295 to HK$1,765 for one day, with compulsory and voluntary insurance included; fuel, tolls and parking are extra.",
-      updated: "2026-09-25",
+      updated: "2026-11-17",
       blocks: [
         {
           type: "p",
           text: "Below are reference prices for vehicle rent and the various add-ons. The actual rent varies slightly by vehicle class, rental dates and branch, and the final quote is confirmed on the rental booking form.",
+        },
+        {
+          type: "note",
+          text: `December offer: pick-ups from ${DEC2026_PROMO.pickupFrom} to ${DEC2026_PROMO.pickupTo} inclusive get ${DEC2026_PROMO.customerLabelEn}. Helmets, cases, bags, MamoRide and other accessories are not discounted. The tables below stay at list price; the booking form and the invoice show the reduction as its own line. Fuel, expressway tolls and parking are extra.`,
         },
         { type: "h", text: "Japan motorcycle rental rates (HK$)" },
         {

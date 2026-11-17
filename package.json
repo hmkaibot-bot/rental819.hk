@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "node --experimental-strip-types --test lib/promo/dec2026.test.ts scripts/catalogue/parse.test.mjs",
     "sync-catalogue": "node scripts/sync-catalogue.mjs"
   },
   "dependencies": {
