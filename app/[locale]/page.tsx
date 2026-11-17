@@ -12,6 +12,7 @@ import FeatureIcon from "@/components/FeatureIcon";
 import CTABand from "@/components/CTABand";
 import TrustLine from "@/components/TrustLine";
 import { ArrowRight, WhatsAppIcon } from "@/components/icons";
+import PromoPopup from "@/components/PromoPopup";
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const isEn = params.locale === "en";
@@ -41,6 +42,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
 
   return (
     <>
+      <PromoPopup locale={locale} />
       {/* Hero */}
       <section className="relative overflow-hidden bg-brand-950 text-white">
         <div className="pointer-events-none absolute inset-0">

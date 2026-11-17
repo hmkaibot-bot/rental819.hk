@@ -6,6 +6,7 @@ import type { CatalogueData } from "@/lib/catalogue/query";
 import { makerLabel, typeLabel } from "@/lib/catalogue/labels";
 import { shopAreaLabel, shopLabel } from "@/lib/reservations/shop-labels";
 import type { RentalContent } from "@/lib/content/rental";
+import { DEC2026_PROMO, pickupEligible } from "@/lib/promo/dec2026";
 
 const field =
   "mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
@@ -102,6 +103,12 @@ export default function BikeCatalogue({
           ) : data.cards.length === 0 ? (
             <p className="mt-8 text-sm text-ink-muted">{data.listed === 0 ? copy.noBikes : copy.emptyFilter}</p>
           ) : (
+            <>
+            {pickupEligible(data.pickup) && (
+              <p className="mt-6 rounded-xl border border-accent-100 bg-accent-50 px-4 py-3 text-sm leading-6 text-accent-800">
+                {isEn ? DEC2026_PROMO.catalogueNoteEn : DEC2026_PROMO.catalogueNoteZh}
+              </p>
+            )}
             <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {data.cards.map((card) => (
                 <li key={card.key} className="card flex flex-col overflow-hidden">
@@ -181,6 +188,7 @@ export default function BikeCatalogue({
                 </li>
               ))}
             </ul>
+            </>
           )}
           {data.selected && data.cards.length > 0 && (
             <p className="mt-6 max-w-3xl text-sm leading-6 text-ink-muted">{copy.footnote}</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { localePath, type Locale } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/site";
@@ -19,7 +19,10 @@ import {
 } from "@/lib/reservations/types";
 import { shopAreaLabel, shopLabel } from "@/lib/reservations/shop-labels";
 import { matchEquipmentBike, type EquipmentBikeRef } from "@/lib/catalogue/equipment";
+import { DEC2026_PROMO, gradeFromBikePref, quoteRental, type PromoPrice } from "@/lib/promo/dec2026";
+import { rentalDays } from "@/lib/reservations/duration";
 import { WhatsAppIcon, CheckIcon } from "./icons";
+import BookingQuote from "./BookingQuote";
 
 type Status = "idle" | "submitting" | "done" | "error";
 
@@ -124,6 +127,8 @@ const t = {
     errSubmit: "提交失敗，請稍後再試或直接 WhatsApp 我們。",
     required: "必填",
     optional: "可選",
+    estimateHint: "於車款偏好填上等級（例如 P-4）後，可顯示參考報價。",
+    estimateUnpriced: "行李寄存及穿梭巴士未有標準港幣價，未計入以上參考價。",
   },
   en: {
     chooseBike: "Choose a bike",
@@ -214,6 +219,8 @@ const t = {
     errSubmit: "Submission failed — please try again or WhatsApp us.",
     required: "required",
     optional: "optional",
+    estimateHint: "Add the class to your 1st-choice bike (for example P-4) to see a reference quote.",
+    estimateUnpriced: "Luggage storage and the shuttle bus have no standard HK$ price, so they are not in this quote.",
   },
 } as const;
 
@@ -365,11 +372,14 @@ export default function BookingForm({
   locale,
   shopGroups,
   equipmentBikes = [],
+  priceRows = [],
 }: {
   locale: Locale;
   shopGroups?: BookingShopGroup[];
   /** Catalogue models with scraped equipment. Empty keeps every add-on selectable. */
   equipmentBikes?: EquipmentBikeRef[];
+  /** List prices (code → HK$). The December quote is 12% off bike rent + insurance. */
+  priceRows?: PromoPrice[];
 }) {
   const c = t[locale];
   const isEn = locale === "en";
@@ -459,6 +469,32 @@ export default function BookingForm({
     doneRef.current?.focus({ preventScroll: true });
     doneRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
   }, [status, draftKey, personalKey]);
+
+  const quote = useMemo(() => {
+    if (!form.pickup_date || !form.return_date) return null;
+    const pickupAt = new Date(`${form.pickup_date}T${form.pickup_time || "00:00"}`);
+    const returnAt = new Date(`${form.return_date}T${form.return_time || "00:00"}`);
+    if (!(returnAt > pickupAt)) return null;
+    const grade = gradeFromBikePref(form.bike_pref_1);
+    if (grade == null) return null;
+    return quoteRental({
+      pickupDate: form.pickup_date,
+      days: rentalDays({
+        pickup_date: form.pickup_date,
+        pickup_time: form.pickup_time || null,
+        return_date: form.return_date,
+        return_time: form.return_time || null,
+      }),
+      grade,
+      prices: priceRows,
+      helmets: (Number(form.helmet_full) || 0) + (Number(form.helmet_open) || 0),
+      topcase: form.addon_topcase,
+      sidebag: form.addon_sidebag,
+      pannier: form.addon_pannier,
+      mamoride: form.addon_mamoride,
+      cardo: form.addon_cardo,
+    });
+  }, [form, priceRows]);
 
   const clearBad = (k: keyof Form) =>
     setBadFields((b) => (b.includes(k) ? b.filter((x) => x !== k) : b));
@@ -561,6 +597,10 @@ export default function BookingForm({
       `${c.nameEn}: ${form.name_en}`,
       `${c.hkPhone}: ${form.hk_phone}`,
     ].filter(Boolean);
+    if (quote?.ok && quote.applies) {
+      lines.push(`${DEC2026_PROMO.customerLabelZh}: −HK$${quote.discount}`);
+      lines.push(`${isEn ? "Reference total" : "參考合計"}: HK$${quote.totalAfter}`);
+    }
     return lines.join("\n");
   }
 
@@ -635,6 +675,17 @@ export default function BookingForm({
             <span className="font-semibold">{form.email.trim()}</span>
             {c.ackPost}
           </p>
+        )}
+        {quote?.ok && (
+          <div className="mx-auto mt-6 max-w-md text-left">
+            <BookingQuote
+              locale={locale}
+              quote={quote}
+              unpricedNote={
+                form.addon_shuttle_bus || form.addon_luggage_storage ? c.estimateUnpriced : undefined
+              }
+            />
+          </div>
         )}
         <a
           href={whatsappLink(waText)}
@@ -902,6 +953,23 @@ export default function BookingForm({
           <input {...ctl("promo")} value={form.promo} onChange={setText("promo")} placeholder={c.promoPh} />
         </div>
       </Section>
+
+      {(quote?.ok || (form.pickup_date && form.return_date && gradeFromBikePref(form.bike_pref_1) == null)) && (
+        <Section title={isEn ? "Reference quote" : "參考報價"}>
+          {quote?.ok ? (
+            <BookingQuote
+              locale={locale}
+              quote={quote}
+              hideTitle
+              unpricedNote={
+                form.addon_shuttle_bus || form.addon_luggage_storage ? c.estimateUnpriced : undefined
+              }
+            />
+          ) : (
+            <p className="text-sm text-ink-muted">{c.estimateHint}</p>
+          )}
+        </Section>
+      )}
 
       {/* Notes */}
       <Section title={c.secNotes}>
